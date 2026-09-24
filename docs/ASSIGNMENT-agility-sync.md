@@ -21,7 +21,7 @@ By the end of this assignment you will be able to:
 
 | Tool | Notes |
 |------|--------|
-| This Speckit repo | Opened in Cursor; features already present (Todo example or your own) |
+| This Speckit repo | Opened in Cursor; features already present (courses example or your own) |
 | Node.js 24+ / npm | For export / push scripts |
 | Digital.ai Agility access | Product Planning edit rights on a project |
 | Access token (API path) | Agility → **My Settings → Access Tokens** |

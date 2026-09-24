@@ -163,10 +163,10 @@ export function mapScenarioToStory(featureNum, scenario) {
 
   if (featureNum === 3) {
     if (section.includes("authentication") || title.includes("unauthenticated")) return pick(5);
-    if (title.includes("adds a todo") || title.includes("empty title") || title.includes("no list is selected")) return pick(1);
-    if (title.includes("no todos") || title.includes("switches lists") || title.includes("only sees their own")) return pick(2);
+    if (title.includes("adds a courses") || title.includes("empty title") || title.includes("no list is selected")) return pick(1);
+    if (title.includes("no coursess") || title.includes("switches lists") || title.includes("only sees their own")) return pick(2);
     if (title.includes("complete") || title.includes("incomplete")) return pick(3);
-    if (title.includes("edits") || title.includes("deletes a todo")) return pick(4);
+    if (title.includes("edits") || title.includes("deletes a courses")) return pick(4);
     if (title.includes("another user") || title.includes("spoofed") || title.includes("cannot read")) return pick(5);
     if (title.includes("deleting a list removes")) return pick(6);
     return pick(1);

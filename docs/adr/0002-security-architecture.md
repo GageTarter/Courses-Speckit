@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-07-07  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
@@ -10,7 +10,7 @@
 
 Threats relevant to this app:
 
-- User A accessing user B's lists, todos, or profile.
+- User A accessing user B's lists, coursess, or profile.
 - Stolen or replayed session tokens after logout or expiry.
 - Client tampering (`userId` in request body, ID enumeration).
 - Credential disclosure (password hashes in API responses, weak storage).
@@ -43,7 +43,7 @@ Adopt a **layered security architecture** with the **API as the sole enforcement
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  MySQL (persistence)                                        │
-│  • userId FK on lists/todos                                 │
+│  • userId FK on lists/coursess                                 │
 │  • sessions table for revocable tokens                      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -67,9 +67,9 @@ Adopt a **layered security architecture** with the **API as the sole enforcement
 
 | Control | Implementation |
 |---------|----------------|
-| Row-level scope | Every list/todo query includes `userId: req.user.id` in the `WHERE` clause |
+| Row-level scope | Every list/courses query includes `userId: req.user.id` in the `WHERE` clause |
 | Create ownership | Set `userId` from `req.user.id`; **ignore** client-supplied `userId` in body |
-| Update/delete | Load via `getAccessibleListOrNull`, `getAccessibleTodoOrNull`, or `getAccessibleUserOrNull` |
+| Update/delete | Load via `getAccessibleListOrNull`, `getAccessiblecoursesOrNull`, or `getAccessibleUserOrNull` |
 | Cross-user access | Return **404** with a not-found message — never **403** (avoids confirming resource existence) |
 | Profile access | User may only `GET`/`PUT` their own `userId`; `:id` must match `req.user.id` |
 | Centralization | All scope checks live in `backend/app/authorization/` — controllers do not inline duplicate logic |
@@ -95,7 +95,7 @@ Adopt a **layered security architecture** with the **API as the sole enforcement
 
 ### Roles (foundation only)
 
-New users receive role `worker`. Middleware hooks (`requireAdmin`, `requireSuperAdmin`) exist for future admin features but are not used by current todo CRUD. Todo data is scoped by **user**, not role.
+New users receive role `worker`. Middleware hooks (`requireAdmin`, `requireSuperAdmin`) exist for future admin features but are not used by current courses CRUD. courses data is scoped by **user**, not role.
 
 ### Explicitly out of scope (v1)
 
@@ -138,12 +138,12 @@ Documented deferrals — not security holes by omission in the teaching model, b
 | **JWT only (no Session table)** | Cannot revoke on logout without extra infrastructure. |
 | **Cookie-based session without Bearer** | Complicates SPA CORS/dev setup; CSRF becomes mandatory. |
 | **Inline scope checks per controller** | Duplication risk; already rejected in favor of `getAccessible*OrNull` helpers. |
-| **RBAC for todo ownership** | Overkill; `worker` role + `userId` FK is sufficient for private todos. |
+| **RBAC for courses ownership** | Overkill; `worker` role + `userId` FK is sufficient for private coursess. |
 
 ## Related artifacts
 
 - ADRs: [ADR-0001 — Client–server multi-user architecture](./0001-client-server-multi-user-architecture.md), [ADR-0006 — Node.js and Express](./0006-node-express-api.md)
-- Feature specs: [Feature 1](../../features/feature-1-user-auth.md) (auth); [Features 2–3](../../features/feature-2-todo-list-management.md) (list/todo isolation); [Feature 4](../../features/feature-4-user-profile-management.md) (profile scope)
+- Feature specs: [Feature 1](../../features/feature-1-user-auth.md) (auth); [Features 2–3](../../features/feature-2-courses-list-management.md) (list/courses isolation); [Feature 4](../../features/feature-4-user-profile-management.md) (profile scope)
 - Cursor rules: [security.mdc](../../.cursor/rules/security.mdc), [auth-patterns.mdc](../../.cursor/rules/auth-patterns.mdc), [frontend-services.mdc](../../.cursor/rules/frontend-services.mdc)
 - Implementation: `backend/app/authorization/authorization.js`
-- Tests: `backend/tests/authenticate.test.js`, `backend/tests/auth.test.js`, ownership scenarios in `lists.test.js`, `todos.test.js`, `users.test.js`
+- Tests: `backend/tests/authenticate.test.js`, `backend/tests/auth.test.js`, ownership scenarios in `lists.test.js`, `coursess.test.js`, `users.test.js`

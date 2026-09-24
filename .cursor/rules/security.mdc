@@ -18,8 +18,8 @@ globs: "backend/app/**/*"
 *   Sets `req.user = { id, role, organizationId }` from joined User row.
 *   Missing/invalid → `401` with `{ message: "Unauthorized! ..." }`.
 
-## User-Scoped Data (Todo App)
-*   Every list/todo query must include `userId: req.user.id` in the `where` clause.
+## User-Scoped Data (courses App)
+*   Every list/courses query must include `userId: req.user.id` in the `where` clause.
 *   On create, set `userId` from `req.user.id` — never from request body.
 *   Before update/delete, load the row and verify ownership; return `404` if not found or not owned (do not leak existence via `403`).
 

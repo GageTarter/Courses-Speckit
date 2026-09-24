@@ -12,12 +12,12 @@ globs: "frontend/src/**/*.js, frontend/vite.config.js"
 *   `utils/` — pure helpers only; no HTTP calls.
 
 ## Domain Service Modules
-*   One file per domain: `authServices.js`, `todoServices.js`, etc.
+*   One file per domain: `authServices.js`, `coursesServices.js`, etc.
 *   Default-export an object of methods; each method calls `apiClient` and returns the promise.
 *   No axios calls inside views or components — always go through `*Services.js`.
 
 ## Axios Client (`services/services.js`)
-*   Dev `baseURL`: `http://localhost:3200/todo/`; prod: `/todo/`.
+*   Dev `baseURL`: `http://localhost:3200/courses/`; prod: `/courses/`.
 *   `withCredentials: true`.
 *   `transformRequest`: attach `Authorization: Bearer <token>` from `Utils.getStore("user")`.
 *   `transformResponse`: on unauthorized message, clear user and `Router.push({ name: "login" })`.
@@ -25,7 +25,7 @@ globs: "frontend/src/**/*.js, frontend/vite.config.js"
 
 ## Router Conventions (`router.js`)
 *   vue-router 4 with `createWebHistory`.
-*   Named routes (`name: "editTodo"`).
+*   Named routes (`name: "editcourses"`).
 *   `props: true` on routes with `:id` params.
 *   `router.beforeEach` — auth and role guards per `auth-patterns.mdc`.
 

@@ -233,7 +233,7 @@ function buildCombinedMarkdown() {
   );
 
   return [
-    "# Todo — Application Specifications",
+    "# courses — Application Specifications",
     "",
     "Product specs only: architecture decisions, quality attributes, C4 diagrams, and feature specifications (including UI mockups when linked under `docs/ui/`).",
     "",
@@ -332,8 +332,8 @@ async function renderPdf(combinedMarkdown, pdfPath) {
 async function main() {
   const combinedMarkdown = buildCombinedMarkdown();
   const outputDir = join(rootDir, "docs");
-  const markdownPath = join(outputDir, "todo-app-specs.md");
-  const pdfPath = join(outputDir, "todo-app-specs.pdf");
+  const markdownPath = join(outputDir, "courses-app-specs.md");
+  const pdfPath = join(outputDir, "courses-app-specs.pdf");
 
   mkdirSync(outputDir, { recursive: true });
   writeFileSync(markdownPath, combinedMarkdown, "utf8");

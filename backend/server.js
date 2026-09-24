@@ -40,13 +40,13 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/todo", routes);
+app.use("/courses", routes);
 
 const PORT = process.env.PORT || 3200;
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    logger.info(`Todo API running on port ${PORT}`);
+    logger.info(`courses API running on port ${PORT}`);
   });
 }
 

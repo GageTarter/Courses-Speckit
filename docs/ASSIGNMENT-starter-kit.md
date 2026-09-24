@@ -1,10 +1,10 @@
 # Assignment: Start a New App with the Speckit Starter Kit
 
-**Goal:** Create your own GitHub repository for a **new** product using the OC CS Speckit **starter kit** (empty Vue + Express shells, Cursor rules, and SDD methodology — **no** Todo feature specs or answer-key code). Rename the product, set up local env, then write and implement Feature 1 with Cursor.
+**Goal:** Create your own GitHub repository for a **new** product using the OC CS Speckit **starter kit** (empty Vue + Express shells, Cursor rules, and SDD methodology — **no** courses feature specs or answer-key code). Rename the product, set up local env, then write and implement Feature 1 with Cursor.
 
 **Related docs:** [STARTER-KIT.md](./STARTER-KIT.md) · [features/framework.md](../features/framework.md) · [writing-feature-requirements.md](../features/writing-feature-requirements.md) · [writing-feature-design.md](../features/writing-feature-design.md)
 
-**Not this assignment:** Rebuilding the Todo example — use [ASSIGNMENT-rebuild-todo.md](./ASSIGNMENT-rebuild-todo.md) (`reset:example`) instead. Reading-only tour of Speckit — use [ASSIGNMENT-walkthrough-todo.md](./ASSIGNMENT-walkthrough-todo.md).
+**Not this assignment:** Rebuilding the courses example — use [ASSIGNMENT-rebuild-courses.md](./ASSIGNMENT-rebuild-courses.md) (`reset:example`) instead. Reading-only tour of Speckit — use [ASSIGNMENT-walkthrough-courses.md](./ASSIGNMENT-walkthrough-courses.md).
 
 ---
 
@@ -37,7 +37,7 @@ By the end of this assignment you will be able to:
 
 1. Open [GitHub → New repository](https://github.com/new).
 2. Set:
-   - **Repository name:** e.g. `myapp-speckit` or `<project>-speckit-<your-username>` (your product name, not `todo-speckit`)
+   - **Repository name:** e.g. `myapp-speckit` or `<project>-speckit-<your-username>` (your product name, not `courses-speckit`)
    - **Visibility:** Public
    - **Do not** add a README, `.gitignore`, or license (keep it empty so the first push is clean)
 3. Create the repository. Copy the HTTPS or SSH URL, e.g.  
@@ -47,14 +47,14 @@ By the end of this assignment you will be able to:
 
 ## Part B — Obtain the starter kit and load your repo
 
-Start from the **starter kit zip** so you get empty shells and **no** Todo `features/feature-*.md`. Do **not** copy Todo specs into this project.
+Start from the **starter kit zip** so you get empty shells and **no** courses `features/feature-*.md`. Do **not** copy courses specs into this project.
 
 ### B1. Get `speckit-starter-kit.zip`
 
 **Option A — Instructor / course zip (usual)**  
 Download or copy the `speckit-starter-kit.zip` your course provides.
 
-**Option B — Build the zip yourself** (if you have the full OC CS Speckit / todospeckit tree):
+**Option B — Build the zip yourself** (if you have the full OC CS Speckit / courses tree):
 
 ```bash
 # In a separate folder that already contains OC CS Speckit (with scripts/)
@@ -258,7 +258,7 @@ git push origin scaffold-v1
 
 ## Part F — Write and implement Feature 1
 
-Your product specs live in **your** `features/feature-*.md` files. Do **not** paste Todo feature specs from the example app.
+Your product specs live in **your** `features/feature-*.md` files. Do **not** paste courses feature specs from the example app.
 
 ### F1. Author the Feature 1 spec
 
@@ -343,7 +343,7 @@ git push origin dev
 
 ### F6. Do not
 
-- Copy Todo `feature-1`…`feature-5` specs into this repo as if they were your product.
+- Copy courses `feature-1`…`feature-5` specs into this repo as if they were your product.
 - Implement on `main` or `dev` — use `feature/*` only.
 - Commit `.env` or Agility tokens.
 
@@ -411,9 +411,9 @@ git checkout dev && git merge feature/1-<short-name> && git push origin dev
 
 | Problem | Fix |
 |---------|-----|
-| Repo still has Todo `feature-1`…`feature-5` | You used the full Todo tree or `reset:example`. Start over from **`speckit-starter-kit.zip`** |
+| Repo still has courses `feature-1`…`feature-5` | You used the full courses tree or `reset:example`. Start over from **`speckit-starter-kit.zip`** |
 | Agent implements on `main` or `dev` | Stop; check out `feature/N-…` first |
 | Agent invents behavior not in the spec | Refuse; update `features/` first or drop the code |
 | Wrong stack / API shape | Cite `@.cursor/rules/` (e.g. `api-conventions`, `ui-style-system`) |
 | Tests weakened to “pass” | Require real Gherkin coverage; no `expect(true).toBe(true)` |
-| Confused with Todo rebuild | That assignment is [ASSIGNMENT-rebuild-todo.md](./ASSIGNMENT-rebuild-todo.md) — this one is **starter kit only** |
+| Confused with courses rebuild | That assignment is [ASSIGNMENT-rebuild-courses.md](./ASSIGNMENT-rebuild-courses.md) — this one is **starter kit only** |

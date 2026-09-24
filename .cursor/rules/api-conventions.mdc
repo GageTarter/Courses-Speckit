@@ -6,7 +6,7 @@ globs: "backend/**/*, **/*.routes.js, **/*.controller.js, **/*.model.js"
 
 ## Stack
 *   Node.js `"type": "module"` — import/export only.
-*   Express 4, mounted at `/todo/`.
+*   Express 4, mounted at `/courses/`.
 *   Sequelize 6 + mysql2; config in `app/config/db.config.js` via dotenv.
 *   Separate `sequelizeInstance.js`; models import it and register in `models/index.js`.
 *   bcryptjs + jsonwebtoken + Session model for auth.
@@ -16,19 +16,19 @@ globs: "backend/**/*, **/*.routes.js, **/*.controller.js, **/*.model.js"
 *   `db.sequelize.sync()` on startup; optional `{ alter: true }` when `SEQUELIZE_SYNC_ALTER=true`.
 *   CORS with `credentials: true` and frontend origin.
 *   `express.json()` and `urlencoded({ extended: true })`.
-*   Mount routes: `app.use("/todo", routes)`.
+*   Mount routes: `app.use("/courses", routes)`.
 *   Export `app` as default; call `listen()` only when `NODE_ENV !== "test"`.
 
 ## Route Layout
 *   `app/routes/index.js` — central router registering each `*.routes.js`.
 *   Auth at mount root: `POST /register`, `POST /login`, `POST /logout`, `POST /reset-password` (dev only).
 *   Resource routes: `router.use("/lists", ListRoutes)` etc.
-*   Nested children on parent router: `GET /lists/:listId/todos`.
+*   Nested children on parent router: `GET /lists/:listId/coursess`.
 
-Todo REST shape:
-*   `GET/POST /todo/lists`
-*   `GET/POST /todo/lists/:listId/todos`
-*   `PUT/DELETE /todo/todos/:id`
+courses REST shape:
+*   `GET/POST /courses/lists`
+*   `GET/POST /courses/lists/:listId/coursess`
+*   `PUT/DELETE /courses/coursess/:id`
 
 ## Controller Pattern
 ```javascript

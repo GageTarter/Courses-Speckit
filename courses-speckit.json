@@ -1,7 +1,7 @@
 {
-  "name": "todo-speckit",
+  "name": "courses-speckit",
   "private": true,
-  "description": "OC CS Speckit — Spec-Driven Development kit with Todo example application (monorepo root)",
+  "description": "OC CS Speckit — Spec-Driven Development kit with courses example application (monorepo root)",
   "scripts": {
     "build:frontend": "npm run build --prefix frontend",
     "bundle:frontend": "npm run bundle --prefix frontend",
