@@ -1,8 +1,9 @@
 /**
- * Shared parser: OC CS Speckit feature specs → Agility backlog structure.
+ * Shared parser: feature specs → Agility backlog structure.
  *
  * Feature specs are auto-discovered from `features/feature-N-*.md`.
  * Epic names come from each file's `# Feature: …` heading.
+ * Set DEFAULT_PROJECT to your Agility Scope name before first export/push.
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -12,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const rootDir = join(__dirname, "..", "..");
 
-export const DEFAULT_PROJECT = "OC CS Speckit";
+export const DEFAULT_PROJECT = "League Speckit";
 
 const FEATURE_FILE_RE = /^feature-(\d+)-.+\.md$/i;
 
@@ -49,7 +50,7 @@ export function discoverFeatureFiles() {
 export const FEATURE_FILES = discoverFeatureFiles();
 
 export function storyRef(featureNum, usNum) {
-  return `TS-F${featureNum}-US${featureNum}.${usNum}`;
+  return `SK-F${featureNum}-US${featureNum}.${usNum}`;
 }
 
 export function storyId(featureNum, usNum) {
@@ -57,17 +58,18 @@ export function storyId(featureNum, usNum) {
 }
 
 export function testRef(featureNum, index) {
-  return `TS-F${featureNum}-AC${String(index).padStart(3, "0")}`;
+  return `SK-F${featureNum}-AC${String(index).padStart(3, "0")}`;
 }
 
 export function epicRef(featureNum) {
-  return `TS-F${featureNum}-EPIC`;
+  return `SK-F${featureNum}-EPIC`;
 }
 
 export function parseUserStories(content) {
   const stories = [];
+  // Allow a blank line after the heading (standard markdown in feature specs).
   const storyRegex =
-    /### US-\d+\.(\d+): ([^\n]+)\n\*\*As (?:a|the)\*\* ([^\n]+)\n\*\*I want(?: to)?\*\* ([^\n]+)\n\*\*So that\*\* ([^\n]+)/g;
+    /### US-\d+\.(\d+):\s*([^\n]+)\r?\n+\*\*As (?:a|the)\*\*\s*([^\n]+)\r?\n\*\*I want(?: to)?\*\*\s*([^\n]+)\r?\n\*\*So that\*\*\s*([^\n]+)/g;
 
   let match;
   while ((match = storyRegex.exec(content)) !== null) {
@@ -98,7 +100,13 @@ export function parseScenarios(content) {
   for (const line of lines) {
     if (line.startsWith("### ") && !line.startsWith("#### ")) {
       const heading = line.slice(4).trim();
-      if (!heading.startsWith("US-") && !heading.startsWith("`") && !heading.startsWith("[")) {
+      if (
+        !heading.startsWith("US-") &&
+        !heading.startsWith("`") &&
+        !heading.startsWith("[")
+      ) {
+        section = heading;
+      } else {
         section = heading;
       }
       continue;
@@ -128,80 +136,18 @@ export function parseScenarios(content) {
   return scenarios;
 }
 
-/** Map each Gherkin scenario to a user story id (US feature.story). */
+/** Map each Gherkin scenario to a user story id using the AC ### US-N.n heading. */
 export function mapScenarioToStory(featureNum, scenario) {
   const idMatch = scenario.section.match(/US-(\d+)\.(\d+)/i);
   if (idMatch && Number(idMatch[1]) === featureNum) {
     return idMatch[2];
   }
 
-  const title = scenario.title.toLowerCase();
-  const section = scenario.section.toLowerCase();
-
-  const pick = (...usNums) => String(usNums[0]);
-
-  if (featureNum === 1) {
-    if (section.includes("registration")) return pick(1);
-    if (section.includes("login")) {
-      if (title.includes("signed-in user visits login")) return pick(3);
-      return pick(2);
-    }
-    if (section.includes("logout")) return pick(4);
-    if (title.includes("session token") || title.includes("expired")) return pick(3);
-    if (section.includes("route protection")) return pick(5);
-  }
-
-  if (featureNum === 2) {
-    if (section.includes("authentication") || title.includes("unauthenticated")) return pick(5);
-    if (title.includes("creates") || title.includes("empty name") || title.includes("too long")) return pick(1);
-    if (title.includes("loads") || title.includes("no lists") || title.includes("cannot see another")) return pick(2);
-    if (title.includes("selects")) return pick(3);
-    if (title.includes("renames") || title.includes("deletes a list")) return pick(4);
-    if (title.includes("another user") || title.includes("spoofed")) return pick(5);
-    return pick(2);
-  }
-
-  if (featureNum === 3) {
-    if (section.includes("authentication") || title.includes("unauthenticated")) return pick(5);
-    if (title.includes("adds a todo") || title.includes("empty title") || title.includes("no list is selected")) return pick(1);
-    if (title.includes("no todos") || title.includes("switches lists") || title.includes("only sees their own")) return pick(2);
-    if (title.includes("complete") || title.includes("incomplete")) return pick(3);
-    if (title.includes("edits") || title.includes("deletes a todo")) return pick(4);
-    if (title.includes("another user") || title.includes("spoofed") || title.includes("cannot read")) return pick(5);
-    if (title.includes("deleting a list removes")) return pick(6);
-    return pick(1);
-  }
-
-  if (featureNum === 4) {
-    if (section.includes("profile dropdown")) {
-      if (title.includes("sign out") && title.includes("menu bar")) return pick(4);
-      if (title.includes("log out")) return pick(3);
-      return pick(1);
-    }
-    if (section.includes("profile edit")) return pick(2);
-    if (section.includes("profile api")) return pick(2);
-    return pick(1);
-  }
-
-  if (featureNum === 5) {
-    if (section.includes("due date on create")) return pick(1);
-    if (section.includes("due date on update")) return pick(3);
-    if (section.includes("overdue")) return pick(4);
-    if (section.includes("api validation")) {
-      if (title.includes("another user")) return pick(3);
-      return pick(1);
-    }
-    if (title.includes("view") || title.includes("shows")) return pick(2);
-    return pick(1);
-  }
-
   return "1";
 }
 
 export function formatGherkin(scenario) {
-  return scenario.steps
-    .map((step) => step.replace(/\*\*/g, ""))
-    .join("\n");
+  return scenario.steps.map((step) => step.replace(/\*\*/g, "")).join("\n");
 }
 
 export function formatExpectedResults(scenario) {
@@ -225,9 +171,8 @@ function storyDescription(story, feature, ref) {
 }
 
 /**
- * Build structured backlog from feature spec files.
  * @param {string} project Agility Scope (project name)
- * @param {{ featureNums?: number[] }} [options] Optional filter — e.g. `{ featureNums: [3] }`
+ * @param {{ featureNums?: number[] }} [options]
  */
 export function buildBacklog(project = DEFAULT_PROJECT, options = {}) {
   const { featureNums } = options;
@@ -246,7 +191,9 @@ export function buildBacklog(project = DEFAULT_PROJECT, options = {}) {
 
   if (featureNums?.length > 0 && selectedFeatures.length === 0) {
     const valid = featureFiles.map((feature) => feature.num).join(", ");
-    throw new Error(`Unknown feature number(s): ${featureNums.join(", ")}. Valid: ${valid}`);
+    throw new Error(
+      `Unknown feature number(s): ${featureNums.join(", ")}. Valid: ${valid}`,
+    );
   }
 
   const features = [];
@@ -256,7 +203,6 @@ export function buildBacklog(project = DEFAULT_PROJECT, options = {}) {
   for (const feature of selectedFeatures) {
     const content = readFileSync(join(rootDir, feature.file), "utf8");
     const epicReference = epicRef(feature.num);
-
     const stories = parseUserStories(content);
     const scenarios = parseScenarios(content);
 
@@ -272,14 +218,11 @@ export function buildBacklog(project = DEFAULT_PROJECT, options = {}) {
       const ref = testRef(feature.num, acIndex);
       acIndex += 1;
 
-      const gherkin = formatGherkin(scenario);
-      const expected = formatExpectedResults(scenario);
-
       const test = {
         ref,
         name: scenario.title,
-        description: gherkin,
-        expectedResults: expected,
+        description: formatGherkin(scenario),
+        expectedResults: formatExpectedResults(scenario),
         parentRef,
       };
 
@@ -306,7 +249,7 @@ export function buildBacklog(project = DEFAULT_PROJECT, options = {}) {
       epic: {
         ref: epicReference,
         name: feature.epic,
-        description: `Epic for ${feature.file}. Spec-driven backlog from OC CS Speckit.`,
+        description: `Epic for ${feature.file}. Spec-driven backlog.`,
         specLink: feature.file,
       },
       stories: featureStories,

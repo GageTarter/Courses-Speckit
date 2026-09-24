@@ -83,7 +83,7 @@ You are on <current-branch>.
 Create or check out that branch from dev first, then ask me to continue.
 ```
 
-Use the exact short-name from the feature spec (e.g. `feature/3-todo-list-item-management`). Optional helper they can run themselves:
+Use the exact short-name from the feature spec (e.g. `feature/3-courses-list-item-management`). Optional helper they can run themselves:
 
 ```bash
 git checkout dev
@@ -137,7 +137,7 @@ Split frontend and backend in one repository. Specs in `features/` are the sourc
 
 ## Directory Layout
 ```
-todo-speckit/
+courses-speckit/
   features/                  # SDD specs
   frontend/                  # Vue 3 + Vite + Vuetify 4
     public/                  # .htaccess for SPA deploy
@@ -166,13 +166,13 @@ todo-speckit/
 ```
 
 ## Naming Conventions
-*   Frontend services: `camelCase` + `Services.js` (e.g. `authServices.js`, `todoServices.js`).
+*   Frontend services: `camelCase` + `Services.js` (e.g. `authServices.js`, `coursesServices.js`).
 *   Backend files: `resource.controller.js`, `resource.routes.js`, `resource.model.js`.
-*   Multi-word URL segments: kebab-case (`/todo-lists`).
+*   Multi-word URL segments: kebab-case (`/courses-lists`).
 
 ## Environment Variables
 Backend (`backend/.env`):
-*   `DB_HOST`, `DB_USER`, `DB_PW`, `DB_NAME` — MySQL connection (default database: `todospeckit-db`).
+*   `DB_HOST`, `DB_USER`, `DB_PW`, `DB_NAME` — MySQL connection (default database: `courses-db`).
 *   `AUTH_SECRET` — JWT signing secret (required in production).
 *   `PORT` — default `3200`.
 *   `NODE_ENV` — `development` | `production` | `test`.
@@ -180,7 +180,7 @@ Backend (`backend/.env`):
 
 Frontend: use `import.meta.env.DEV` for dev/prod API base URL; `cross-env APP_ENV=development` in npm scripts.
 
-Backend test env (`backend/.env.test`): copy from `backend/.env.test.example`; uses `NODE_ENV=test` and `DB_NAME=todospeckit-db-test`.
+Backend test env (`backend/.env.test`): copy from `backend/.env.test.example`; uses `NODE_ENV=test` and `DB_NAME=courses-db-test`.
 
 ## Dev Ports
 *   Frontend Vite: `8082`
@@ -203,7 +203,7 @@ Backend test env (`backend/.env.test`): copy from `backend/.env.test.example`; u
 
 ## Stack
 *   Node.js `"type": "module"` — import/export only.
-*   Express 4, mounted at `/todo/`.
+*   Express 4, mounted at `/courses/`.
 *   Sequelize 6 + mysql2; config in `app/config/db.config.js` via dotenv.
 *   Separate `sequelizeInstance.js`; models import it and register in `models/index.js`.
 *   bcryptjs + jsonwebtoken + Session model for auth.
@@ -213,19 +213,19 @@ Backend test env (`backend/.env.test`): copy from `backend/.env.test.example`; u
 *   `db.sequelize.sync()` on startup; optional `{ alter: true }` when `SEQUELIZE_SYNC_ALTER=true`.
 *   CORS with `credentials: true` and frontend origin.
 *   `express.json()` and `urlencoded({ extended: true })`.
-*   Mount routes: `app.use("/todo", routes)`.
+*   Mount routes: `app.use("/courses", routes)`.
 *   Export `app` as default; call `listen()` only when `NODE_ENV !== "test"`.
 
 ## Route Layout
 *   `app/routes/index.js` — central router registering each `*.routes.js`.
 *   Auth at mount root: `POST /register`, `POST /login`, `POST /logout`, `POST /reset-password` (dev only).
 *   Resource routes: `router.use("/lists", ListRoutes)` etc.
-*   Nested children on parent router: `GET /lists/:listId/todos`.
+*   Nested children on parent router: `GET /lists/:listId/coursess`.
 
-Todo REST shape:
-*   `GET/POST /todo/lists`
-*   `GET/POST /todo/lists/:listId/todos`
-*   `PUT/DELETE /todo/todos/:id`
+courses REST shape:
+*   `GET/POST /courses/lists`
+*   `GET/POST /courses/lists/:listId/coursess`
+*   `PUT/DELETE /courses/coursess/:id`
 
 ## Controller Pattern
 ```javascript
@@ -316,12 +316,12 @@ Return flat JSON (not wrapped):
 *   `utils/` — pure helpers only; no HTTP calls.
 
 ## Domain Service Modules
-*   One file per domain: `authServices.js`, `todoServices.js`, etc.
+*   One file per domain: `authServices.js`, `coursesServices.js`, etc.
 *   Default-export an object of methods; each method calls `apiClient` and returns the promise.
 *   No axios calls inside views or components — always go through `*Services.js`.
 
 ## Axios Client (`services/services.js`)
-*   Dev `baseURL`: `http://localhost:3200/todo/`; prod: `/todo/`.
+*   Dev `baseURL`: `http://localhost:3200/courses/`; prod: `/courses/`.
 *   `withCredentials: true`.
 *   `transformRequest`: attach `Authorization: Bearer <token>` from `Utils.getStore("user")`.
 *   `transformResponse`: on unauthorized message, clear user and `Router.push({ name: "login" })`.
@@ -329,7 +329,7 @@ Return flat JSON (not wrapped):
 
 ## Router Conventions (`router.js`)
 *   vue-router 4 with `createWebHistory`.
-*   Named routes (`name: "editTodo"`).
+*   Named routes (`name: "editcourses"`).
 *   `props: true` on routes with `:id` params.
 *   `router.beforeEach` — auth and role guards per `auth-patterns.mdc`.
 
@@ -361,8 +361,8 @@ Copy `public/.htaccess` to `dist/` on build — SPA fallback rewrite and cache h
 *   Sets `req.user = { id, role, organizationId }` from joined User row.
 *   Missing/invalid → `401` with `{ message: "Unauthorized! ..." }`.
 
-## User-Scoped Data (Todo App)
-*   Every list/todo query must include `userId: req.user.id` in the `where` clause.
+## User-Scoped Data (courses App)
+*   Every list/courses query must include `userId: req.user.id` in the `where` clause.
 *   On create, set `userId` from `req.user.id` — never from request body.
 *   Before update/delete, load the row and verify ownership; return `404` if not found or not owned (do not leak existence via `403`).
 
@@ -420,7 +420,7 @@ Harness smoke tests (`backend/tests/app.test.js`, `frontend/tests/App.test.js`) 
     1.  Missing/invalid input → `400` with `{ message }`.
     2.  Missing/expired token → `401`.
     3.  Another user's resource → `404` (scoped access).
-*   Use a dedicated test database (`todospeckit-db-test`); copy `backend/.env.test.example` to `backend/.env.test`.
+*   Use a dedicated test database (`courses-db-test`); copy `backend/.env.test.example` to `backend/.env.test`.
 
 ## Frontend (Vitest + @vue/test-utils)
 *   Mount views/components with reactive state.
@@ -696,7 +696,7 @@ What we chose, in one or two sentences. Be specific (technologies, boundaries, i
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [0001](./0001-client-server-multi-user-architecture.md) | Client–server architecture for multi-user todo data | Accepted |
+| [0001](./0001-client-server-multi-user-architecture.md) | Client–server architecture for multi-user courses data | Accepted |
 | [0002](./0002-security-architecture.md) | Layered security architecture | Accepted |
 | [0003](./0003-mysql-relational-database.md) | MySQL relational database | Accepted |
 
@@ -706,15 +706,15 @@ What we chose, in one or two sentences. Be specific (technologies, boundaries, i
 
 # 0001-client-server-multi-user-architecture.md
 
-# ADR-0001: Client–server architecture for multi-user todo data
+# ADR-0001: Client–server architecture for multi-user courses data
 
 **Status:** Accepted  
 **Date:** 2026-07-07  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
-The **Todo** example application shipped with OC CS Speckit is a **multi-user** todo app: each registered user owns private lists and items. No user may read or modify another user's data. The kit must be teachable as a Spec-Driven Development reference — clear boundaries between specification, frontend, backend, and tests.
+The **courses** example application shipped with OC CS Speckit is a **multi-user** courses app: each registered user owns private lists and items. No user may read or modify another user's data. The kit must be teachable as a Spec-Driven Development reference — clear boundaries between specification, frontend, backend, and tests.
 
 We needed to decide:
 
@@ -733,23 +733,23 @@ Adopt a **classic client–server split** with a **stateless REST API** and **se
 | **Client** | Vue 3 SPA (Vite), Vuetify 4, axios |
 | **Server** | Node.js + Express + Sequelize (ES modules) |
 | **Database** | MySQL — single shared database, rows scoped by `userId` |
-| **Transport** | JSON over HTTPS; API base path `/todo/` |
+| **Transport** | JSON over HTTPS; API base path `/courses/` |
 | **Auth** | Username + password; bcrypt hashes; **JWT + Session table** (token stored server-side, revocable on logout) |
 | **Client session hint** | Login response stored in `localStorage` key `user`; axios attaches `Authorization: Bearer <token>` on every request |
-| **Authorization** | `authenticate` middleware sets `req.user.id`; all list/todo queries filter by `userId`; create writes use `req.user.id`, never body; cross-user access returns **404** (not 403) |
+| **Authorization** | `authenticate` middleware sets `req.user.id`; all list/courses queries filter by `userId`; create writes use `req.user.id`, never body; cross-user access returns **404** (not 403) |
 | **Repo layout** | Monorepo: `frontend/` + `backend/` + `features/` specs |
 
 ```text
 Browser (Vue SPA)                    Express API                 MySQL
 ─────────────────                    ───────────                 ─────
 localStorage["user"]  ──Bearer──►   authenticate middleware  ──► sessions, users
-router guards (UI)                   controllers + auth helpers    lists, todos
+router guards (UI)                   controllers + auth helpers    lists, coursess
                                      userId in every WHERE clause
 ```
 
 **Invariants** (must hold in every feature):
 
-1. The server is the **source of truth** for lists, todos, and profile data.
+1. The server is the **source of truth** for lists, coursess, and profile data.
 2. Every authenticated request resolves to **exactly one** `req.user.id` from a valid session row.
 3. **No endpoint** returns or mutates rows owned by another user.
 4. The client never sends a trusted `userId` on create — the server assigns ownership.
@@ -774,7 +774,7 @@ router guards (UI)                   controllers + auth helpers    lists, todos
 
 | Option | Why not |
 |--------|---------|
-| **localStorage-only todos (no backend)** | No shared database, no real multi-user isolation, does not match course API/testing goals. |
+| **localStorage-only coursess (no backend)** | No shared database, no real multi-user isolation, does not match course API/testing goals. |
 | **JWT in cookie only, no Session table** | Harder to revoke on logout; server cannot invalidate a stolen token without extra infrastructure. |
 | **GraphQL or tRPC** | Heavier stack; REST + flat JSON matches existing rules and Agility export simplicity. |
 | **403 Forbidden on cross-user IDs** | Leaks that a resource exists; **404** treats other users' rows as not found (see `security.mdc`). |
@@ -784,7 +784,7 @@ router guards (UI)                   controllers + auth helpers    lists, todos
 
 - ADRs: [ADR-0002 — Layered security architecture](./0002-security-architecture.md), [ADR-0003 — MySQL relational database](./0003-mysql-relational-database.md)
 - C4 diagrams: [docs/arch_diagrams/](../arch_diagrams/README.md) (context, container, component)
-- Feature specs: [Feature 1 — User Authentication](../../features/feature-1-user-auth.md) (identity foundation); Features 2–3 (list/todo isolation)
+- Feature specs: [Feature 1 — User Authentication](../../features/feature-1-user-auth.md) (identity foundation); Features 2–3 (list/courses isolation)
 - Cursor rules: [auth-patterns.mdc](../../.cursor/rules/auth-patterns.mdc), [security.mdc](../../.cursor/rules/security.mdc), [frontend-services.mdc](../../.cursor/rules/frontend-services.mdc), [project-structure.mdc](../../.cursor/rules/project-structure.mdc)
 - Reference: [api.md](../../features/reference/api.md), [data-model.md](../../features/reference/data-model.md)
 
@@ -798,7 +798,7 @@ router guards (UI)                   controllers + auth helpers    lists, todos
 
 **Status:** Accepted  
 **Date:** 2026-07-07  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
@@ -806,7 +806,7 @@ router guards (UI)                   controllers + auth helpers    lists, todos
 
 Threats relevant to this app:
 
-- User A accessing user B's lists, todos, or profile.
+- User A accessing user B's lists, coursess, or profile.
 - Stolen or replayed session tokens after logout or expiry.
 - Client tampering (`userId` in request body, ID enumeration).
 - Credential disclosure (password hashes in API responses, weak storage).
@@ -839,7 +839,7 @@ Adopt a **layered security architecture** with the **API as the sole enforcement
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  MySQL (persistence)                                        │
-│  • userId FK on lists/todos                                 │
+│  • userId FK on lists/coursess                                 │
 │  • sessions table for revocable tokens                      │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -863,9 +863,9 @@ Adopt a **layered security architecture** with the **API as the sole enforcement
 
 | Control | Implementation |
 |---------|----------------|
-| Row-level scope | Every list/todo query includes `userId: req.user.id` in the `WHERE` clause |
+| Row-level scope | Every list/courses query includes `userId: req.user.id` in the `WHERE` clause |
 | Create ownership | Set `userId` from `req.user.id`; **ignore** client-supplied `userId` in body |
-| Update/delete | Load via `getAccessibleListOrNull`, `getAccessibleTodoOrNull`, or `getAccessibleUserOrNull` |
+| Update/delete | Load via `getAccessibleListOrNull`, `getAccessiblecoursesOrNull`, or `getAccessibleUserOrNull` |
 | Cross-user access | Return **404** with a not-found message — never **403** (avoids confirming resource existence) |
 | Profile access | User may only `GET`/`PUT` their own `userId`; `:id` must match `req.user.id` |
 | Centralization | All scope checks live in `backend/app/authorization/` — controllers do not inline duplicate logic |
@@ -891,7 +891,7 @@ Adopt a **layered security architecture** with the **API as the sole enforcement
 
 ### Roles (foundation only)
 
-New users receive role `worker`. Middleware hooks (`requireAdmin`, `requireSuperAdmin`) exist for future admin features but are not used by current todo CRUD. Todo data is scoped by **user**, not role.
+New users receive role `worker`. Middleware hooks (`requireAdmin`, `requireSuperAdmin`) exist for future admin features but are not used by current courses CRUD. courses data is scoped by **user**, not role.
 
 ### Explicitly out of scope (v1)
 
@@ -934,15 +934,15 @@ Documented deferrals — not security holes by omission in the teaching model, b
 | **JWT only (no Session table)** | Cannot revoke on logout without extra infrastructure. |
 | **Cookie-based session without Bearer** | Complicates SPA CORS/dev setup; CSRF becomes mandatory. |
 | **Inline scope checks per controller** | Duplication risk; already rejected in favor of `getAccessible*OrNull` helpers. |
-| **RBAC for todo ownership** | Overkill; `worker` role + `userId` FK is sufficient for private todos. |
+| **RBAC for courses ownership** | Overkill; `worker` role + `userId` FK is sufficient for private coursess. |
 
 ## Related artifacts
 
 - ADRs: [ADR-0001 — Client–server multi-user architecture](./0001-client-server-multi-user-architecture.md)
-- Feature specs: [Feature 1](../../features/feature-1-user-auth.md) (auth); [Features 2–3](../../features/feature-2-todo-list-management.md) (list/todo isolation); [Feature 4](../../features/feature-4-user-profile-management.md) (profile scope)
+- Feature specs: [Feature 1](../../features/feature-1-user-auth.md) (auth); [Features 2–3](../../features/feature-2-courses-list-management.md) (list/courses isolation); [Feature 4](../../features/feature-4-user-profile-management.md) (profile scope)
 - Cursor rules: [security.mdc](../../.cursor/rules/security.mdc), [auth-patterns.mdc](../../.cursor/rules/auth-patterns.mdc), [frontend-services.mdc](../../.cursor/rules/frontend-services.mdc)
 - Implementation: `backend/app/authorization/authorization.js`
-- Tests: `backend/tests/authenticate.test.js`, `backend/tests/auth.test.js`, ownership scenarios in `lists.test.js`, `todos.test.js`, `users.test.js`
+- Tests: `backend/tests/authenticate.test.js`, `backend/tests/auth.test.js`, ownership scenarios in `lists.test.js`, `coursess.test.js`, `users.test.js`
 
 <div style="page-break-after: always;"></div>
 
@@ -954,11 +954,11 @@ Documented deferrals — not security holes by omission in the teaching model, b
 
 **Status:** Accepted  
 **Date:** 2026-07-07  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
-The **Todo** example application persists multi-user identity, sessions, lists, and todos. The data is inherently **relational**: users own lists; lists contain todos; sessions belong to users. [ADR-0001](./0001-client-server-multi-user-architecture.md) requires a shared server-side database; [ADR-0002](./0002-security-architecture.md) requires row-level ownership enforced in every query.
+The **courses** example application persists multi-user identity, sessions, lists, and coursess. The data is inherently **relational**: users own lists; lists contain coursess; sessions belong to users. [ADR-0001](./0001-client-server-multi-user-architecture.md) requires a shared server-side database; [ADR-0002](./0002-security-architecture.md) requires row-level ownership enforced in every query.
 
 We needed to decide:
 
@@ -980,8 +980,8 @@ Use **MySQL** as the production database with **Sequelize 6** as the ORM and **r
 | **Driver** | `mysql2` |
 | **ORM** | Sequelize 6 (ES modules) |
 | **Config** | `backend/app/config/db.config.js` + `sequelizeInstance.js`; credentials from `.env` |
-| **Default database** | `todospeckit-db` |
-| **Test database** | Separate `todospeckit-db-test` (`backend/.env.test`) |
+| **Default database** | `courses-db` |
+| **Test database** | Separate `courses-db-test` (`backend/.env.test`) |
 
 ### Schema model
 
@@ -989,22 +989,22 @@ Four core tables with explicit foreign keys (see [data-model.md](../../features/
 
 ```text
 users ──┬── sessions
-        ├── lists ── todos
-        └── todos (direct userId for authorization queries)
+        ├── lists ── coursess
+        └── coursess (direct userId for authorization queries)
 ```
 
 | Table | Purpose |
 |-------|---------|
 | `users` | Accounts; bcrypt password hash; unique `email` and `username` |
 | `sessions` | Revocable Bearer tokens; `expirationDate`; FK → `users.id` |
-| `lists` | Per-user todo lists; FK → `users.id` |
-| `todos` | Items in a list; FK → `lists.id` + `users.id`; `onDelete: CASCADE` from list |
+| `lists` | Per-user courses lists; FK → `users.id` |
+| `coursess` | Items in a list; FK → `lists.id` + `users.id`; `onDelete: CASCADE` from list |
 
 **Design rules:**
 
-- **Normalized relational schema** — no embedded todo arrays in list documents.
-- **`userId` on lists and todos** — enables authorization `WHERE` clauses without joins-only assumptions.
-- **Cascade delete** — removing a list deletes its todos (US-3.6).
+- **Normalized relational schema** — no embedded courses arrays in list documents.
+- **`userId` on lists and coursess** — enables authorization `WHERE` clauses without joins-only assumptions.
+- **Cascade delete** — removing a list deletes its coursess (US-3.6).
 - **`DATEONLY` for `dueDate`** — date-only semantics without timezone complexity (Feature 5).
 - **Timestamps** — Sequelize `createdAt` / `updatedAt` on all tables.
 - **Uniqueness** — email and username enforced at DB + controller.
@@ -1035,7 +1035,7 @@ No checked-in Sequelize migration files in v1 — schema is defined in `backend/
 
 ### Positive
 
-- Natural fit for user → list → todo hierarchy and FK integrity.
+- Natural fit for user → list → courses hierarchy and FK integrity.
 - MySQL ships with XAMPP — low friction for local full-stack development.
 - Sequelize models map cleanly to SDD **Data Model Requirements** sections in feature specs.
 - Separate test database prevents dev data loss during `force: true` test sync.
@@ -1056,7 +1056,7 @@ No checked-in Sequelize migration files in v1 — schema is defined in `backend/
 |--------|---------|
 | **SQLite (file DB)** | Simpler setup but weaker classroom alignment with deployed MySQL; concurrent test + dev access is awkward. |
 | **PostgreSQL** | Excellent choice for production; less universal in XAMPP/LAMP developer environments for this course. |
-| **MongoDB / document store** | Todo-in-list fits poorly without duplicating ownership; cross-user isolation harder to reason about in specs. |
+| **MongoDB / document store** | courses-in-list fits poorly without duplicating ownership; cross-user isolation harder to reason about in specs. |
 | **JSON files / in-memory store** | No real multi-user persistence; fails ADR-0001. |
 | **Prisma** | Viable ORM; Sequelize already wired in rules, models, and course materials. |
 | **Raw SQL only (no ORM)** | More boilerplate; Sequelize matches constitution stack consistency. |
@@ -1136,7 +1136,7 @@ NFRs here do **not** authorize new product behavior by themselves. Feature specs
 
 # Quality attributes
 
-App-wide non-functional targets for OC CS Speckit (illustrated by the Todo example application).
+App-wide non-functional targets for OC CS Speckit (illustrated by the courses example application).
 
 **Teaching policy:** Specs say *what* to build. This table says *how good* the system should be. Only **Accepted** rows (and feature **Requirements (FR-00N)** / **Success Criteria (SC-00N)**) constrain implementation. **Deferred** is the quality backlog / classroom example. **Out of scope** is what not to build. Cursor agents follow [`.cursor/rules/quality-attributes.mdc`](../../.cursor/rules/quality-attributes.mdc) for this literacy — they must **not** treat every Deferred number as always-on.
 
@@ -1158,7 +1158,7 @@ App-wide non-functional targets for OC CS Speckit (illustrated by the Todo examp
 | **Accepted** | In force for this product | Must not regress; covered by linked rules, ADRs, and/or tests |
 | **Accepted (minimal)** | Thin bar in force | Meet the stated Approach only; do not expand scope |
 | **Deferred** | Documented, not enforced yet | Example Target for learning; implement only if a feature spec or instructor requires it |
-| **Out of scope** | Explicit non-goal for this Todo example / kit demo | Do not design or generate for this bar |
+| **Out of scope** | Explicit non-goal for this courses example / kit demo | Do not design or generate for this bar |
 
 ## Links column
 
@@ -1181,13 +1181,13 @@ Update this table when the bar changes. Feature-local bars stay in that feature�
 | Attribute | Target | Approach | How we verify | Status | Links |
 |-----------|--------|----------|---------------|--------|-------|
 | **Security** | **100%** of protected routes require auth; **0** cross-user reads/writes in automated tests; other users’ resources → **404** (not 403) | Layered API enforcement; ownership isolation | Gherkin + Jest (supertest); Vitest for UX-only guards | Accepted | [ADR-0002](../adr/0002-security-architecture.md), [security.mdc](../../.cursor/rules/security.mdc), [auth-patterns.mdc](../../.cursor/rules/auth-patterns.mdc) |
-| **Data integrity** | **100%** of list/todo rows have a valid owning `userId`; **0** orphan associations after CRUD tests | Relational MySQL; foreign keys / Sequelize associations | Jest + schema in [data-model](../../features/reference/data-model.md) | Accepted | [ADR-0003](../adr/0003-mysql-relational-database.md) |
+| **Data integrity** | **100%** of list/courses rows have a valid owning `userId`; **0** orphan associations after CRUD tests | Relational MySQL; foreign keys / Sequelize associations | Jest + schema in [data-model](../../features/reference/data-model.md) | Accepted | [ADR-0003](../adr/0003-mysql-relational-database.md) |
 | **Reliability** | Happy-path write success ≥ **99%** in local test runs; failed writes return HTTP **4xx/5xx** with a body (never empty **200**) | Single-process Express; no HA/retry layer | Jest on create/update/delete paths | Deferred | — |
 | **Availability** | Local demo uptime goal **≥ 95%** of lab session time; **no** multi-region SLA | Single-node deploy (XAMPP or similar); no HA | N/A | Out of scope | [ADR-0001](../adr/0001-client-server-multi-user-architecture.md) |
 | **Performance** | p95 API latency **&lt; 200 ms** (local XAMPP); dashboard first paint **&lt; 2 s** on a typical developer laptop | No formal load-test gate in CI yet | Manual / `npm run dev` (future: timed Jest or k6) | Deferred | — |
-| **Scalability** | Correct for **≤ 30** concurrent classroom users; **≤ 500** todos per user without pagination redesign | Multi-user correctness, not horizontal scale | Ownership tests; manual multi-browser check | Out of scope | [ADR-0001](../adr/0001-client-server-multi-user-architecture.md) |
+| **Scalability** | Correct for **≤ 30** concurrent classroom users; **≤ 500** coursess per user without pagination redesign | Multi-user correctness, not horizontal scale | Ownership tests; manual multi-browser check | Out of scope | [ADR-0001](../adr/0001-client-server-multi-user-architecture.md) |
 | **Observability** | **100%** of unhandled server errors logged at `error`; HTTP access logged; retain rotating logs **≥ 7 days** | Winston console + daily rotate under `backend/logs/` | Logs present in local runs | Accepted (minimal) | `backend/app/config/logger.js` |
-| **Usability** | New user completes register → create list → add todo in **≤ 3 minutes** without help; primary CTAs use labels from Screen Requirements (**100%** match); **≤ 2** clicks from dashboard to add a todo on an existing list | Vuetify + Screen Requirements; `oc-cta` for primary actions; empty states documented per feature | Manual walkthrough; Vitest for labeled CTAs / flows | Deferred | [ui-style-system.mdc](../../.cursor/rules/ui-style-system.mdc), feature **Screen Requirements** |
+| **Usability** | New user completes register → create list → add courses in **≤ 3 minutes** without help; primary CTAs use labels from Screen Requirements (**100%** match); **≤ 2** clicks from dashboard to add a courses on an existing list | Vuetify + Screen Requirements; `oc-cta` for primary actions; empty states documented per feature | Manual walkthrough; Vitest for labeled CTAs / flows | Deferred | [ui-style-system.mdc](../../.cursor/rules/ui-style-system.mdc), feature **Screen Requirements** |
 | **Accessibility (a11y)** | Primary flows keyboard-reachable; aim **WCAG 2.2 AA** for auth + dashboard when audited; **0** unlabeled icon-only CTAs on primary actions | Prefer Vuetify semantic components | Manual / future Vitest a11y | Deferred | [ui-style-system.mdc](../../.cursor/rules/ui-style-system.mdc) |
 | **Internationalization (i18n)** | **1** locale (en-US); **0** translated string catalogs | No i18n framework | N/A | Out of scope | — |
 | **Maintainability** | **100%** of Gherkin scenarios mapped in Test Coverage Map before merge; `npm test` green; feature PRs typically **≤ 15** files of product code (guideline) | Cursor rules + feature specs as source of truth | Merge checklist; `npm test` | Accepted | [framework.md](../../features/framework.md), [constitution.mdc](../../.cursor/rules/constitution.mdc), [quality-attributes.mdc](../../.cursor/rules/quality-attributes.mdc) |
@@ -1263,7 +1263,7 @@ NFRs here do **not** authorize new product behavior by themselves. A **Deferred*
 | Attribute | Status | Why it belongs in NFRs |
 |-----------|--------|-------------------------|
 | **Security** | Accepted | Cross-cutting: auth on protected routes, **0** cross-user leaks, **404** not **403** |
-| **Data integrity** | Accepted | Every list/todo row has owning `userId` — app-wide invariant |
+| **Data integrity** | Accepted | Every list/courses row has owning `userId` — app-wide invariant |
 | **Observability** | Accepted (minimal) | Thin Winston logging bar — meet Approach, don’t invent a full APM platform |
 | **Performance** | Deferred | Illustrative p95 / first-paint numbers — **not** a CI gate yet |
 | **Availability** / **Scalability** / **i18n** | Out of scope | Explicit non-goals (no multi-region HA, no i18n framework) |
@@ -1410,7 +1410,7 @@ Day-to-day how for agents   → .cursor/rules/*.mdc (incl. quality-attributes.md
 
 # Architecture diagrams (C4)
 
-C4 views for the **Todo** example application in **OC CS Speckit**, as Mermaid. Source of truth for *why* the shape exists: [ADR-0001](../adr/0001-client-server-multi-user-architecture.md).
+C4 views for the **courses** example application in **OC CS Speckit**, as Mermaid. Source of truth for *why* the shape exists: [ADR-0001](../adr/0001-client-server-multi-user-architecture.md).
 
 | File | C4 level | Shows |
 |------|----------|--------|
@@ -1440,28 +1440,28 @@ Adding a new `docs/arch_diagrams/*.md` file is enough; preferred order is listed
 
 # C4 Level 1 — System context
 
-**Todo** (the OC CS Speckit example application) stores each registered user's private lists and todos in MySQL through a server API. There are no external SaaS dependencies.
+**courses** (the OC CS Speckit example application) stores each registered user's private lists and coursess in MySQL through a server API. There are no external SaaS dependencies.
 
 ```mermaid
 C4Context
-title System Context — Todo
+title System Context — courses
 
 UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 
-Person(user, "Registered User", "Owns private lists and todos.")
-System(todoApp, "Todo", "Web application for private lists and todos.")
+Person(user, "Registered User", "Owns private lists and coursess.")
+System(coursesApp, "courses", "Web application for private lists and coursess.")
 SystemDb_Ext(mysql, "MySQL", "Application system of record.")
 
-Rel(user, todoApp, "Uses", "HTTPS")
-Rel(todoApp, mysql, "Reads and writes", "Sequelize")
+Rel(user, coursesApp, "Uses", "HTTPS")
+Rel(coursesApp, mysql, "Reads and writes", "Sequelize")
 
-UpdateRelStyle(user, todoApp, $offsetY="-20")
-UpdateRelStyle(todoApp, mysql, $offsetX="15")
+UpdateRelStyle(user, coursesApp, $offsetY="-20")
+UpdateRelStyle(coursesApp, mysql, $offsetX="15")
 ```
 
 ## Notes
 
-- The Todo system contains the Vue SPA and Express API; the [container diagram](./c4-container.md) expands that boundary.
+- The courses system contains the Vue SPA and Express API; the [container diagram](./c4-container.md) expands that boundary.
 - The API is the source of truth. Browser storage is only a session/UX hint.
 
 **Related:** [ADR-0001](../adr/0001-client-server-multi-user-architecture.md) · [ADR-0003](../adr/0003-mysql-relational-database.md)
@@ -1478,14 +1478,14 @@ Monorepo split: browser SPA talks to a stateless REST API; API owns auth and `us
 
 ```mermaid
 C4Container
-title Container Diagram — Todo
+title Container Diagram — courses
 
-Person(user, "Registered User", "Uses Todo in a browser.")
+Person(user, "Registered User", "Uses courses in a browser.")
 
-System_Boundary(todoApp, "Todo") {
+System_Boundary(coursesApp, "courses") {
   Container(spa, "Web SPA", "Vue 3, Vuetify, axios", "Browser UI and UX-only route guards.")
-  Container(api, "API", "Node.js, Express, Sequelize", "REST /todo — auth and ownership enforcement.")
-  ContainerDb(db, "Database", "MySQL", "Users, sessions, lists, and todos.")
+  Container(api, "API", "Node.js, Express, Sequelize", "REST /courses — auth and ownership enforcement.")
+  ContainerDb(db, "Database", "MySQL", "Users, sessions, lists, and coursess.")
 }
 
 Rel(user, spa, "Uses", "HTTPS")
@@ -1500,7 +1500,7 @@ UpdateRelStyle(api, db, $offsetX="15")
 
 ## Notes
 
-- API routes are mounted under `/todo/`; authenticated requests carry a Bearer JWT backed by the Session table.
+- API routes are mounted under `/courses/`; authenticated requests carry a Bearer JWT backed by the Session table.
 - The API assigns and scopes ownership from `req.user.id`; the browser never supplies a trusted owner ID.
 - Dev ports: frontend `8082` · backend `3200`; CORS origin must match the SPA.
 
@@ -1524,11 +1524,11 @@ Container_Boundary(spa, "Web SPA") {
   Component(router, "Router", "vue-router", "Routes and UX-only auth redirects.")
   Component(views, "Views", "views/*.vue", "Login, register, dashboard, and profile flows.")
   Component(ui, "UI Components", "components/*.vue", "Navigation, forms, dialogs, and rows.")
-  Component(services, "API Services", "*Services.js", "axios modules for /todo resources.")
+  Component(services, "API Services", "*Services.js", "axios modules for /courses resources.")
   Component(config, "Client Config", "config + plugins", "Token storage, helpers, and Vuetify.")
 }
 
-Container_Ext(api, "API", "Express /todo")
+Container_Ext(api, "API", "Express /courses")
 
 Rel(router, views, "Renders")
 Rel(views, ui, "Uses")
@@ -1565,7 +1565,7 @@ C4Component
 title Component Diagram — API
 
 Container_Boundary(api, "API Application") {
-  Component(routes, "Routes", "app/routes/*", "Resource routers under /todo.")
+  Component(routes, "Routes", "app/routes/*", "Resource routers under /courses.")
   Component(authz, "Authorization", "app/authorization/*", "Session auth and ownership helpers.")
   Component(controllers, "Controllers", "app/controllers/*", "Validation, feature rules, and responses.")
   Component(models, "Models", "app/models/*", "Sequelize entities and associations.")
@@ -1609,7 +1609,7 @@ Logical deployment: the **User PC** runs the SPA in a browser; the **Web Server*
 
 ```mermaid
 C4Deployment
-title Deployment Diagram — Todo
+title Deployment Diagram — courses
 
 Deployment_Node(userPc, "User PC", "Developer / end-user computer") {
   Container(spa, "Web SPA", "Browser + Vue", "Loaded from Apache; runs on the user PC.")
@@ -1617,8 +1617,8 @@ Deployment_Node(userPc, "User PC", "Developer / end-user computer") {
 
 Deployment_Node(webServer, "Web Server", "Classroom or CI deploy host") {
   Container(staticAssets, "Static Assets", "Apache", "Built Vue dist and .htaccess.")
-  Container(api, "API", "Node.js + Express", "REST /todo on port 3200.")
-  ContainerDb(db, "Database", "MySQL", "Users, sessions, lists, and todos.")
+  Container(api, "API", "Node.js + Express", "REST /courses on port 3200.")
+  ContainerDb(db, "Database", "MySQL", "Users, sessions, lists, and coursess.")
 }
 
 Rel(staticAssets, spa, "Serves", "HTTPS")
@@ -1660,7 +1660,7 @@ UpdateRelStyle(api, db, $offsetX="15")
 
 # Feature Specifications
 
-Spec-driven development (SDD) source of truth for **OC CS Speckit** (Todo is the example application in this repo).  
+Spec-driven development (SDD) source of truth for **OC CS Speckit** (courses is the example application in this repo).  
 No application code may be written unless it maps to a requirement in one of these files.
 
 **Methodology:** [framework.md](./framework.md) — how to write, trace, and ship feature specs.  
@@ -1677,10 +1677,10 @@ Regenerate writing-guide PDFs: `npm run writing-guides:pdf`
 | ID | File | Branch | Status | Depends on |
 |----|------|--------|--------|------------|
 | 1 | [feature-1-user-auth.md](./feature-1-user-auth.md) | `feature/1-user-auth` | Ready | — |
-| 2 | [feature-2-todo-list-management.md](./feature-2-todo-list-management.md) | `feature/2-todo-list-management` | Ready | Feature 1 |
-| 3 | [feature-3-todo-list-item-management.md](./feature-3-todo-list-item-management.md) | `feature/3-todo-list-item-management` | Ready | Features 1–2 |
+| 2 | [feature-2-courses-list-management.md](./feature-2-courses-list-management.md) | `feature/2-courses-list-management` | Ready | Feature 1 |
+| 3 | [feature-3-courses-list-item-management.md](./feature-3-courses-list-item-management.md) | `feature/3-courses-list-item-management` | Ready | Features 1–2 |
 | 4 | [feature-4-user-profile-management.md](./feature-4-user-profile-management.md) | `feature/4-user-profile-management` | Ready | Features 1–3 |
-| 5 | [feature-5-todo-due-date.md](./feature-5-todo-due-date.md) | `feature/5-todo-due-date` | Ready | Features 1–3 |
+| 5 | [feature-5-courses-due-date.md](./feature-5-courses-due-date.md) | `feature/5-courses-due-date` | Ready | Features 1–3 |
 
 **Branch roles:** `main` = scaffold-only starter kit · `dev` = integration (branch from `main`, merge features here) · `feature/N-*` = feature implementation (branch from `dev`).
 
@@ -1695,7 +1695,7 @@ Keep these snapshots in sync with the codebase when schema or API changes — **
 | [reference/README.md](./reference/README.md) | How to maintain reference docs |
 | [reference/writing-living-reference.md](./reference/writing-living-reference.md) | Student guide — writing/updating living reference |
 | [reference/data-model.md](./reference/data-model.md) | Current database tables and associations |
-| [reference/api.md](./reference/api.md) | Current REST API under `/todo/` |
+| [reference/api.md](./reference/api.md) | Current REST API under `/courses/` |
 | [reference/behavior.md](./reference/behavior.md) | Current product rules (ownership, sort, validation, UI) |
 
 New features: follow the template in [framework.md](./framework.md#feature-spec-template) — **Status**, **Input**, story **Priority** / **Independent test**, **FR-00N**, **Assumptions**, **Edge Cases**, **SC-00N**, **Key Entities**, plus **Agent implementation request** and **Definition of Done**.
@@ -1740,7 +1740,7 @@ npm run test:frontend    # Vitest
 npm run specs:pdf:app
 ```
 
-Output: `docs/todo-app-specs.md` · `docs/todo-app-specs.pdf`
+Output: `docs/courses-app-specs.md` · `docs/courses-app-specs.pdf`
 
 **Full methodology pack** (rules + ADRs + NFRs + diagrams + specs + reference):
 
@@ -1790,7 +1790,7 @@ Note: a plain `md-to-pdf` run leaves Mermaid as code blocks; `npm run specs:pdf`
 
 # Spec-Driven Development Framework
 
-How **OC CS Speckit** writes, traces, and ships **feature specifications** (illustrated here by the Todo example application).  
+How **OC CS Speckit** writes, traces, and ships **feature specifications** (illustrated here by the courses example application).  
 This document is the methodology handbook; individual feature files are the requirements.
 
 **Related:** [Feature catalog](./README.md) · [ADRs](../docs/adr/README.md) · [Quality attributes (NFRs)](../docs/nfr/README.md) · [Living reference](./reference/README.md) · [Constitution](../.cursor/rules/constitution.mdc)
@@ -1962,8 +1962,8 @@ Conceptual model before **Data Model Requirements** (GitHub Spec Kit alignment):
 ```markdown
 ## Key Entities
 
-- **User**: account owner; has many lists and todos
-- **List**: named group of todos; belongs to one user
+- **User**: account owner; has many lists and coursess
+- **List**: named group of coursess; belongs to one user
 ```
 
 No column types here — those belong in **Data Model Requirements** or `features/reference/data-model.md`.
@@ -1990,7 +1990,7 @@ Every scenario must appear in the **Test Coverage Map** and have at least one au
 
 ## GitHub Spec Kit alignment
 
-This repo uses one merged `feature-N-*.md` per capability (Todo example app + fixed stack). [GitHub Spec Kit](https://github.com/github/spec-kit) splits **spec** (what/why) from **plan** (how). Map phases as follows:
+This repo uses one merged `feature-N-*.md` per capability (courses example app + fixed stack). [GitHub Spec Kit](https://github.com/github/spec-kit) splits **spec** (what/why) from **plan** (how). Map phases as follows:
 
 | Spec Kit phase | OC CS Speckit artifact |
 |----------------|----------------------|
@@ -2022,10 +2022,10 @@ Export backlog: `npm run agility:export` or `npm run agility:push` (see [docs/ag
 Tests must link back to the spec in three layers:
 
 ```text
-feature-3-todo-list-item-management.md
+feature-3-courses-list-item-management.md
   └── US-3.1 — Add tasks to a list
-        └── Scenario: User adds a todo to the selected list
-              └── backend/tests/todos.test.js → it("User adds a todo…")
+        └── Scenario: User adds a courses to the selected list
+              └── backend/tests/coursess.test.js → it("User adds a courses…")
 ```
 
 ### File header
@@ -2034,8 +2034,8 @@ Every feature test file starts with:
 
 ```javascript
 /**
- * Feature 3 — Todo List Item Management
- * Spec: features/feature-3-todo-list-item-management.md
+ * Feature 3 — courses List Item Management
+ * Spec: features/feature-3-courses-list-item-management.md
  */
 ```
 
@@ -2044,10 +2044,10 @@ Harness-only files (`app.test.js`, `App.test.js`) are exempt — they verify the
 ### Nested `describe` blocks
 
 ```javascript
-describe("Feature 3 — Todo API", () => {
+describe("Feature 3 — courses API", () => {
   describe("US-3.1 — Add tasks to a list", () => {
-    it("User adds a todo to the selected list", async () => { /* … */ });
-    it("User adds a todo with an empty title", async () => { /* … */ });
+    it("User adds a courses to the selected list", async () => { /* … */ });
+    it("User adds a courses with an empty title", async () => { /* … */ });
   });
 });
 ```
@@ -2062,8 +2062,8 @@ The map is the authoritative index. Prefer this column layout:
 
 | Story | Scenario | Test file | Test name |
 |-------|----------|-----------|-----------|
-| US-3.1 | User adds a todo to the selected list | `backend/tests/todos.test.js` | `it("User adds a todo to the selected list")` |
-| US-3.1 | User adds a todo with an empty title | `frontend/tests/Dashboard.test.js` | `it("User adds a todo with an empty title")` |
+| US-3.1 | User adds a courses to the selected list | `backend/tests/coursess.test.js` | `it("User adds a courses to the selected list")` |
+| US-3.1 | User adds a courses with an empty title | `frontend/tests/Dashboard.test.js` | `it("User adds a courses with an empty title")` |
 
 ### Auditing coverage
 
@@ -2072,7 +2072,7 @@ The map is the authoritative index. Prefer this column layout:
 rg "US-3.1" features/ backend/tests frontend/tests
 
 # Find a scenario across spec and tests
-rg "User adds a todo with an empty title" features/ backend/tests frontend/tests
+rg "User adds a courses with an empty title" features/ backend/tests frontend/tests
 ```
 
 Every `#### Scenario` in the spec must have ≥1 matching `it`. Every feature `it` must trace to a scenario.
@@ -2269,7 +2269,7 @@ One feature file + the style rule is usually enough — you do not need to `@` t
 **Screen Requirements only (most common):**
 
 ```text
-I updated Screen Requirements in @features/feature-2-todo-list-management.md.
+I updated Screen Requirements in @features/feature-2-courses-list-management.md.
 
 Revise the dashboard sidebar UI to match the spec:
 - + New List button placement and class oc-cta
@@ -2284,7 +2284,7 @@ No API or test changes unless Gherkin scenario text changed.
 
 ```text
 Per @.cursor/rules/ui-style-system.mdc and
-@features/feature-3-todo-list-item-management.md Screen Requirements,
+@features/feature-3-courses-list-item-management.md Screen Requirements,
 apply the oc-cta button style to Add and align with Edit Profile.
 
 Update Dashboard.vue and MenuBar.vue if needed.
@@ -2457,7 +2457,7 @@ Example: Feature 2 (lists) and Feature 4 (profile) can ship in the same sprint, 
 
 | Command | Output |
 |---------|--------|
-| `npm run specs:pdf:app` | ADRs + NFRs + C4 + feature specs → `docs/todo-app-specs.pdf` (no rules / writing guides / reference) |
+| `npm run specs:pdf:app` | ADRs + NFRs + C4 + feature specs → `docs/courses-app-specs.pdf` (no rules / writing guides / reference) |
 | `npm run specs:pdf` | Rules + ADRs + NFRs + C4 diagrams + specs + reference → `docs/oc-cs-speckit-specs.pdf` (auto-discovers; Mermaid/C4 rendered) |
 | `npm run agility:export` | CSV backlog for Agility Excel import (auto-discovers `feature-N-*.md`) |
 | `npm run agility:push` | Push epics, stories, tests via Agility API |
@@ -2478,7 +2478,7 @@ PDF and Agility both pick up new `features/feature-N-*.md` automatically. See [R
 **Branch pattern:** `feature/1-user-auth`
 **Status:** Ready
 **Created:** 2026-01-15
-**Input:** Multi-user authentication and session management so each user can sign in and access private todo data
+**Input:** Multi-user authentication and session management so each user can sign in and access private courses data
 **Related:** [ADR-0001 — Client–server multi-user architecture](../docs/adr/0001-client-server-multi-user-architecture.md), [ADR-0002 — Security architecture](../docs/adr/0002-security-architecture.md)
 
 ---
@@ -2488,7 +2488,7 @@ PDF and Agility both pick up new `features/feature-N-*.md` automatically. See [R
 ### US-1.1: Register an account
 **As a** new user  
 **I want to** create an account with my name, email, username, and password  
-**So that** I can sign in and manage my own private todo lists
+**So that** I can sign in and manage my own private courses lists
 
 **Priority:** P1  
 **Independent test:** Submit valid registration and land on protected home with `user` in `localStorage`  
@@ -2552,7 +2552,7 @@ PDF and Agility both pick up new `features/feature-N-*.md` automatically. See [R
 
 - Greenfield app — no existing users or external identity provider.
 - Single browser `localStorage` session per device (no multi-tab sync beyond shared storage).
-- Lists and todos are deferred to Features 2–3; Feature 1 delivers auth and a minimal protected home placeholder only.
+- Lists and coursess are deferred to Features 2–3; Feature 1 delivers auth and a minimal protected home placeholder only.
 
 ## Edge Cases
 
@@ -2573,9 +2573,9 @@ PDF and Agility both pick up new `features/feature-N-*.md` automatically. See [R
 
 Feature 1 establishes identity; Features 2–3 enforce per-user data boundaries.
 
-*   Each user account is a separate tenant boundary for todo lists and items.
+*   Each user account is a separate tenant boundary for courses lists and items.
 *   No API in this feature returns another user's profile or session.
-*   Later features must never expose lists or todos across users — not in list responses, detail views, or error messages that confirm another user's resource exists.
+*   Later features must never expose lists or coursess across users — not in list responses, detail views, or error messages that confirm another user's resource exists.
 
 ---
 
@@ -2583,9 +2583,9 @@ Feature 1 establishes identity; Features 2–3 enforce per-user data boundaries.
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `POST` | `/todo/register` | No | Create a new user account |
-| `POST` | `/todo/login` | No | Authenticate and return session payload |
-| `POST` | `/todo/logout` | Yes | Invalidate current session token |
+| `POST` | `/courses/register` | No | Create a new user account |
+| `POST` | `/courses/login` | No | Authenticate and return session payload |
+| `POST` | `/courses/logout` | Yes | Invalidate current session token |
 
 **Login / register success response** (flat JSON, no envelope):
 ```json
@@ -2631,7 +2631,7 @@ Feature 1 establishes identity; Features 2–3 enforce per-user data boundaries.
 
 ## Key Entities
 
-- **User**: registered account (name, email, username, role); owns future lists and todos.
+- **User**: registered account (name, email, username, role); owns future lists and coursess.
 - **Session**: server-side record tying a JWT token to a user; expires after 24 hours.
 
 ---
@@ -2779,7 +2779,7 @@ Feature 1 establishes identity; Features 2–3 enforce per-user data boundaries.
 #### Scenario: Protected API request succeeds with a valid session
 *   **Given** I am signed in as user A
 *   **And** user B also exists
-*   **When** I send an authenticated `GET /todo/lists` request
+*   **When** I send an authenticated `GET /courses/lists` request
 *   **Then** the API returns `200`
 *   **And** only lists owned by user A are returned
 
@@ -2871,34 +2871,34 @@ Do not implement behavior not in this spec.
 
 ## Out of Scope
 
-*   Password reset (`POST /todo/reset-password`)
+*   Password reset (`POST /courses/reset-password`)
 *   Email verification
 *   OAuth / social login
 *   Admin user management
-*   Full todo dashboard (Feature 2)
+*   Full courses dashboard (Feature 2)
 
 <div style="page-break-after: always;"></div>
 
-<!-- source: features/feature-2-todo-list-management.md -->
+<!-- source: features/feature-2-courses-list-management.md -->
 
-# feature-2-todo-list-management.md
+# feature-2-courses-list-management.md
 
-# Feature: Todo List Management
+# Feature: courses List Management
 
 **Feature ID:** 2
-**Branch pattern:** `feature/2-todo-list-management`
+**Branch pattern:** `feature/2-courses-list-management`
 **Status:** Ready
 **Created:** 2026-02-01
-**Input:** Signed-in users manage private named todo lists on one dashboard view; new lists are added via a dialog
+**Input:** Signed-in users manage private named courses lists on one dashboard view; new lists are added via a dialog
 **Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md)
 
 ---
 
 ## User Stories
 
-### US-2.1: Create todo lists
+### US-2.1: Create courses lists
 **As a** signed-in user  
-**I want to** create named todo lists (e.g. "Work", "Groceries")  
+**I want to** create named courses lists (e.g. "Work", "Groceries")  
 **So that** I can organize tasks into separate groups
 
 **Priority:** P1  
@@ -2907,7 +2907,7 @@ Do not implement behavior not in this spec.
 
 ### US-2.2: View my lists
 **As a** signed-in user  
-**I want to** see all of my todo lists on one screen  
+**I want to** see all of my courses lists on one screen  
 **So that** I can see what groups I have created
 
 **Priority:** P1  
@@ -2917,7 +2917,7 @@ Do not implement behavior not in this spec.
 ### US-2.3: Manage list rows
 **As a** signed-in user  
 **I want** each list row to show **edit** and **delete** actions  
-**So that** I can manage lists without leaving the lists view (todo **items** open in a dialog — Feature 3)
+**So that** I can manage lists without leaving the lists view (courses **items** open in a dialog — Feature 3)
 
 **Priority:** P1  
 **Independent test:** Each list row exposes edit and delete icon actions  
@@ -2925,7 +2925,7 @@ Do not implement behavior not in this spec.
 
 ### US-2.4: Rename and delete lists
 **As a** signed-in user  
-**I want to** rename or delete a todo list  
+**I want to** rename or delete a courses list  
 **So that** I can keep my workspace organized
 
 **Priority:** P2  
@@ -2938,7 +2938,7 @@ Do not implement behavior not in this spec.
 **So that** other users cannot read or modify my list names
 
 **Priority:** P1  
-**Independent test:** Cross-user list access returns `404`; `GET /todo/lists` never returns another user's rows  
+**Independent test:** Cross-user list access returns `404`; `GET /courses/lists` never returns another user's rows  
 **Acceptance scenarios:** see ### US-2.5 under Acceptance Criteria
 
 ---
@@ -2953,14 +2953,14 @@ Do not implement behavior not in this spec.
 - **FR-004**: On create, `userId` MUST be set from `req.user.id` only — ignore or strip any `userId` in the request body.
 - **FR-005**: List names MUST be trimmed before save; empty strings MUST be rejected.
 - **FR-006**: Lists MUST be ordered alphabetically by name in API responses.
-- **FR-007**: This feature MUST deliver list CRUD and a **single-view** lists UI in `Dashboard.vue` (dialog-based add/edit/delete). No sidebar/main split. Todo **items** UI is Feature 3.
+- **FR-007**: This feature MUST deliver list CRUD and a **single-view** lists UI in `Dashboard.vue` (dialog-based add/edit/delete). No sidebar/main split. courses **items** UI is Feature 3.
 
 ---
 
 ## Assumptions
 
 - Feature 1 auth and session handling MUST be merged to `dev` before implementing this feature.
-- Lists and todos use **dialog-based** workflows (no split sidebar / main panel).
+- Lists and coursess use **dialog-based** workflows (no split sidebar / main panel).
 - `MenuBar` is introduced in this feature with basic sign-out (profile dropdown is Feature 4).
 
 ## Edge Cases
@@ -2968,7 +2968,7 @@ Do not implement behavior not in this spec.
 - Empty or whitespace-only list name → client block and/or `400`.
 - List name longer than 100 characters → `400`.
 - Invalid `listId` → `400`; unowned list → `404`.
-- Unauthenticated dashboard or `GET /todo/lists` → redirect or `401`.
+- Unauthenticated dashboard or `GET /courses/lists` → redirect or `401`.
 
 ## Success Criteria
 
@@ -2984,11 +2984,11 @@ Each user owns their lists exclusively. Another authenticated user must not be a
 
 | Rule | Requirement |
 |------|-------------|
-| **Read scope** | `GET /todo/lists` returns only lists where `userId = req.user.id`. |
+| **Read scope** | `GET /courses/lists` returns only lists where `userId = req.user.id`. |
 | **Write scope** | `PUT` and `DELETE` apply only when the list row matches both `id` and `req.user.id`. |
 | **Create scope** | New lists are always owned by the authenticated user. |
 | **Cross-user access** | If a list belongs to another user, respond with `404` — never `403` (do not confirm the list exists). |
-| **UI scope** | The lists view shows only lists returned by `GET /todo/lists` for the signed-in user. |
+| **UI scope** | The lists view shows only lists returned by `GET /courses/lists` for the signed-in user. |
 | **Implementation** | Use a shared helper (e.g. `getAccessibleListOrNull(req, listId)`) in `app/authorization/` — do not duplicate scope logic in controllers. |
 
 ---
@@ -2997,10 +2997,10 @@ Each user owns their lists exclusively. Another authenticated user must not be a
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/todo/lists` | Yes | Fetch all lists for the authenticated user |
-| `POST` | `/todo/lists` | Yes | Create a new list |
-| `PUT` | `/todo/lists/:listId` | Yes | Rename a list |
-| `DELETE` | `/todo/lists/:listId` | Yes | Delete a list owned by the caller |
+| `GET` | `/courses/lists` | Yes | Fetch all lists for the authenticated user |
+| `POST` | `/courses/lists` | Yes | Create a new list |
+| `PUT` | `/courses/lists/:listId` | Yes | Rename a list |
+| `DELETE` | `/courses/lists/:listId` | Yes | Delete a list owned by the caller |
 
 All endpoints return **only data owned by the authenticated user**. Cross-user access attempts return `404`.
 
@@ -3052,7 +3052,7 @@ Replaces the Feature 1 placeholder home page. **Single Vue view** (`Dashboard.vu
 
 ## Key Entities
 
-- **List**: named group belonging to one user; will contain todos (Feature 3).
+- **List**: named group belonging to one user; will contain coursess (Feature 3).
 - **User**: owns many lists (from Feature 1).
 
 ---
@@ -3076,7 +3076,7 @@ Replaces the Feature 1 placeholder home page. **Single Vue view** (`Dashboard.vu
 
 ## Acceptance Criteria (Gherkin)
 
-### US-2.1 — Create todo lists
+### US-2.1 — Create courses lists
 
 #### Scenario: User creates a new list
 *   **Given** I am signed in on the dashboard
@@ -3123,7 +3123,7 @@ Replaces the Feature 1 placeholder home page. **Single Vue view** (`Dashboard.vu
 #### Scenario: User cannot see another user's lists
 *   **Given** user B owns list `Secret Project`
 *   **And** I am signed in as user A
-*   **When** I request `GET /todo/lists`
+*   **When** I request `GET /courses/lists`
 *   **Then** the response contains only lists owned by user A
 *   **And** `Secret Project` is not in the response
 *   **And** the lists view does not show `Secret Project`
@@ -3167,20 +3167,20 @@ Replaces the Feature 1 placeholder home page. **Single Vue view** (`Dashboard.vu
 #### Scenario: User attempts to rename another user's list
 *   **Given** I am signed in as user A
 *   **And** a list exists that belongs to user B
-*   **When** I send `PUT /todo/lists/:listId` with user B's list ID and body `{ "name": "Hijacked" }`
+*   **When** I send `PUT /courses/lists/:listId` with user B's list ID and body `{ "name": "Hijacked" }`
 *   **Then** the API returns `404` with `{ "message": "List with id=<id> not found." }`
 *   **And** user B's list name is unchanged in the database
 
 #### Scenario: User attempts to delete another user's list
 *   **Given** I am signed in as user A
 *   **And** a list exists that belongs to user B
-*   **When** I send `DELETE /todo/lists/:listId` with user B's list ID
+*   **When** I send `DELETE /courses/lists/:listId` with user B's list ID
 *   **Then** the API returns `404` with `{ "message": "List with id=<id> not found." }`
 *   **And** user B's list still exists
 
 #### Scenario: Client cannot assign a list to another user on create
 *   **Given** I am signed in as user A
-*   **When** I send `POST /todo/lists` with body `{ "name": "Groceries", "userId": 999 }` where user `999` is a different user
+*   **When** I send `POST /courses/lists` with body `{ "name": "Groceries", "userId": 999 }` where user `999` is a different user
 *   **Then** the API returns `201` with a list owned by user A
 *   **And** the saved `userId` is user A's ID, not `999`
 
@@ -3191,7 +3191,7 @@ Replaces the Feature 1 placeholder home page. **Single Vue view** (`Dashboard.vu
 
 #### Scenario: Unauthenticated API request to lists
 *   **Given** I have no valid session token
-*   **When** I request `GET /todo/lists`
+*   **When** I request `GET /courses/lists`
 *   **Then** the API returns `401` with an unauthorized message
 
 ---
@@ -3221,7 +3221,7 @@ Replaces the Feature 1 placeholder home page. **Single Vue view** (`Dashboard.vu
 Copy when asking Cursor to implement this feature (`@` this file):
 
 ```text
-Implement Feature 2 from @features/feature-2-todo-list-management.md on branch `feature/2-todo-list-management`.
+Implement Feature 2 from @features/feature-2-courses-list-management.md on branch `feature/2-courses-list-management`.
 
 Follow layer order in @features/framework.md (models → routes → backend tests → frontend → frontend tests).
 Map every Gherkin scenario in the Test Coverage Map; run `npm test` before finishing.
@@ -3248,7 +3248,7 @@ Do not implement behavior not in this spec.
 
 ## Out of Scope
 
-*   Todo items (see `features/feature-3-todo-list-item-management.md`)
+*   courses items (see `features/feature-3-courses-list-item-management.md`)
 *   `MenuBar` beyond basic sign-out (full nav deferred if not needed)
 *   Drag-and-drop list reordering
 *   Sharing lists with other users
@@ -3259,25 +3259,25 @@ Do not implement behavior not in this spec.
 
 The following are intentionally deferred to the next feature spec:
 
-*   `todos` table and associations
-*   **Items** icon on each list row; list-items dialog (view todos for that list)
-*   Add / edit / delete todo dialogs and row actions (checkbox, name, edit, delete)
-*   `GET/POST /todo/lists/:listId/todos` and `PUT/DELETE /todo/todos/:id`
+*   `coursess` table and associations
+*   **Items** icon on each list row; list-items dialog (view coursess for that list)
+*   Add / edit / delete courses dialogs and row actions (checkbox, name, edit, delete)
+*   `GET/POST /courses/lists/:listId/coursess` and `PUT/DELETE /courses/coursess/:id`
 
 <div style="page-break-after: always;"></div>
 
-<!-- source: features/feature-3-todo-list-item-management.md -->
+<!-- source: features/feature-3-courses-list-item-management.md -->
 
-# feature-3-todo-list-item-management.md
+# feature-3-courses-list-item-management.md
 
-# Feature: Todo List Item Management
+# Feature: courses List Item Management
 
 **Feature ID:** 3
-**Branch pattern:** `feature/3-todo-list-item-management`
+**Branch pattern:** `feature/3-courses-list-item-management`
 **Status:** Ready
 **Created:** 2026-02-15
-**Input:** Signed-in users manage todo items per list via dialogs opened from list rows (items, add, edit, delete)
-**Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md), [Feature 2 — Todo List Management](feature-2-todo-list-management.md)
+**Input:** Signed-in users manage courses items per list via dialogs opened from list rows (items, add, edit, delete)
+**Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md), [Feature 2 — courses List Management](feature-2-courses-list-management.md)
 
 ---
 
@@ -3285,25 +3285,25 @@ The following are intentionally deferred to the next feature spec:
 
 ### US-3.1: Add tasks to a list
 **As a** signed-in user  
-**I want to** add todo items to a list from its items dialog  
+**I want to** add courses items to a list from its items dialog  
 **So that** I can track what needs to be done in that context
 
 **Priority:** P1  
-**Independent test:** Open items dialog for a list, add a todo via add-item dialog; it appears in the items list with `completed: false`  
+**Independent test:** Open items dialog for a list, add a courses via add-item dialog; it appears in the items list with `completed: false`  
 **Acceptance scenarios:** see ### US-3.1 under Acceptance Criteria
 
 ### US-3.2: View tasks in a list
 **As a** signed-in user  
-**I want to** open a list's items dialog and see all todos for that list  
+**I want to** open a list's items dialog and see all coursess for that list  
 **So that** I know what work belongs to that group
 
 **Priority:** P1  
-**Independent test:** Open items dialog on different list rows; each dialog shows only that list's todos  
+**Independent test:** Open items dialog on different list rows; each dialog shows only that list's coursess  
 **Acceptance scenarios:** see ### US-3.2 under Acceptance Criteria
 
 ### US-3.3: Complete tasks
 **As a** signed-in user  
-**I want to** mark todos as complete or incomplete  
+**I want to** mark coursess as complete or incomplete  
 **So that** I can track my progress
 
 **Priority:** P1  
@@ -3312,29 +3312,29 @@ The following are intentionally deferred to the next feature spec:
 
 ### US-3.4: Edit and remove tasks
 **As a** signed-in user  
-**I want to** edit or delete individual todos  
+**I want to** edit or delete individual coursess  
 **So that** I can keep my lists accurate
 
 **Priority:** P2  
-**Independent test:** Edit title and delete todo via UI; changes persist after refresh  
+**Independent test:** Edit title and delete courses via UI; changes persist after refresh  
 **Acceptance scenarios:** see ### US-3.4 under Acceptance Criteria
 
 ### US-3.5: Private items only
 **As a** signed-in user  
-**I want** my todo items visible only to me  
+**I want** my courses items visible only to me  
 **So that** other users cannot read or modify my tasks
 
 **Priority:** P1  
-**Independent test:** Cross-user todo or parent-list access returns `404`  
+**Independent test:** Cross-user courses or parent-list access returns `404`  
 **Acceptance scenarios:** see ### US-3.5 under Acceptance Criteria
 
 ### US-3.6: Lists carry their items
 **As a** signed-in user  
-**I want** deleting a list to remove its todo items  
+**I want** deleting a list to remove its courses items  
 **So that** I do not leave orphaned tasks in the database
 
 **Priority:** P2  
-**Independent test:** Delete list with todos; todos are gone from database  
+**Independent test:** Delete list with coursess; coursess are gone from database  
 **Acceptance scenarios:** see ### US-3.6 under Acceptance Criteria
 
 ---
@@ -3343,16 +3343,16 @@ The following are intentionally deferred to the next feature spec:
 
 ### Functional Requirements
 
-- **FR-001**: All todo endpoints MUST require a valid session (`authenticate` middleware).
-- **FR-002**: A todo MUST belong to exactly one list and one user for its entire lifetime.
-- **FR-003**: Every todo read, update, and delete MUST scope with `userId: req.user.id`.
-- **FR-004**: Before creating a todo, the parent list MUST be owned by `req.user.id`; otherwise return `404`.
+- **FR-001**: All courses endpoints MUST require a valid session (`authenticate` middleware).
+- **FR-002**: A courses MUST belong to exactly one list and one user for its entire lifetime.
+- **FR-003**: Every courses read, update, and delete MUST scope with `userId: req.user.id`.
+- **FR-004**: Before creating a courses, the parent list MUST be owned by `req.user.id`; otherwise return `404`.
 - **FR-005**: On create, `userId` and `listId` MUST come from validated server context — ignore client spoofing of ownership.
-- **FR-006**: Todo titles MUST be trimmed before save; empty strings MUST be rejected.
-- **FR-007**: New todos MUST default to `completed: false`.
-- **FR-008**: Deleting a list MUST delete all todos in that list (cascade).
-- **FR-009**: Todos MUST be ordered incomplete first, then by `createdAt` ascending.
-- **FR-010**: This feature MUST extend the Feature 2 single-view lists UI: each list row gains an **Items** icon that opens a list-items `<v-dialog>`. Todo add/edit/delete use nested dialogs — no sidebar/main split.
+- **FR-006**: courses titles MUST be trimmed before save; empty strings MUST be rejected.
+- **FR-007**: New coursess MUST default to `completed: false`.
+- **FR-008**: Deleting a list MUST delete all coursess in that list (cascade).
+- **FR-009**: coursess MUST be ordered incomplete first, then by `createdAt` ascending.
+- **FR-010**: This feature MUST extend the Feature 2 single-view lists UI: each list row gains an **Items** icon that opens a list-items `<v-dialog>`. courses add/edit/delete use nested dialogs — no sidebar/main split.
 
 ---
 
@@ -3364,32 +3364,32 @@ The following are intentionally deferred to the next feature spec:
 
 ## Edge Cases
 
-- Add todo with items dialog closed → no add UI visible; no API call until user opens items dialog and add-item dialog.
-- Empty todo title → client block and/or `400`.
+- Add courses with items dialog closed → no add UI visible; no API call until user opens items dialog and add-item dialog.
+- Empty courses title → client block and/or `400`.
 - Title longer than 255 characters → `400`.
-- Parent list or todo owned by another user → `404`.
-- Unauthenticated todo API → `401`.
+- Parent list or courses owned by another user → `404`.
+- Unauthenticated courses API → `401`.
 
 ## Success Criteria
 
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
-- **SC-002**: User can add, view, complete, edit, and delete todos in an owned list end-to-end.
-- **SC-003**: Deleting a list removes its todos; `npm test` passes.
+- **SC-002**: User can add, view, complete, edit, and delete coursess in an owned list end-to-end.
+- **SC-003**: Deleting a list removes its coursess; `npm test` passes.
 
 ---
 
 ## Data Ownership & Isolation
 
-Each user owns their todo items exclusively. Items are private to the user even when nested under a list.
+Each user owns their courses items exclusively. Items are private to the user even when nested under a list.
 
 | Rule | Requirement |
 |------|-------------|
-| **Parent list check** | Todo operations require the parent list to belong to `req.user.id`. |
-| **Todo scope** | `GET`, `PUT`, and `DELETE` on todos match both `id` and `userId = req.user.id`. |
-| **Create scope** | `POST .../todos` succeeds only when `:listId` is owned by the caller; new todo `userId` is set from `req.user.id`. |
-| **Cross-user access** | If a todo or parent list belongs to another user, respond with `404` — never `403`. |
-| **UI scope** | The list-items dialog shows only todos for the list opened from that row, fetched via API for the signed-in user. |
-| **Implementation** | Use shared helpers (e.g. `getAccessibleListOrNull`, `getAccessibleTodoOrNull`) in `app/authorization/`. |
+| **Parent list check** | courses operations require the parent list to belong to `req.user.id`. |
+| **courses scope** | `GET`, `PUT`, and `DELETE` on coursess match both `id` and `userId = req.user.id`. |
+| **Create scope** | `POST .../coursess` succeeds only when `:listId` is owned by the caller; new courses `userId` is set from `req.user.id`. |
+| **Cross-user access** | If a courses or parent list belongs to another user, respond with `404` — never `403`. |
+| **UI scope** | The list-items dialog shows only coursess for the list opened from that row, fetched via API for the signed-in user. |
+| **Implementation** | Use shared helpers (e.g. `getAccessibleListOrNull`, `getAccessiblecoursesOrNull`) in `app/authorization/`. |
 
 ---
 
@@ -3397,19 +3397,19 @@ Each user owns their todo items exclusively. Items are private to the user even 
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/todo/lists/:listId/todos` | Yes | Fetch all todos in a list |
-| `POST` | `/todo/lists/:listId/todos` | Yes | Add a todo to a list |
-| `PUT` | `/todo/todos/:id` | Yes | Update a todo (title and/or `completed`) |
-| `DELETE` | `/todo/todos/:id` | Yes | Delete a todo owned by the caller |
+| `GET` | `/courses/lists/:listId/coursess` | Yes | Fetch all coursess in a list |
+| `POST` | `/courses/lists/:listId/coursess` | Yes | Add a courses to a list |
+| `PUT` | `/courses/coursess/:id` | Yes | Update a courses (title and/or `completed`) |
+| `DELETE` | `/courses/coursess/:id` | Yes | Delete a courses owned by the caller |
 
-All endpoints enforce **list ownership** and **todo ownership** by the authenticated user. Cross-user access attempts return `404`.
+All endpoints enforce **list ownership** and **courses ownership** by the authenticated user. Cross-user access attempts return `404`.
 
-**Create todo request body:**
+**Create courses request body:**
 ```json
 { "title": "Buy milk" }
 ```
 
-**Todo success response** (`200` / `201`):
+**courses success response** (`200` / `201`):
 ```json
 {
   "id": 10,
@@ -3430,7 +3430,7 @@ All endpoints enforce **list ownership** and **todo ownership** by the authentic
 ## Screen Requirements
 
 ### [View: Application Dashboard] — route name `home`
-Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete list) is unchanged; this feature adds todo management via dialogs.
+Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete list) is unchanged; this feature adds courses management via dialogs.
 
 **List rows (extend Feature 2)**
 *   Each list row adds an **Items** icon (`aria-label`: **Items** or **View items for &lt;list name&gt;**).
@@ -3439,17 +3439,17 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 **List-items dialog**
 *   Title shows the list name (e.g. **Groceries — Items**).
 *   Primary action: **+ Add Item** opens a nested **add-item dialog** with a title `<v-text-field>` and **Add** / **Cancel**. **+ Add Item** and **Add** use class `oc-cta`.
-*   Todo rows: **checkbox** (`completed`), **name** (title text), **edit** icon, **delete** icon.
+*   courses rows: **checkbox** (`completed`), **name** (title text), **edit** icon, **delete** icon.
 *   **Edit:** edit icon opens a nested **edit-item dialog** with title field pre-filled; **Save** / **Cancel**.
 *   **Delete:** delete icon opens a confirmation `<v-dialog>`.
-*   Completed todos show struck-through or muted title styling.
-*   **Empty state:** **"No todos in this list yet."** when the list has zero todos.
-*   **Loading state:** skeleton or progress indicator while todos are fetching.
+*   Completed coursess show struck-through or muted title styling.
+*   **Empty state:** **"No coursess in this list yet."** when the list has zero coursess.
+*   **Loading state:** skeleton or progress indicator while coursess are fetching.
 *   **Error state:** `<v-alert type="error">` for API failures.
 *   **Close:** dialog has **Close** or equivalent to return to the lists view.
 
 **List switch behavior**
-*   User opens items dialog on one list row, closes it, then opens items on another row — each dialog load fetches only that list's todos.
+*   User opens items dialog on one list row, closes it, then opens items on another row — each dialog load fetches only that list's coursess.
 
 **Implementation note:** list-items, add-item, and edit-item dialogs may be child components; only one list-items dialog need be open at a time.
 
@@ -3457,14 +3457,14 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 
 ## Key Entities
 
-- **Todo**: task item with title and completion state; belongs to one list and one user.
-- **List**: parent container for todos (Feature 2); deleting a list removes its todos.
+- **courses**: task item with title and completion state; belongs to one list and one user.
+- **List**: parent container for coursess (Feature 2); deleting a list removes its coursess.
 
 ---
 
 ## Data Model Requirements
 
-### `todos` table
+### `coursess` table
 | Field | Type | Rules |
 |-------|------|-------|
 | `id` | INTEGER PK | Auto-increment |
@@ -3476,10 +3476,10 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 | `updatedAt` | DATE | Sequelize timestamps |
 
 ### Associations (add to `models/index.js`)
-*   `List hasMany Todo` — `onDelete: CASCADE`
-*   `Todo belongsTo List`
-*   `User hasMany Todo`
-*   `Todo belongsTo User`
+*   `List hasMany courses` — `onDelete: CASCADE`
+*   `courses belongsTo List`
+*   `User hasMany courses`
+*   `courses belongsTo User`
 
 ---
 
@@ -3487,33 +3487,33 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 
 ### US-3.1 — Add tasks to a list
 
-#### Scenario: User adds a todo to a list via dialog
+#### Scenario: User adds a courses to a list via dialog
 *   **Given** I am signed in on the dashboard
 *   **And** I own list `Groceries`
 *   **When** I click the **Items** icon on the `Groceries` row
 *   **And** I click **+ Add Item**
-*   **And** I enter todo title `Buy milk`
+*   **And** I enter courses title `Buy milk`
 *   **And** I confirm the add-item dialog
-*   **Then** the API returns `201` with a todo object where `completed` is `false`
+*   **Then** the API returns `201` with a courses object where `completed` is `false`
 *   **And** the returned `userId` matches my authenticated user ID
 *   **And** the returned `listId` matches `Groceries`
 *   **And** `Buy milk` appears in the list-items dialog
 
-#### Scenario: User adds a todo with an empty title
+#### Scenario: User adds a courses with an empty title
 *   **Given** I am signed in
 *   **And** I have opened the items dialog for an owned list
 *   **When** I open the add-item dialog
-*   **And** I leave the todo title empty
+*   **And** I leave the courses title empty
 *   **And** I attempt to confirm
 *   **Then** inline validation blocks the request
-*   **And** I see the message **"Todo title is required."**
+*   **And** I see the message **"courses title is required."**
 *   **And** no API request is sent
 
 #### Scenario: Add item is only available inside the items dialog
 *   **Given** I am signed in on the dashboard
 *   **And** the list-items dialog is not open
 *   **When** I view the lists view
-*   **Then** I do not see an add-todo field or **+ Add Item** control on the main lists view
+*   **Then** I do not see an add-courses field or **+ Add Item** control on the main lists view
 
 ---
 
@@ -3523,23 +3523,23 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 *   **Given** I am signed in
 *   **And** I own an empty list `Personal`
 *   **When** I open the items dialog for `Personal`
-*   **And** the todos finish loading
-*   **Then** I see **"No todos in this list yet."**
+*   **And** the coursess finish loading
+*   **Then** I see **"No coursess in this list yet."**
 
 #### Scenario: User opens items for different lists
 *   **Given** I am signed in
-*   **And** list `Work` has todos `Email client` and `Write report`
-*   **And** list `Personal` has todo `Call mom`
+*   **And** list `Work` has coursess `Email client` and `Write report`
+*   **And** list `Personal` has courses `Call mom`
 *   **When** I open the items dialog for `Personal`
 *   **Then** I see only `Call mom`
 *   **When** I close the items dialog
 *   **And** I open the items dialog for `Work`
 *   **Then** I see `Email client` and `Write report`
 
-#### Scenario: User only sees their own todos when opening items
+#### Scenario: User only sees their own coursess when opening items
 *   **Given** I am signed in as user A
-*   **And** I own list `Work` with todo `My task`
-*   **And** user B owns list `Work` with todo `Their task` (same list name, different owner)
+*   **And** I own list `Work` with courses `My task`
+*   **And** user B owns list `Work` with courses `Their task` (same list name, different owner)
 *   **When** I open the items dialog for my `Work` list
 *   **Then** I see only `My task`
 *   **And** I do not see `Their task`
@@ -3548,94 +3548,94 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 
 ### US-3.3 — Complete tasks
 
-#### Scenario: User marks a todo as complete
+#### Scenario: User marks a courses as complete
 *   **Given** I am signed in
-*   **And** I have opened the items dialog for a list containing todo `Buy milk` with `completed: false`
-*   **When** I check the todo's checkbox
+*   **And** I have opened the items dialog for a list containing courses `Buy milk` with `completed: false`
+*   **When** I check the courses's checkbox
 *   **Then** the API returns `200` with `completed: true`
-*   **And** the todo displays as completed (struck-through or muted)
+*   **And** the courses displays as completed (struck-through or muted)
 
-#### Scenario: User marks a completed todo as incomplete
+#### Scenario: User marks a completed courses as incomplete
 *   **Given** I am signed in
-*   **And** I have opened the items dialog for a list containing todo `Buy milk` with `completed: true`
-*   **When** I uncheck the todo's checkbox
+*   **And** I have opened the items dialog for a list containing courses `Buy milk` with `completed: true`
+*   **When** I uncheck the courses's checkbox
 *   **Then** the API returns `200` with `completed: false`
-*   **And** the todo displays as active again
+*   **And** the courses displays as active again
 
 ---
 
 ### US-3.4 — Edit and remove tasks
 
-#### Scenario: User edits a todo title
+#### Scenario: User edits a courses title
 *   **Given** I am signed in
-*   **And** I have opened the items dialog for a list containing todo `Buy milk`
+*   **And** I have opened the items dialog for a list containing courses `Buy milk`
 *   **When** I click the edit icon on `Buy milk`
 *   **And** I change the title to `Buy oat milk` in the edit dialog
 *   **And** I confirm
 *   **Then** the API returns `200` with the updated title
 *   **And** the list-items dialog shows `Buy oat milk`
 
-#### Scenario: User deletes a todo
+#### Scenario: User deletes a courses
 *   **Given** I am signed in
-*   **And** I have opened the items dialog for a list containing todo `Buy milk`
+*   **And** I have opened the items dialog for a list containing courses `Buy milk`
 *   **When** I click the delete icon on `Buy milk`
 *   **And** I confirm
 *   **Then** the API returns `200` or `204`
-*   **And** the todo is removed from the list-items dialog
+*   **And** the courses is removed from the list-items dialog
 
 ---
 
 ### US-3.5 — Private items only
 
-#### Scenario: User cannot read todos in another user's list
+#### Scenario: User cannot read coursess in another user's list
 *   **Given** I am signed in as user A
-*   **And** user B owns list `Secret` with todo `Hidden task`
-*   **When** I request `GET /todo/lists/:listId/todos` with user B's list ID
+*   **And** user B owns list `Secret` with courses `Hidden task`
+*   **When** I request `GET /courses/lists/:listId/coursess` with user B's list ID
 *   **Then** the API returns `404` with `{ "message": "List with id=<id> not found." }`
 *   **And** `Hidden task` is not returned to user A
 
-#### Scenario: User attempts to add a todo to another user's list
+#### Scenario: User attempts to add a courses to another user's list
 *   **Given** I am signed in as user A
 *   **And** a list exists that belongs to user B
-*   **When** I send `POST /todo/lists/:listId/todos` with user B's list ID and body `{ "title": "Intruder task" }`
+*   **When** I send `POST /courses/lists/:listId/coursess` with user B's list ID and body `{ "title": "Intruder task" }`
 *   **Then** the API returns `404` with `{ "message": "List with id=<id> not found." }`
-*   **And** no todo is created in user B's list
+*   **And** no courses is created in user B's list
 
-#### Scenario: User attempts to rename another user's todo
+#### Scenario: User attempts to rename another user's courses
 *   **Given** I am signed in as user A
-*   **And** a todo exists that belongs to user B
-*   **When** I send `PUT /todo/todos/:id` with body `{ "title": "Hijacked" }`
-*   **Then** the API returns `404` with `{ "message": "Todo with id=<id> not found." }`
-*   **And** user B's todo title is unchanged in the database
+*   **And** a courses exists that belongs to user B
+*   **When** I send `PUT /courses/coursess/:id` with body `{ "title": "Hijacked" }`
+*   **Then** the API returns `404` with `{ "message": "courses with id=<id> not found." }`
+*   **And** user B's courses title is unchanged in the database
 
-#### Scenario: User attempts to delete another user's todo
+#### Scenario: User attempts to delete another user's courses
 *   **Given** I am signed in as user A
-*   **And** a todo exists that belongs to user B
-*   **When** I send `DELETE /todo/todos/:id`
-*   **Then** the API returns `404` with `{ "message": "Todo with id=<id> not found." }`
-*   **And** user B's todo still exists
+*   **And** a courses exists that belongs to user B
+*   **When** I send `DELETE /courses/coursess/:id`
+*   **Then** the API returns `404` with `{ "message": "courses with id=<id> not found." }`
+*   **And** user B's courses still exists
 
-#### Scenario: Client cannot assign a todo to another user on create
+#### Scenario: Client cannot assign a courses to another user on create
 *   **Given** I am signed in as user A
 *   **And** I own list `Groceries`
-*   **When** I send `POST /todo/lists/:listId/todos` with body `{ "title": "Buy milk", "userId": 999 }` where user `999` is a different user
-*   **Then** the API returns `201` with a todo owned by user A
+*   **When** I send `POST /courses/lists/:listId/coursess` with body `{ "title": "Buy milk", "userId": 999 }` where user `999` is a different user
+*   **Then** the API returns `201` with a courses owned by user A
 *   **And** the saved `userId` is user A's ID, not `999`
 
-#### Scenario: Unauthenticated API request for todos
+#### Scenario: Unauthenticated API request for coursess
 *   **Given** I have no valid session token
-*   **When** I request `GET /todo/lists/1/todos`
+*   **When** I request `GET /courses/lists/1/coursess`
 *   **Then** the API returns `401` with an unauthorized message
 
 ---
 
 ### US-3.6 — Lists carry their items
 
-#### Scenario: Deleting a list removes its todos
+#### Scenario: Deleting a list removes its coursess
 *   **Given** I am signed in
-*   **And** I own list `Groceries` with todos `Buy milk` and `Buy eggs`
+*   **And** I own list `Groceries` with coursess `Buy milk` and `Buy eggs`
 *   **When** I delete list `Groceries` and confirm
-*   **Then** both todos are removed from the database
+*   **Then** both coursess are removed from the database
 *   **And** they no longer appear if the list ID were still queried
 
 ---
@@ -3644,23 +3644,23 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 
 | Story | Scenario | Test file | Test name |
 |-------|----------|-----------|-----------|
-| US-3.1 | User adds a todo to a list via dialog | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User adds a todo to a list via dialog` |
-| US-3.1 | User adds a todo with an empty title | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User adds a todo with an empty title` |
+| US-3.1 | User adds a courses to a list via dialog | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User adds a courses to a list via dialog` |
+| US-3.1 | User adds a courses with an empty title | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User adds a courses with an empty title` |
 | US-3.1 | Add item is only available inside the items dialog | `frontend/tests/Dashboard.test.js` | `Add item is only available inside the items dialog` |
 | US-3.2 | List items dialog shows empty state | `frontend/tests/Dashboard.test.js` | `List items dialog shows empty state` |
 | US-3.2 | User opens items for different lists | `frontend/tests/Dashboard.test.js` | `User opens items for different lists` |
-| US-3.2 | User only sees their own todos when opening items | `backend/tests/todos.test.js` | `User only sees their own todos when opening items` |
-| US-3.3 | User marks a todo as complete | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User marks a todo as complete` |
-| US-3.3 | User marks a completed todo as incomplete | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User marks a completed todo as incomplete` |
-| US-3.4 | User edits a todo title | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User edits a todo title` |
-| US-3.4 | User deletes a todo | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User deletes a todo` |
-| US-3.5 | User cannot read todos in another user's list | `backend/tests/todos.test.js` | `User cannot read todos in another user's list` |
-| US-3.5 | User attempts to add a todo to another user's list | `backend/tests/todos.test.js` | `User attempts to add a todo to another user's list` |
-| US-3.5 | User attempts to rename another user's todo | `backend/tests/todos.test.js` | `User attempts to rename another user's todo` |
-| US-3.5 | User attempts to delete another user's todo | `backend/tests/todos.test.js` | `User attempts to delete another user's todo` |
-| US-3.5 | Client cannot assign a todo to another user on create | `backend/tests/todos.test.js` | `Client cannot assign a todo to another user on create` |
-| US-3.5 | Unauthenticated API request for todos | `backend/tests/todos.test.js` | `Unauthenticated API request for todos` |
-| US-3.6 | Deleting a list removes its todos | `backend/tests/todos.test.js` | `Deleting a list removes its todos` |
+| US-3.2 | User only sees their own coursess when opening items | `backend/tests/coursess.test.js` | `User only sees their own coursess when opening items` |
+| US-3.3 | User marks a courses as complete | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User marks a courses as complete` |
+| US-3.3 | User marks a completed courses as incomplete | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User marks a completed courses as incomplete` |
+| US-3.4 | User edits a courses title | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User edits a courses title` |
+| US-3.4 | User deletes a courses | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User deletes a courses` |
+| US-3.5 | User cannot read coursess in another user's list | `backend/tests/coursess.test.js` | `User cannot read coursess in another user's list` |
+| US-3.5 | User attempts to add a courses to another user's list | `backend/tests/coursess.test.js` | `User attempts to add a courses to another user's list` |
+| US-3.5 | User attempts to rename another user's courses | `backend/tests/coursess.test.js` | `User attempts to rename another user's courses` |
+| US-3.5 | User attempts to delete another user's courses | `backend/tests/coursess.test.js` | `User attempts to delete another user's courses` |
+| US-3.5 | Client cannot assign a courses to another user on create | `backend/tests/coursess.test.js` | `Client cannot assign a courses to another user on create` |
+| US-3.5 | Unauthenticated API request for coursess | `backend/tests/coursess.test.js` | `Unauthenticated API request for coursess` |
+| US-3.6 | Deleting a list removes its coursess | `backend/tests/coursess.test.js` | `Deleting a list removes its coursess` |
 
 ---
 
@@ -3669,7 +3669,7 @@ Extends the Feature 2 single-view lists dashboard. List CRUD (add/rename/delete 
 Copy when asking Cursor to implement this feature (`@` this file):
 
 ```text
-Implement Feature 3 from @features/feature-3-todo-list-item-management.md on branch `feature/3-todo-list-item-management`.
+Implement Feature 3 from @features/feature-3-courses-list-item-management.md on branch `feature/3-courses-list-item-management`.
 
 Follow layer order in @features/framework.md (models → routes → backend tests → frontend → frontend tests).
 Map every Gherkin scenario in the Test Coverage Map; run `npm test` before finishing.
@@ -3697,13 +3697,13 @@ Do not implement behavior not in this spec.
 ## Out of Scope
 
 *   New list CRUD features (owned by Feature 2)
-*   Drag-and-drop reordering of todos
-*   Due dates → [feature-5-todo-due-date.md](./feature-5-todo-due-date.md) (Feature 5)
-*   Priorities, labels, or notes on todos
-*   Sharing lists or todos with other users
-*   Search or filter across todos
+*   Drag-and-drop reordering of coursess
+*   Due dates → [feature-5-courses-due-date.md](./feature-5-courses-due-date.md) (Feature 5)
+*   Priorities, labels, or notes on coursess
+*   Sharing lists or coursess with other users
+*   Search or filter across coursess
 *   Bulk complete / bulk delete
-*   Archive completed todos
+*   Archive completed coursess
 
 <div style="page-break-after: always;"></div>
 
@@ -3718,7 +3718,7 @@ Do not implement behavior not in this spec.
 **Status:** Ready
 **Created:** 2026-03-01
 **Input:** Signed-in users view and edit their profile from a menu-bar dropdown; logout moves to profile menu
-**Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md), [Feature 2 — Todo List Management](feature-2-todo-list-management.md), [Feature 3 — Todo List Item Management](feature-3-todo-list-item-management.md)
+**Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md), [Feature 2 — courses List Management](feature-2-courses-list-management.md), [Feature 3 — courses List Item Management](feature-3-courses-list-item-management.md)
 
 ---
 
@@ -3775,7 +3775,7 @@ Do not implement behavior not in this spec.
 - **FR-007**: Responses MUST never include the password hash.
 - **FR-008**: After successful profile update, the frontend MUST refresh `localStorage` key `user` and dispatch `user-logged-in` so `MenuBar` reflects the new display name.
 - **FR-009**: Edit Profile MUST use shared `emailRules` from `frontend/src/config/validation.js` (same as registration).
-- **FR-010**: Dashboard list and todo behavior MUST remain unchanged (Features 2–3).
+- **FR-010**: Dashboard list and courses behavior MUST remain unchanged (Features 2–3).
 
 ---
 
@@ -3807,8 +3807,8 @@ Each user manages their own profile exclusively.
 
 | Rule | Requirement |
 |------|-------------|
-| **Read scope** | `GET /todo/users/:id` succeeds only when `:id = req.user.id`. |
-| **Write scope** | `PUT /todo/users/:id` applies only when `:id = req.user.id`. |
+| **Read scope** | `GET /courses/users/:id` succeeds only when `:id = req.user.id`. |
+| **Write scope** | `PUT /courses/users/:id` applies only when `:id = req.user.id`. |
 | **Cross-user access** | If `:id` belongs to another user, respond with `404` — do not confirm the user exists. |
 | **Implementation** | Use a shared helper (e.g. `getAccessibleUserOrNull(req, userId)`) in `app/authorization/` — do not duplicate scope logic in controllers. |
 
@@ -3818,8 +3818,8 @@ Each user manages their own profile exclusively.
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/todo/users/:id` | Yes | Fetch the authenticated user's profile |
-| `PUT` | `/todo/users/:id` | Yes | Update the authenticated user's profile |
+| `GET` | `/courses/users/:id` | Yes | Fetch the authenticated user's profile |
+| `PUT` | `/courses/users/:id` | Yes | Update the authenticated user's profile |
 
 All endpoints enforce **self-access only**. Cross-user access attempts return `404`.
 
@@ -3877,7 +3877,7 @@ Extends the Feature 2 `MenuBar`. Dashboard lists view is unchanged.
 **Edit Profile dialog (`<v-dialog>`)**
 *   `<v-text-field>` for first name, last name, email, username.
 *   Optional `<v-text-field type="password">` for new password and confirm password.
-*   Pre-fill all fields except passwords from the current session / `GET /todo/users/:id`.
+*   Pre-fill all fields except passwords from the current session / `GET /courses/users/:id`.
 *   **Save** / **Cancel** actions.
 *   Client-side validation mirrors `Register.vue` rules (required fields, email format via shared `emailRules`, password length, password match).
 *   **Loading state:** `:loading` on **Save** while the API request is in flight.
@@ -3900,7 +3900,7 @@ No new tables. This feature uses the existing `users` table from Feature 1.
 
 | Field | Notes for this feature |
 |-------|------------------------|
-| `fName`, `lName`, `email`, `username` | Editable via `PUT /todo/users/:id` |
+| `fName`, `lName`, `email`, `username` | Editable via `PUT /courses/users/:id` |
 | `password` | Optional on update; hashed when provided |
 | `role` | Read-only in API responses; not editable in this feature |
 
@@ -3987,56 +3987,56 @@ No new tables. This feature uses the existing `users` table from Feature 1.
 
 #### Scenario: User fetches their own profile
 *   **Given** I am signed in as user A
-*   **When** I request `GET /todo/users/:id` with my user ID
+*   **When** I request `GET /courses/users/:id` with my user ID
 *   **Then** the API returns `200` with my profile fields
 *   **And** the response does not include a password hash
 
 #### Scenario: User attempts to fetch another user's profile
 *   **Given** I am signed in as user A
 *   **And** user B exists
-*   **When** I request `GET /todo/users/:id` with user B's ID
+*   **When** I request `GET /courses/users/:id` with user B's ID
 *   **Then** the API returns `404` with `{ "message": "User with id=<id> not found." }`
 
 #### Scenario: User attempts to update another user's profile
 *   **Given** I am signed in as user A
 *   **And** user B exists
-*   **When** I send `PUT /todo/users/:id` with user B's ID
+*   **When** I send `PUT /courses/users/:id` with user B's ID
 *   **Then** the API returns `404` with `{ "message": "User with id=<id> not found." }`
 *   **And** user B's profile is unchanged in the database
 
 #### Scenario: Unauthenticated profile API request
 *   **Given** I have no valid session token
-*   **When** I request `GET /todo/users/1`
+*   **When** I request `GET /courses/users/1`
 *   **Then** the API returns `401` with an unauthorized message
 
 #### Scenario: Profile update rejects a password that is too short
 *   **Given** I am signed in as user A
-*   **When** I send `PUT /todo/users/:id` with body `{ "password": "short" }`
+*   **When** I send `PUT /courses/users/:id` with body `{ "password": "short" }`
 *   **Then** the API returns `400` with `{ "message": "Password must be at least 8 characters." }`
 
 #### Scenario: Profile update rejects missing required fields
 *   **Given** I am signed in as user A
-*   **When** I send `PUT /todo/users/:id` with a body that omits a required field (e.g. first name)
+*   **When** I send `PUT /courses/users/:id` with a body that omits a required field (e.g. first name)
 *   **Then** the API returns `400` with `{ "message": "First name is required." }`
 *   **And** my stored profile is unchanged
 
 #### Scenario: Profile update rejects a duplicate username
 *   **Given** I am signed in as user A
 *   **And** user B exists with username `userb`
-*   **When** I send `PUT /todo/users/:id` with body `{ "username": "userb" }` (and other valid fields)
+*   **When** I send `PUT /courses/users/:id` with body `{ "username": "userb" }` (and other valid fields)
 *   **Then** the API returns `400` with `{ "message": "Username is already taken." }`
 *   **And** user B's username remains `userb`
 
 #### Scenario: Profile update rejects a duplicate email
 *   **Given** I am signed in as user A
 *   **And** user B exists with email `b@example.com`
-*   **When** I send `PUT /todo/users/:id` with body `{ "email": "b@example.com" }` (and other valid fields)
+*   **When** I send `PUT /courses/users/:id` with body `{ "email": "b@example.com" }` (and other valid fields)
 *   **Then** the API returns `400` with `{ "message": "Email is already registered." }`
 *   **And** user B's email remains `b@example.com`
 
 #### Scenario: Unauthenticated profile update API request
 *   **Given** I have no valid session token
-*   **When** I send `PUT /todo/users/1` with a valid profile body
+*   **When** I send `PUT /courses/users/1` with a valid profile body
 *   **Then** the API returns `401` with an unauthorized message
 
 ---
@@ -4125,63 +4125,63 @@ Do not implement behavior not in this spec.
 *   Admin user management or role changes
 *   Avatar or profile photo upload
 *   Email verification workflow
-*   Changes to list or todo CRUD (Features 2–3)
+*   Changes to list or courses CRUD (Features 2–3)
 *   Password reset / forgot-password flow
 
 <div style="page-break-after: always;"></div>
 
-<!-- source: features/feature-5-todo-due-date.md -->
+<!-- source: features/feature-5-courses-due-date.md -->
 
-# feature-5-todo-due-date.md
+# feature-5-courses-due-date.md
 
-# Feature: Todo Due Date
+# Feature: courses Due Date
 
 **Feature ID:** 5
-**Branch pattern:** `feature/5-todo-due-date`
+**Branch pattern:** `feature/5-courses-due-date`
 **Status:** Ready
 **Created:** 2026-03-15
-**Input:** Optional calendar due dates on todos with display and overdue highlighting
-**Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md), [Feature 2 — Todo List Management](feature-2-todo-list-management.md), [Feature 3 — Todo List Item Management](feature-3-todo-list-item-management.md)
+**Input:** Optional calendar due dates on coursess with display and overdue highlighting
+**Depends on:** [Feature 1 — User Authentication](feature-1-user-auth.md), [Feature 2 — courses List Management](feature-2-courses-list-management.md), [Feature 3 — courses List Item Management](feature-3-courses-list-item-management.md)
 **Related:** `features/reference/data-model.md`, `features/reference/api.md`, `features/reference/behavior.md` (update in same PR when implementing)
 
 ---
 
 ## User Stories
 
-### US-5.1: Set a due date when creating a todo
+### US-5.1: Set a due date when creating a courses
 **As a** signed-in user  
-**I want to** optionally set a due date when I add a todo  
+**I want to** optionally set a due date when I add a courses  
 **So that** I can plan when work should be finished
 
 **Priority:** P1  
-**Independent test:** Create todo with `dueDate`; API returns date and row displays it  
+**Independent test:** Create courses with `dueDate`; API returns date and row displays it  
 **Acceptance scenarios:** see ### US-5.1 under Acceptance Criteria
 
-### US-5.2: View due dates on todos
+### US-5.2: View due dates on coursess
 **As a** signed-in user  
-**I want to** see each todo's due date in the list  
+**I want to** see each courses's due date in the list  
 **So that** I know what is due and when
 
 **Priority:** P1  
-**Independent test:** Todos with `dueDate` show formatted date in list rows  
+**Independent test:** coursess with `dueDate` show formatted date in list rows  
 **Acceptance scenarios:** covered by US-5.1 and US-5.3 scenarios (display in list)
 
 ### US-5.3: Edit or clear a due date
 **As a** signed-in user  
-**I want to** change or remove a due date when editing a todo  
+**I want to** change or remove a due date when editing a courses  
 **So that** I can keep deadlines accurate
 
 **Priority:** P1  
 **Independent test:** Edit dialog sets or clears `dueDate`; API and UI stay in sync  
 **Acceptance scenarios:** see ### US-5.3 under Acceptance Criteria
 
-### US-5.4: Spot overdue todos
+### US-5.4: Spot overdue coursess
 **As a** signed-in user  
-**I want** incomplete todos past their due date to stand out visually  
+**I want** incomplete coursess past their due date to stand out visually  
 **So that** I can prioritize overdue work
 
 **Priority:** P2  
-**Independent test:** Incomplete todo with past `dueDate` uses overdue styling; completed does not  
+**Independent test:** Incomplete courses with past `dueDate` uses overdue styling; completed does not  
 **Acceptance scenarios:** see ### US-5.4 under Acceptance Criteria
 
 ---
@@ -4190,62 +4190,62 @@ Do not implement behavior not in this spec.
 
 ### Functional Requirements
 
-- **FR-001**: All behavior MUST build on Feature 3 todo CRUD (list-items and add/edit-item dialogs); list and ownership rules are unchanged.
+- **FR-001**: All behavior MUST build on Feature 3 courses CRUD (list-items and add/edit-item dialogs); list and ownership rules are unchanged.
 - **FR-002**: `dueDate` MUST be optional on create and update; `null` means no due date.
 - **FR-003**: Dates MUST be calendar-only: API `YYYY-MM-DD`; database `DATEONLY`.
 - **FR-004**: Invalid date strings MUST return `400` with `{ "message": "..." }`.
 - **FR-005**: Sending `dueDate: null` on `PUT` MUST clear the due date.
 - **FR-006**: Omitting `dueDate` on `PUT` MUST leave the existing value unchanged.
-- **FR-007**: Todo sort order MUST remain unchanged from Feature 3 (incomplete first, then `createdAt` ascending).
-- **FR-008**: Incomplete todos MUST be styled overdue when `dueDate` is before today in the browser's local calendar (frontend only; API returns stored date).
+- **FR-007**: courses sort order MUST remain unchanged from Feature 3 (incomplete first, then `createdAt` ascending).
+- **FR-008**: Incomplete coursess MUST be styled overdue when `dueDate` is before today in the browser's local calendar (frontend only; API returns stored date).
 - **FR-009**: Reference docs MUST be updated in the same PR when implementing (see **Agent implementation request**).
 
 ---
 
 ## Assumptions
 
-- Features 1–3 MUST be merged to `dev` before implementing this feature (todo CRUD complete).
+- Features 1–3 MUST be merged to `dev` before implementing this feature (courses CRUD complete).
 - No timezone or time-of-day — date-only in local browser calendar.
 - No sorting, filtering, reminders, or calendar views.
 
 ## Edge Cases
 
 - Invalid `dueDate` on create or update → `400` (`"Due date must be a valid date in YYYY-MM-DD format."`).
-- Cross-user todo `dueDate` change → `404`.
-- Completed todo with past due date → no overdue styling.
+- Cross-user courses `dueDate` change → `404`.
+- Completed courses with past due date → no overdue styling.
 - Create without `dueDate` → `null` in API and no date on row.
 
 ## Success Criteria
 
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
-- **SC-002**: User can set, view, edit, and clear due dates on owned todos.
-- **SC-003**: Overdue styling applies only to incomplete past-due todos; `npm test` passes.
+- **SC-002**: User can set, view, edit, and clear due dates on owned coursess.
+- **SC-003**: Overdue styling applies only to incomplete past-due coursess; `npm test` passes.
 
 ---
 
 ## Data Ownership & Isolation
 
-Due date changes follow the same scope rules as Feature 3 todos.
+Due date changes follow the same scope rules as Feature 3 coursess.
 
 | Rule | Requirement |
 |------|-------------|
-| **Read scope** | `dueDate` is returned only on todos the caller already owns via list/todo scoping. |
-| **Write scope** | `dueDate` may be set or cleared only on todos owned by `req.user.id`. |
-| **Cross-user access** | Unchanged — `404` for another user's list or todo. |
+| **Read scope** | `dueDate` is returned only on coursess the caller already owns via list/courses scoping. |
+| **Write scope** | `dueDate` may be set or cleared only on coursess owned by `req.user.id`. |
+| **Cross-user access** | Unchanged — `404` for another user's list or courses. |
 
 ---
 
 ## API Requirements
 
-Extends Feature 3 todo endpoints. Auth and ownership behavior are unchanged.
+Extends Feature 3 courses endpoints. Auth and ownership behavior are unchanged.
 
 | Method | Endpoint | Change |
 |--------|----------|--------|
-| `POST` | `/todo/lists/:listId/todos` | Accept optional `dueDate` in body |
-| `PUT` | `/todo/todos/:id` | Accept optional `dueDate` (date string or `null`) |
-| `GET` | `/todo/lists/:listId/todos` | Response includes `dueDate` on each todo |
+| `POST` | `/courses/lists/:listId/coursess` | Accept optional `dueDate` in body |
+| `PUT` | `/courses/coursess/:id` | Accept optional `dueDate` (date string or `null`) |
+| `GET` | `/courses/lists/:listId/coursess` | Response includes `dueDate` on each courses |
 
-**Create todo request body:**
+**Create courses request body:**
 ```json
 {
   "title": "Buy milk",
@@ -4255,7 +4255,7 @@ Extends Feature 3 todo endpoints. Auth and ownership behavior are unchanged.
 
 `dueDate` is optional. Omit it or send `null` for no due date.
 
-**Update todo request body** (any combination):
+**Update courses request body** (any combination):
 ```json
 {
   "title": "Buy oat milk",
@@ -4269,7 +4269,7 @@ Clear due date:
 { "dueDate": null }
 ```
 
-**Todo success response** (`200` / `201`):
+**courses success response** (`200` / `201`):
 ```json
 {
   "id": 10,
@@ -4299,14 +4299,14 @@ Extends Feature 3 list-items, add-item, and edit-item dialogs only.
 
 **Add-item dialog**
 *   Optional `<v-text-field type="date">` (or equivalent) beside the title field for due date.
-*   Leaving the date empty creates a todo with no due date.
+*   Leaving the date empty creates a courses with no due date.
 
-**Todo row (in list-items dialog)**
+**courses row (in list-items dialog)**
 *   Show due date when set (formatted for readability, e.g. `Jul 15, 2026` or locale-appropriate).
 *   When `completed` is `false` and `dueDate` is before today (local date), apply overdue styling (e.g. error color on the date text).
-*   Completed todos do not use overdue styling even if the date is in the past.
+*   Completed coursess do not use overdue styling even if the date is in the past.
 
-**Edit todo dialog**
+**Edit courses dialog**
 *   Add optional date field pre-filled with the current `dueDate` (empty when `null`).
 *   User can clear the date and **Save** to remove the due date.
 *   **Save** / **Cancel** behavior unchanged otherwise.
@@ -4319,13 +4319,13 @@ Extends Feature 3 list-items, add-item, and edit-item dialogs only.
 
 ## Key Entities
 
-- **Todo**: gains optional **dueDate** (calendar date); still belongs to one list and one user.
+- **courses**: gains optional **dueDate** (calendar date); still belongs to one list and one user.
 
 ---
 
 ## Data Model Requirements
 
-### `todos` table (add column)
+### `coursess` table (add column)
 
 | Field | Type | Rules |
 |-------|------|-------|
@@ -4337,19 +4337,19 @@ Existing Feature 3 columns are unchanged. Existing rows default to `dueDate: nul
 
 ## Acceptance Criteria (Gherkin)
 
-### US-5.1 — Set a due date when creating a todo
+### US-5.1 — Set a due date when creating a courses
 
-#### Scenario: User adds a todo with a due date
+#### Scenario: User adds a courses with a due date
 *   **Given** I am signed in on the dashboard
 *   **And** I have opened the items dialog for an owned list
 *   **When** I click **+ Add Item**
-*   **And** I enter todo title `Buy milk`
+*   **And** I enter courses title `Buy milk`
 *   **And** I set due date `2026-07-15`
 *   **And** I confirm the add-item dialog
 *   **Then** the API returns `201` with `dueDate` `2026-07-15`
-*   **And** the todo row in the list-items dialog shows the due date
+*   **And** the courses row in the list-items dialog shows the due date
 
-#### Scenario: User adds a todo without a due date
+#### Scenario: User adds a courses without a due date
 *   **Given** I am signed in
 *   **And** I have opened the items dialog for an owned list
 *   **When** I open the add-item dialog
@@ -4361,24 +4361,24 @@ Existing Feature 3 columns are unchanged. Existing rows default to `dueDate: nul
 #### Scenario: API rejects an invalid due date on create
 *   **Given** I am signed in as user A
 *   **And** I own a list
-*   **When** I send `POST /todo/lists/:listId/todos` with body `{ "title": "Task", "dueDate": "not-a-date" }`
+*   **When** I send `POST /courses/lists/:listId/coursess` with body `{ "title": "Task", "dueDate": "not-a-date" }`
 *   **Then** the API returns `400` with `{ "message": "..." }`
-*   **And** no todo is created
+*   **And** no courses is created
 
 ### US-5.3 — Edit or clear a due date
 
-#### Scenario: User sets a due date when editing a todo
+#### Scenario: User sets a due date when editing a courses
 *   **Given** I am signed in
-*   **And** I have todo `Buy milk` with no due date
+*   **And** I have courses `Buy milk` with no due date
 *   **When** I open the edit dialog
 *   **And** I set due date `2026-07-20`
 *   **And** I click **Save**
 *   **Then** the API returns `200` with `dueDate` `2026-07-20`
 *   **And** the row shows the new due date
 
-#### Scenario: User clears a due date when editing a todo
+#### Scenario: User clears a due date when editing a courses
 *   **Given** I am signed in
-*   **And** I have todo `Buy milk` with due date `2026-07-20`
+*   **And** I have courses `Buy milk` with due date `2026-07-20`
 *   **When** I open the edit dialog
 *   **And** I clear the due date field
 *   **And** I click **Save**
@@ -4387,30 +4387,30 @@ Existing Feature 3 columns are unchanged. Existing rows default to `dueDate: nul
 
 #### Scenario: API rejects an invalid due date on update
 *   **Given** I am signed in as user A
-*   **And** I own todo `Buy milk`
-*   **When** I send `PUT /todo/todos/:id` with body `{ "dueDate": "2026-99-99" }`
+*   **And** I own courses `Buy milk`
+*   **When** I send `PUT /courses/coursess/:id` with body `{ "dueDate": "2026-99-99" }`
 *   **Then** the API returns `400` with `{ "message": "..." }`
 *   **And** the stored `dueDate` is unchanged
 
-#### Scenario: User cannot set due date on another user's todo
+#### Scenario: User cannot set due date on another user's courses
 *   **Given** I am signed in as user A
-*   **And** a todo exists that belongs to user B
-*   **When** I send `PUT /todo/todos/:id` with body `{ "dueDate": "2026-07-15" }`
-*   **Then** the API returns `404` with `{ "message": "Todo with id=<id> not found." }`
-*   **And** user B's todo is unchanged
+*   **And** a courses exists that belongs to user B
+*   **When** I send `PUT /courses/coursess/:id` with body `{ "dueDate": "2026-07-15" }`
+*   **Then** the API returns `404` with `{ "message": "courses with id=<id> not found." }`
+*   **And** user B's courses is unchanged
 
-### US-5.4 — Spot overdue todos
+### US-5.4 — Spot overdue coursess
 
-#### Scenario: Incomplete todo past due date is styled as overdue
+#### Scenario: Incomplete courses past due date is styled as overdue
 *   **Given** I am signed in
-*   **And** I have opened the items dialog for a list containing an incomplete todo with `dueDate` yesterday
-*   **When** the todos are displayed
+*   **And** I have opened the items dialog for a list containing an incomplete courses with `dueDate` yesterday
+*   **When** the coursess are displayed
 *   **Then** the due date is displayed with overdue styling
 
-#### Scenario: Completed todo past due date is not styled as overdue
+#### Scenario: Completed courses past due date is not styled as overdue
 *   **Given** I am signed in
-*   **And** I have opened the items dialog for a list containing a completed todo with `dueDate` yesterday
-*   **When** the todos are displayed
+*   **And** I have opened the items dialog for a list containing a completed courses with `dueDate` yesterday
+*   **When** the coursess are displayed
 *   **Then** the due date does not use overdue styling
 
 ---
@@ -4421,15 +4421,15 @@ Each scenario above must map to at least one automated test.
 
 | Story | Scenario | Test file | Test name |
 |-------|----------|-----------|-----------|
-| US-5.1 | User adds a todo with a due date | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User adds a todo with a due date` |
-| US-5.1 | User adds a todo without a due date | `backend/tests/todos.test.js` | `User adds a todo without a due date` |
-| US-5.1 | API rejects an invalid due date on create | `backend/tests/todos.test.js` | `API rejects an invalid due date on create` |
-| US-5.3 | User sets a due date when editing a todo | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User sets a due date when editing a todo` |
-| US-5.3 | User clears a due date when editing a todo | `backend/tests/todos.test.js`, `frontend/tests/Dashboard.test.js` | `User clears a due date when editing a todo` |
-| US-5.3 | API rejects an invalid due date on update | `backend/tests/todos.test.js` | `API rejects an invalid due date on update` |
-| US-5.3 | User cannot set due date on another user's todo | `backend/tests/todos.test.js` | `User cannot set due date on another user's todo` |
-| US-5.4 | Incomplete todo past due date is styled as overdue | `frontend/tests/Dashboard.test.js` | `Incomplete todo past due date is styled as overdue` |
-| US-5.4 | Completed todo past due date is not styled as overdue | `frontend/tests/Dashboard.test.js` | `Completed todo past due date is not styled as overdue` |
+| US-5.1 | User adds a courses with a due date | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User adds a courses with a due date` |
+| US-5.1 | User adds a courses without a due date | `backend/tests/coursess.test.js` | `User adds a courses without a due date` |
+| US-5.1 | API rejects an invalid due date on create | `backend/tests/coursess.test.js` | `API rejects an invalid due date on create` |
+| US-5.3 | User sets a due date when editing a courses | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User sets a due date when editing a courses` |
+| US-5.3 | User clears a due date when editing a courses | `backend/tests/coursess.test.js`, `frontend/tests/Dashboard.test.js` | `User clears a due date when editing a courses` |
+| US-5.3 | API rejects an invalid due date on update | `backend/tests/coursess.test.js` | `API rejects an invalid due date on update` |
+| US-5.3 | User cannot set due date on another user's courses | `backend/tests/coursess.test.js` | `User cannot set due date on another user's courses` |
+| US-5.4 | Incomplete courses past due date is styled as overdue | `frontend/tests/Dashboard.test.js` | `Incomplete courses past due date is styled as overdue` |
+| US-5.4 | Completed courses past due date is not styled as overdue | `frontend/tests/Dashboard.test.js` | `Completed courses past due date is not styled as overdue` |
 
 ---
 
@@ -4438,7 +4438,7 @@ Each scenario above must map to at least one automated test.
 Copy when asking Cursor to implement this feature (`@` this file):
 
 ```text
-Implement Feature 5 from @features/feature-5-todo-due-date.md on branch `feature/5-todo-due-date`.
+Implement Feature 5 from @features/feature-5-courses-due-date.md on branch `feature/5-courses-due-date`.
 
 Follow layer order in @features/framework.md (models → routes → backend tests → frontend → frontend tests).
 Map every Gherkin scenario in the Test Coverage Map; run `npm test` before finishing.
@@ -4465,10 +4465,10 @@ Do not implement behavior not in this spec.
 
 ## Out of Scope
 
-*   Sorting or filtering todos by due date
+*   Sorting or filtering coursess by due date
 *   Due date on quick-add without opening edit dialog (optional field on add row is in scope; separate due-date-only modal is not)
 *   Reminders, notifications, or email alerts
-*   Recurring todos
+*   Recurring coursess
 *   Time-of-day or timezone handling (date-only)
 *   Calendar or agenda views
 *   Changes to lists, profile, or auth (Features 2, 4)
@@ -4515,9 +4515,9 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 |------|------------|
 | Auth, sessions | Feature 1 |
 | Lists CRUD + Dashboard lists view + MenuBar (sign-out era) | Feature 2 |
-| Todos CRUD + items dialogs | Feature 3 |
+| coursess CRUD + items dialogs | Feature 3 |
 | Profile API + MenuBar profile dropdown / Log out | Feature 4 |
-| Todo `dueDate` + overdue styling | Feature 5 |
+| courses `dueDate` + overdue styling | Feature 5 |
 
 <div style="page-break-after: always;"></div>
 
@@ -4527,8 +4527,8 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 
 # API Reference
 
-**Base path:** `/todo/`  
-**Status:** Integrated API through **Feature 5** (authentication, lists, todos with optional due dates, user profile).  
+**Base path:** `/courses/`  
+**Status:** Integrated API through **Feature 5** (authentication, lists, coursess with optional due dates, user profile).  
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when routes or payloads change.
 
 **Auth:** Send `Authorization: Bearer <token>` on protected routes.  
@@ -4539,10 +4539,10 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Area | Feature |
 |------|---------|
 | Register, login, logout | 1 |
-| List CRUD (`GET/POST/PUT/DELETE /todo/lists`) | 2 |
-| Todo CRUD (`GET/POST /todo/lists/:listId/todos`, `PUT/DELETE /todo/todos/:id`) | 3 |
-| User profile (`GET/PUT /todo/users/:id`) | 4 |
-| Todo `dueDate` on create/update | 5 |
+| List CRUD (`GET/POST/PUT/DELETE /courses/lists`) | 2 |
+| courses CRUD (`GET/POST /courses/lists/:listId/coursess`, `PUT/DELETE /courses/coursess/:id`) | 3 |
+| User profile (`GET/PUT /courses/users/:id`) | 4 |
+| courses `dueDate` on create/update | 5 |
 
 ---
 
@@ -4550,9 +4550,9 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| `POST` | `/todo/register` | No | Create account |
-| `POST` | `/todo/login` | No | Sign in; returns session payload |
-| `POST` | `/todo/logout` | Yes | Invalidate session token |
+| `POST` | `/courses/register` | No | Create account |
+| `POST` | `/courses/login` | No | Sign in; returns session payload |
+| `POST` | `/courses/logout` | Yes | Invalidate session token |
 
 **Register body:**
 ```json
@@ -4601,10 +4601,10 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| `GET` | `/todo/lists` | Yes | Lists owned by caller (array, ordered by `name` ASC) |
-| `POST` | `/todo/lists` | Yes | Create a new list |
-| `PUT` | `/todo/lists/:listId` | Yes | Rename a list |
-| `DELETE` | `/todo/lists/:listId` | Yes | Delete a list owned by the caller |
+| `GET` | `/courses/lists` | Yes | Lists owned by caller (array, ordered by `name` ASC) |
+| `POST` | `/courses/lists` | Yes | Create a new list |
+| `PUT` | `/courses/lists/:listId` | Yes | Rename a list |
+| `DELETE` | `/courses/lists/:listId` | Yes | Delete a list owned by the caller |
 
 **Create / rename body:**
 ```json
@@ -4631,14 +4631,14 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 
 ---
 
-## Todos (Feature 3)
+## coursess (Feature 3)
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| `GET` | `/todo/lists/:listId/todos` | Yes | Todos in an owned list (incomplete first, then `createdAt` ASC) |
-| `POST` | `/todo/lists/:listId/todos` | Yes | Add a todo to an owned list |
-| `PUT` | `/todo/todos/:id` | Yes | Update title and/or `completed` |
-| `DELETE` | `/todo/todos/:id` | Yes | Delete a todo owned by the caller |
+| `GET` | `/courses/lists/:listId/coursess` | Yes | coursess in an owned list (incomplete first, then `createdAt` ASC) |
+| `POST` | `/courses/lists/:listId/coursess` | Yes | Add a courses to an owned list |
+| `PUT` | `/courses/coursess/:id` | Yes | Update title and/or `completed` |
+| `DELETE` | `/courses/coursess/:id` | Yes | Delete a courses owned by the caller |
 
 **Create body:**
 ```json
@@ -4664,7 +4664,7 @@ Clear due date:
 { "dueDate": null }
 ```
 
-**Todo success** (`200` / `201`):
+**courses success** (`200` / `201`):
 ```json
 {
   "id": 10,
@@ -4682,10 +4682,10 @@ Clear due date:
 
 **Delete success** (`200`):
 ```json
-{ "message": "Todo deleted successfully." }
+{ "message": "courses deleted successfully." }
 ```
 
-**Validation errors:** empty/whitespace title `400` with `"Todo title is required."`; title > 255 chars `400` with `"Todo title must be 255 characters or fewer."`; invalid `dueDate` `400` with `"Due date must be a valid date in YYYY-MM-DD format."`; invalid ids `400`; unowned list/todo `404` with `"List with id=<id> not found."` or `"Todo with id=<id> not found."`
+**Validation errors:** empty/whitespace title `400` with `"courses title is required."`; title > 255 chars `400` with `"courses title must be 255 characters or fewer."`; invalid `dueDate` `400` with `"Due date must be a valid date in YYYY-MM-DD format."`; invalid ids `400`; unowned list/courses `404` with `"List with id=<id> not found."` or `"courses with id=<id> not found."`
 
 ---
 
@@ -4693,8 +4693,8 @@ Clear due date:
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| `GET` | `/todo/users/:id` | Yes | Fetch caller's own profile (`:id` must equal `req.user.id`) |
-| `PUT` | `/todo/users/:id` | Yes | Update caller's own profile |
+| `GET` | `/courses/users/:id` | Yes | Fetch caller's own profile (`:id` must equal `req.user.id`) |
+| `PUT` | `/courses/users/:id` | Yes | Update caller's own profile |
 
 **Update body:**
 ```json
@@ -4775,9 +4775,9 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Every authenticated request resolves to `req.user.id` from the session | `authenticate` | Feature 1 |
 | Cross-user access → **`404`**, never `403` (do not confirm existence) | Controllers + `getAccessible*OrNull` | ADR-0002; Features 2–4 |
 | Lists: reads/writes scoped to `userId = req.user.id`; create ownership from server only | `list.controller` + `getAccessibleListOrNull` | Feature 2 |
-| Todos: parent list must be owned; todo reads/writes scoped to caller; create ignores client `userId`/`listId` spoofing | `todo.controller` + helpers | Feature 3 |
-| Profile: `GET`/`PUT /todo/users/:id` only when `:id === req.user.id` | `user.controller` + `getAccessibleUserOrNull` | Feature 4 |
-| Deleting a list cascades to its todos | Sequelize `List hasMany Todo` `onDelete: CASCADE` | Feature 3 |
+| coursess: parent list must be owned; courses reads/writes scoped to caller; create ignores client `userId`/`listId` spoofing | `courses.controller` + helpers | Feature 3 |
+| Profile: `GET`/`PUT /courses/users/:id` only when `:id === req.user.id` | `user.controller` + `getAccessibleUserOrNull` | Feature 4 |
+| Deleting a list cascades to its coursess | Sequelize `List hasMany courses` `onDelete: CASCADE` | Feature 3 |
 
 ## Lists
 
@@ -4789,28 +4789,28 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Single-view lists UI (`Dashboard.vue`); list CRUD via dialogs; no sidebar/main split | Dashboard | Feature 2 |
 | Empty lists: **"No lists yet. Create your first list."** | Dashboard | Feature 2 |
 
-## Todos
+## coursess
 
 | Rule | Enforcement | Introduced |
 |------|-------------|------------|
-| Todo title trimmed; empty/whitespace rejected | Create/update API + dialogs | Feature 3 |
-| Todo title max **255** characters | API + client rules | Feature 3 |
-| New todos default `completed: false` | Create | Feature 3 |
-| Sort: **incomplete first**, then `createdAt` ascending | API `order` + client `sortTodos` | Feature 3 |
+| courses title trimmed; empty/whitespace rejected | Create/update API + dialogs | Feature 3 |
+| courses title max **255** characters | API + client rules | Feature 3 |
+| New coursess default `completed: false` | Create | Feature 3 |
+| Sort: **incomplete first**, then `createdAt` ascending | API `order` + client `sortcoursess` | Feature 3 |
 | Items managed in list-items dialog (+ nested add/edit/delete); **+ Add Item** only inside that dialog | Dashboard | Feature 3 |
-| Empty items: **"No todos in this list yet."** | Items dialog | Feature 3 |
-| Completed todos show struck-through / muted title | Dashboard row styling | Feature 3 |
+| Empty items: **"No coursess in this list yet."** | Items dialog | Feature 3 |
+| Completed coursess show struck-through / muted title | Dashboard row styling | Feature 3 |
 
 ## Due dates
 
 | Rule | Enforcement | Introduced |
 |------|-------------|------------|
-| `dueDate` optional on create/update; `null` = no due date | Todo API + dialogs | Feature 5 |
+| `dueDate` optional on create/update; `null` = no due date | courses API + dialogs | Feature 5 |
 | Calendar-only: API `YYYY-MM-DD`, DB `DATEONLY` | `parseDueDateInput` + model | Feature 5 |
 | Invalid due date string → `400` with due-date message | `parseDueDateInput` | Feature 5 |
 | `PUT` with `dueDate: null` clears; omitting `dueDate` leaves existing value | Update controller | Feature 5 |
-| Overdue styling only when **incomplete** and `dueDate` **before today** (browser local calendar) | `isTodoOverdue` + Dashboard | Feature 5 |
-| Completed past-due todos are **not** styled overdue | Same | Feature 5 |
+| Overdue styling only when **incomplete** and `dueDate` **before today** (browser local calendar) | `iscoursesOverdue` + Dashboard | Feature 5 |
+| Completed past-due coursess are **not** styled overdue | Same | Feature 5 |
 
 ## Profile & MenuBar
 
@@ -4852,7 +4852,7 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 
 # Data Model Reference
 
-**Status:** Integrated schema through **Feature 5** (`users`, `sessions`, `lists`, `todos` with optional `dueDate`).  
+**Status:** Integrated schema through **Feature 5** (`users`, `sessions`, `lists`, `coursess` with optional `dueDate`).  
 **Authority for new work:** feature specs in `features/` — update this file in the same PR when schema changes.  
 **Architecture:** [ADR-0003 — MySQL relational database](../../docs/adr/0003-mysql-relational-database.md)
 
@@ -4863,8 +4863,8 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | `users`, `sessions` | Feature 1 |
 | `users` profile `GET/PUT` | Feature 4 (same table) |
 | `lists` (CRUD) | Feature 2 |
-| `todos` | Feature 3 |
-| `todos.dueDate` | Feature 5 |
+| `coursess` | Feature 3 |
+| `coursess.dueDate` | Feature 5 |
 
 ---
 
@@ -4914,7 +4914,7 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 
 ---
 
-## `todos`
+## `coursess`
 
 | Column | Type | Rules |
 |--------|------|-------|
@@ -4935,10 +4935,10 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 * `Session belongsTo User`
 * `User hasMany List` — `onDelete: CASCADE`
 * `List belongsTo User`
-* `List hasMany Todo` — `onDelete: CASCADE`
-* `Todo belongsTo List`
-* `User hasMany Todo` — `onDelete: CASCADE`
-* `Todo belongsTo User`
+* `List hasMany courses` — `onDelete: CASCADE`
+* `courses belongsTo List`
+* `User hasMany courses` — `onDelete: CASCADE`
+* `courses belongsTo User`
 
 <div style="page-break-after: always;"></div>
 
@@ -4967,7 +4967,7 @@ A student guide for maintaining `features/reference/` — the **current integrat
 | **ADRs** | *Why* cross-cutting architecture | Indirectly (constraints) |
 | **Cursor rules** | *How* to code | Patterns, not product scope |
 
-Feature specs are **deltas**. Reference files are **current state**. After Feature 5 ships, `api.md` shows the full `/todo/` surface; Feature 5’s spec only describes the due-date delta.
+Feature specs are **deltas**. Reference files are **current state**. After Feature 5 ships, `api.md` shows the full `/courses/` surface; Feature 5’s spec only describes the due-date delta.
 
 Reference is **not** auto-generated from specs. Update it in the **same PR** as the implementation (required Definition of Done).
 
@@ -5030,9 +5030,9 @@ Many features touch **two or three** files (e.g. Feature 5: `dueDate` column →
 
 ### Example delta (Feature 5 style)
 
-- Keep existing todo routes.
+- Keep existing courses routes.
 - Extend create/update body and response docs with optional `dueDate`.
-- Add provenance row: Todo `dueDate` → Feature 5.
+- Add provenance row: courses `dueDate` → Feature 5.
 
 ---
 
@@ -5075,7 +5075,7 @@ Use a compact table shape:
 | State the rule in product language | Dump full Gherkin scenarios |
 | Point at enforcement (middleware, helper, UI) | “The app handles this somehow” |
 | Add a row when a **rule** changes | Duplicate every API path from api.md |
-| Group by area (Auth, Ownership, Lists, Todos, …) | One undifferentiated bullet blob |
+| Group by area (Auth, Ownership, Lists, coursess, …) | One undifferentiated bullet blob |
 
 **behavior.md vs Screen Requirements:** Screen Requirements in the feature authorize UI for that slice. After merge, durable UI **rules** (exact empty-state string, overdue condition) that others must not regress belong in **behavior.md**.
 
@@ -5116,7 +5116,7 @@ Keep a short “who introduced this” index in README and/or each file:
 | Lists CRUD + Dashboard lists view | Feature 2 |
 | … | … |
 
-**Principles:** one row per capability area; update when a **new** area appears; for field-level deltas, a row like `Todo dueDate` → Feature 5 is enough.
+**Principles:** one row per capability area; update when a **new** area appears; for field-level deltas, a row like `courses dueDate` → Feature 5 is enough.
 
 ---
 
