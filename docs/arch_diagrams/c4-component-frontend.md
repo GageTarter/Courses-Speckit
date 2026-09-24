@@ -10,11 +10,11 @@ Container_Boundary(spa, "Web SPA") {
   Component(router, "Router", "vue-router", "Routes and UX-only auth redirects.")
   Component(views, "Views", "views/*.vue", "Login, register, dashboard, and profile flows.")
   Component(ui, "UI Components", "components/*.vue", "Navigation, forms, dialogs, and rows.")
-  Component(services, "API Services", "*Services.js", "axios modules for /todo resources.")
+  Component(services, "API Services", "*Services.js", "axios modules for /courses resources.")
   Component(config, "Client Config", "config + plugins", "Token storage, helpers, and Vuetify.")
 }
 
-Container_Ext(api, "API", "Express /todo")
+Container_Ext(api, "API", "Express /courses")
 
 Rel(router, views, "Renders")
 Rel(views, ui, "Uses")

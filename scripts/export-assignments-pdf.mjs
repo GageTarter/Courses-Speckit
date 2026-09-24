@@ -17,8 +17,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
 
 const ASSIGNMENTS = [
-  "docs/ASSIGNMENT-walkthrough-todo.md",
-  "docs/ASSIGNMENT-rebuild-todo.md",
+  "docs/ASSIGNMENT-walkthrough-courses.md",
+  "docs/ASSIGNMENT-rebuild-courses.md",
   "docs/ASSIGNMENT-starter-kit.md",
   "docs/ASSIGNMENT-agility-sync.md",
 ];

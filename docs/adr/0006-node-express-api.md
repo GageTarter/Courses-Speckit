@@ -2,11 +2,11 @@
 
 **Status:** Accepted  
 **Date:** 2026-08-26  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
-[ADR-0001](./0001-client-server-multi-user-architecture.md) requires a **server-side REST API** as the source of truth for multi-user Todo data. [ADR-0003](./0003-mysql-relational-database.md) selects MySQL + Sequelize. We still needed an explicit choice of **runtime and HTTP framework** for Speckit’s `backend/` shell (starter kit and Todo answer key).
+[ADR-0001](./0001-client-server-multi-user-architecture.md) requires a **server-side REST API** as the source of truth for multi-user courses data. [ADR-0003](./0003-mysql-relational-database.md) selects MySQL + Sequelize. We still needed an explicit choice of **runtime and HTTP framework** for Speckit’s `backend/` shell (starter kit and courses answer key).
 
 Constraints:
 
@@ -26,7 +26,7 @@ Adopt **Node.js** (current LTS suitable for the course, e.g. 24+) with **Express
 |---------|--------|
 | **Runtime** | Node.js (ES modules — `"type": "module"`) |
 | **HTTP framework** | Express 4 |
-| **API mount** | `/todo/` for the Todo example (starter kit may use `/api/` until renamed) |
+| **API mount** | `/courses/` for the courses example (starter kit may use `/api/` until renamed) |
 | **Persistence** | Sequelize 6 + `mysql2` ([ADR-0003](./0003-mysql-relational-database.md)) |
 | **Auth** | bcryptjs, JWT, Session table ([ADR-0002](./0002-security-architecture.md)) |
 | **Logging** | winston + morgan |
@@ -59,7 +59,7 @@ Vue SPA (ADR-0004)  ──JSON / Bearer──►  Express (this ADR)
 
 ### Negative / tradeoffs
 
-- Single-threaded event loop — CPU-heavy work needs care (not a goal of this Todo kit).
+- Single-threaded event loop — CPU-heavy work needs care (not a goal of this courses kit).
 - Students must understand async/await and middleware order.
 - Express is minimal: validation, auth, and structure are **our** conventions (rules + specs), not framework magic.
 - TypeScript is not required by Speckit today — JS + ES modules keeps the teaching surface smaller; adopting TS would be a separate ADR.
@@ -72,7 +72,7 @@ Vue SPA (ADR-0004)  ──JSON / Bearer──►  Express (this ADR)
 | **Java + Spring Boot** | Strong enterprise fit; heavier local setup and mental model for feature-sized SDD slices in this course. |
 | **PHP (Laravel / plain)** | Common on XAMPP hosts, but Speckit’s monorepo, Sequelize, and Jest harness are Node-first. |
 | **.NET / ASP.NET Core** | Viable REST stack; outside OC Speckit’s documented Vue + Node teaching path. |
-| **NestJS (Node)** | Structured, but more ceremony than Express for a small Todo API and starter overlay. |
+| **NestJS (Node)** | Structured, but more ceremony than Express for a small courses API and starter overlay. |
 | **Next.js / Nuxt API routes only** | Couples UI and API deploy; ADR-0001 targets a **separate** Express service and static SPA. |
 
 ## Related artifacts

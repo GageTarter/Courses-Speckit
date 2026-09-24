@@ -28,13 +28,13 @@ Project documentation outside feature specs (`features/`) and Cursor rules (`.cu
 
 | File | Purpose |
 |------|---------|
-| [STARTER-KIT.md](./STARTER-KIT.md) | How to use `npm run starter:zip` for a new SDD app; related: `npm run reset:example` keeps Todo specs and strips product code |
-| [ASSIGNMENT-rebuild-todo.md](./ASSIGNMENT-rebuild-todo.md) ([PDF](./ASSIGNMENT-rebuild-todo.pdf)) | Student assignment: create GitHub repo → load Speckit → `reset:example` → rebuild Features 1–5 from specs |
+| [STARTER-KIT.md](./STARTER-KIT.md) | How to use `npm run starter:zip` for a new SDD app; related: `npm run reset:example` keeps courses specs and strips product code |
+| [ASSIGNMENT-rebuild-courses.md](./ASSIGNMENT-rebuild-courses.md) ([PDF](./ASSIGNMENT-rebuild-courses.pdf)) | Student assignment: create GitHub repo → load Speckit → `reset:example` → rebuild Features 1–5 from specs |
 | [ASSIGNMENT-starter-kit.md](./ASSIGNMENT-starter-kit.md) ([PDF](./ASSIGNMENT-starter-kit.pdf)) | Student assignment: new product from `speckit-starter-kit.zip` → rename → Feature 1 with Cursor |
-| [ASSIGNMENT-walkthrough-todo.md](./ASSIGNMENT-walkthrough-todo.md) ([PDF](./ASSIGNMENT-walkthrough-todo.pdf)) | Student reading tour: SDD, OC Speckit, what folders and files mean |
+| [ASSIGNMENT-walkthrough-courses.md](./ASSIGNMENT-walkthrough-courses.md) ([PDF](./ASSIGNMENT-walkthrough-courses.pdf)) | Student reading tour: SDD, OC Speckit, what folders and files mean |
 | [ASSIGNMENT-agility-sync.md](./ASSIGNMENT-agility-sync.md) ([PDF](./ASSIGNMENT-agility-sync.pdf)) | Student assignment: sync `features/` backlog to Digital.ai Agility (API push or Excel import) |
-| [todo-app-specs.md](./todo-app-specs.md) | Product-only Markdown from `npm run specs:pdf:app` (generated) |
-| [todo-app-specs.pdf](./todo-app-specs.pdf) | Product specs PDF — ADRs, NFRs, C4, features (no rules/guides/reference) |
+| [courses-app-specs.md](./courses-app-specs.md) | Product-only Markdown from `npm run specs:pdf:app` (generated) |
+| [courses-app-specs.pdf](./courses-app-specs.pdf) | Product specs PDF — ADRs, NFRs, C4, features (no rules/guides/reference) |
 | [oc-cs-speckit-specs.md](./oc-cs-speckit-specs.md) | Full pack Markdown from `npm run specs:pdf` (generated) |
 | [oc-cs-speckit-specs.pdf](./oc-cs-speckit-specs.pdf) | Full pack PDF — rules, ADRs, NFRs, diagrams, specs, reference (generated) |
 
@@ -55,9 +55,9 @@ Generated exports are safe to regenerate; do not treat them as the source of tru
 - [Quality attributes](./nfr/quality-attributes.md) · [NFR README](./nfr/README.md) · [Writing quality attributes](./nfr/writing-quality-attributes.md)  
 - [SDD framework](../features/framework.md)  
 - [Starter kit](./STARTER-KIT.md)  
-- [Assignment: create, reset, rebuild Todo](./ASSIGNMENT-rebuild-todo.md)  
+- [Assignment: create, reset, rebuild courses](./ASSIGNMENT-rebuild-courses.md)  
 - [Assignment: new app from starter kit](./ASSIGNMENT-starter-kit.md)  
-- [Assignment: walk through Todo Speckit](./ASSIGNMENT-walkthrough-todo.md) (textual tour)  
+- [Assignment: walk through Courses Speckit](./ASSIGNMENT-walkthrough-courses.md) (textual tour)  
 - [Assignment: sync specs to Agility](./ASSIGNMENT-agility-sync.md)  
 
 Regenerate assignment PDFs: `npm run assignments:pdf`
@@ -66,7 +66,7 @@ Regenerate assignment PDFs: `npm run assignments:pdf`
 ### Backlog & exports
 
 - [Agility import](./agility-import/README.md) — `npm run agility:export` / `agility:push`  
-- Specs PDF (product only) — `npm run specs:pdf:app` → [todo-app-specs.pdf](./todo-app-specs.pdf)  
+- Specs PDF (product only) — `npm run specs:pdf:app` → [courses-app-specs.pdf](./courses-app-specs.pdf)  
 - Specs PDF (full pack) — `npm run specs:pdf` (includes `docs/adr`, `docs/nfr`, `docs/arch_diagrams`, features, reference, rules)
 
 ---

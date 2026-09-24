@@ -41,7 +41,7 @@ NFRs here do **not** authorize new product behavior by themselves. A **Deferred*
 | Attribute | Status | Why it belongs in NFRs |
 |-----------|--------|-------------------------|
 | **Security** | Accepted | Cross-cutting: auth on protected routes, **0** cross-user leaks, **404** not **403** |
-| **Data integrity** | Accepted | Every list/todo row has owning `userId` — app-wide invariant |
+| **Data integrity** | Accepted | Every list/courses row has owning `userId` — app-wide invariant |
 | **Observability** | Accepted (minimal) | Thin Winston logging bar — meet Approach, don’t invent a full APM platform |
 | **Performance** | Deferred | Illustrative p95 / first-paint numbers — **not** a CI gate yet |
 | **Availability** / **Scalability** / **i18n** | Out of scope | Explicit non-goals (no multi-region HA, no i18n framework) |

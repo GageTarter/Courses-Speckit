@@ -1,8 +1,8 @@
-# OC CS Speckit
+# Courses Speckit
 
-**OC CS Speckit** is a Spec-Driven Development (SDD) kit: written specifications, Cursor rules, and living reference docs that drive incremental delivery with AI-assisted coding guardrails via [Cursor](https://cursor.com).
+**Courses Speckit** is a Spec-Driven Development (SDD) kit: written specifications, Cursor rules, and living reference docs that drive incremental delivery with AI-assisted coding guardrails via [Cursor](https://cursor.com).
 
-This repository ships a **Todo** example application (auth, lists, items) so you can see the process end to end. Specifications define *what* to build; Cursor rules define *how* to build it; automated tests verify that both were followed.
+This repository ships a **Courses** application (auth, lists, items) so you can see the process end to end. Specifications define *what* to build; Cursor rules define *how* to build it; automated tests verify that both were followed.
 
 ---
 
@@ -29,17 +29,15 @@ This repository ships with **scaffolding only** (config, deploy scripts, test ha
 | Tests | Jest + supertest (backend), Vitest + `@vue/test-utils` (frontend) |
 | Deploy | GitHub Actions → SSH (separate frontend static + backend Node jobs) |
 
-The API is mounted at `/todo/`. All list and todo data is **scoped per user** — cross-user access returns `404`, not `403`.
-
 ```
-┌─────────────────┐     HTTP /todo/      ┌─────────────────┐
+┌─────────────────┐     HTTP /courses/      ┌─────────────────┐
 │  frontend/      │ ◄──────────────────► │  backend/       │
 │  Vue SPA :8082  │   Bearer token       │  Express :3200  │
 └─────────────────┘                      └────────┬────────┘
                                                     │
                                            ┌────────▼────────┐
                                            │  MySQL          │
-                                           │  todospeckit-db │
+                                           │  coursespeckit-db │
                                            └─────────────────┘
 ```
 
@@ -48,7 +46,7 @@ The API is mounted at `/todo/`. All list and todo data is **scoped per user** �
 ## Repository layout
 
 ```
-todo-speckit/
+courses-speckit/
 ├── features/              # SDD specifications (source of truth)
 ├── .cursor/rules/         # AI + team coding conventions
 ├── docs/                  # ADRs, NFRs, C4 diagrams, Agility, exports — see docs/README.md
@@ -65,11 +63,7 @@ See [features/framework.md](features/framework.md) for the SDD methodology (temp
 
 | Feature | Spec | Delivers |
 |--------|------|----------|
-| 1 | [feature-1-user-auth.md](features/feature-1-user-auth.md) | Registration, login, logout, session, route guards |
-| 2 | [feature-2-todo-list-management.md](features/feature-2-todo-list-management.md) | List CRUD, dashboard sidebar |
-| 3 | [feature-3-todo-list-item-management.md](features/feature-3-todo-list-item-management.md) | Todo item CRUD, dashboard main panel |
-| 4 | [feature-4-user-profile-management.md](features/feature-4-user-profile-management.md) | Profile dropdown, edit profile |
-| 5 | [feature-5-todo-due-date.md](features/feature-5-todo-due-date.md) | Optional todo due dates, overdue display |
+| 2 | [feature-2-course-list-management.md](features/feature-2-course-list-management.md) | List CRUD, dashboard sidebar |
 
 See [features/README.md](features/README.md) for feature dependencies and implementation order.
 
@@ -106,8 +100,8 @@ See **[docs/README.md](docs/README.md)** for the full index (ADRs, NFRs, C4 diag
 ### 1. Clone and install dependencies
 
 ```bash
-git clone <repository-url> todo-speckit
-cd todo-speckit
+git clone <repository-url> courses-speckit
+cd courses-speckit
 
 npm install --prefix frontend
 npm install --prefix backend
@@ -118,8 +112,8 @@ Each app maintains its own `node_modules/` (`frontend/node_modules/`, `backend/n
 ### 2. Create the database
 
 ```sql
-CREATE DATABASE `todospeckit-db`;
-CREATE DATABASE `todospeckit-db-test`;
+CREATE DATABASE `courses-speckit-db`;
+CREATE DATABASE `courses-speckit-db-test`;
 ```
 
 ### 3. Configure environment
@@ -131,9 +125,9 @@ cp backend/.env.test.example backend/.env.test
 #          copy backend\.env.test.example backend\.env.test
 ```
 
-Edit `backend/.env` with your MySQL credentials. Default database name: `todospeckit-db`.
+Edit `backend/.env` with your MySQL credentials. Default database name: `courses-speckit-db`.
 
-Backend tests use `backend/.env.test` with `DB_NAME=todospeckit-db-test` so `npm test` does not wipe dev data.
+Backend tests use `backend/.env.test` with `DB_NAME=courses-speckit-db-test` so `npm test` does not wipe dev data.
 
 For local development you may set `SEQUELIZE_SYNC_ALTER=true` so Sequelize creates/updates tables on startup.
 
@@ -150,7 +144,7 @@ cd frontend && npm run dev
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:8082 |
-| Backend API | http://localhost:3200/todo/ |
+| Backend API | http://localhost:3200/course/ |
 
 ### 5. Run tests
 
@@ -180,8 +174,8 @@ Three branch roles keep the scaffold starter kit separate from working implement
 main (scaffold — clone and start here)
  └── dev (integration — all features land here)
       ├── feature/1-user-auth
-      ├── feature/2-todo-list-management
-      └── feature/3-todo-list-item-management
+      ├── feature/2-course-list-management
+      └── feature/3-course-list-item-management
 ```
 
 **One-time setup** (after scaffold is committed on `main`):
@@ -226,22 +220,22 @@ The constitution rule requires the AI to **refuse code generation** that has no 
 
 Export Figma frames to `docs/ui/feature-N/` and link them from the feature spec. Specs remain the functional source of truth; designs are visual guidance.
 
-### Rebuild the Todo example from specs (strip shipped code)
+### Rebuild the courses example from specs (strip shipped code)
 
-Clone the full repo (kit + Todo answer key), then wipe product code and restore empty shells while **keeping** `features/feature-*.md`:
+Clone the full repo (kit + courses answer key), then wipe product code and restore empty shells while **keeping** `features/feature-*.md`:
 
 ```bash
 npm run reset:example -- --dry-run   # preview
 npm run reset:example -- --yes       # apply (destructive)
 ```
 
-Then implement Feature 1…N from the specs on `feature/*` branches. API prefix stays `/todo` so the specs match.
+Then implement Feature 1…N from the specs on `feature/*` branches. API prefix stays `/course` so the specs match.
 
-**Student assignment (GitHub repo → reset → rebuild):** see [docs/ASSIGNMENT-rebuild-todo.md](docs/ASSIGNMENT-rebuild-todo.md).
+**Student assignment (GitHub repo → reset → rebuild):** see [docs/ASSIGNMENT-rebuild-course.md](docs/ASSIGNMENT-rebuild-course.md).
 
-**Student assignment (walk through / textual tour of Speckit):** see [docs/ASSIGNMENT-walkthrough-todo.md](docs/ASSIGNMENT-walkthrough-todo.md).
+**Student assignment (walk through / textual tour of Speckit):** see [docs/ASSIGNMENT-walkthrough-course.md](docs/ASSIGNMENT-walkthrough-course.md).
 
-### Start a new SDD application (not this todo app)
+### Start a new SDD application (not this course app)
 
 Works on **macOS, Windows, and Linux** (Node.js only).
 
@@ -250,7 +244,7 @@ npm run starter:zip
 # → dist/speckit-starter-kit.zip
 ```
 
-See [docs/STARTER-KIT.md](docs/STARTER-KIT.md) for what is included, what is excluded, Windows `copy` equivalents, and the post-unzip checklist. That zip is for a **new** product (no Todo specs); `reset:example` is for rebuilding **this** Todo app from its specs.
+See [docs/STARTER-KIT.md](docs/STARTER-KIT.md) for what is included, what is excluded, Windows `copy` equivalents, and the post-unzip checklist. That zip is for a **new** product (no courses specs); `reset:example` is for rebuilding **this** courses app from its specs.
 
 **Student assignment (new app from starter kit):** see [docs/ASSIGNMENT-starter-kit.md](docs/ASSIGNMENT-starter-kit.md).
 
@@ -289,9 +283,9 @@ All authenticated endpoints require `Authorization: Bearer <token>`.
 
 | Feature | Endpoints |
 |--------|-----------|
-| 1 | `POST /todo/register`, `/login`, `/logout` |
-| 2 | `GET/POST/PUT/DELETE /todo/lists` |
-| 3 | `GET/POST /todo/lists/:listId/todos`, `PUT/DELETE /todo/todos/:id` |
+| 1 | `POST /course/register`, `/login`, `/logout` |
+| 2 | `GET/POST/PUT/DELETE /course/lists` |
+| 3 | `GET/POST /course/lists/:listId/courses`, `PUT/DELETE /course/courses/:id` |
 
 Responses use flat JSON (no `{ success, data }` envelope). Errors return `{ "message": "..." }`.
 
@@ -313,7 +307,7 @@ This section describes a repeatable workflow for implementing each feature using
 
 ### Before you start
 
-1. **Open the repo in Cursor** — File → Open Folder → select the `todo-speckit` directory.
+1. **Open the repo in Cursor** — File → Open Folder → select the `course-speckit` directory.
 2. **Confirm rules are active** — Cursor loads `.cursor/rules/` automatically. Rules encode stack conventions (Vuetify 4, Express, Sequelize, testing standards). You do not need to paste them into every prompt.
 3. **Complete [Getting started](#getting-started)** — MySQL database, `backend/.env`, and `npm install` in both `frontend/` and `backend/`.
 4. **Use the branch workflow** — stay on `main` for the starter kit; create `dev` from `main` once; branch each feature from `dev`. Never implement feature code on `main`.
@@ -387,7 +381,7 @@ Register models in backend/app/models/index.js only.
 
 **Step 2 — Auth API**
 ```
-Implement POST /todo/register, /login, and /logout per
+Implement POST /course/register, /login, and /logout per
 @features/feature-1-user-auth.md (API Requirements).
 Use bcrypt, Session table, and JWT as specified in the spec.
 Add auth.routes.js and auth.controller.js; register in app/routes/index.js.
@@ -432,10 +426,10 @@ Run npm test.
 
 ---
 
-### Feature 2 — Todo list management
+### Feature 2 — courses list management
 
-**Spec:** [features/feature-2-todo-list-management.md](features/feature-2-todo-list-management.md)  
-**Branch:** `feature/2-todo-list-management` (from `dev`, after Feature 1 is merged)
+**Spec:** [features/feature-2-course-list-management.md](features/feature-2-course-list-management.md)  
+**Branch:** `feature/2-course-list-management` (from `dev`, after Feature 1 is merged)
 
 **Depends on:** Feature 1 complete.
 
@@ -446,85 +440,85 @@ Run npm test.
 **Step 1 — List model**
 ```
 Implement the lists Sequelize model and User association per
-@features/feature-2-todo-list-management.md.
+@features/feature-2-course-list-management.md.
 Add getAccessibleListOrNull helper in backend/app/authorization/.
 ```
 
 **Step 2 — List API**
 ```
-Implement GET/POST/PUT/DELETE /todo/lists per
-@features/feature-2-todo-list-management.md including user-scoped queries
+Implement GET/POST/PUT/DELETE /course/lists per
+@features/feature-2-course-list-management.md including user-scoped queries
 and 404 for cross-user access.
 ```
 
 **Step 3 — Backend tests**
 ```
 Add Jest tests for all list API scenarios and ownership isolation cases in
-@features/feature-2-todo-list-management.md. Run npm run test:backend.
+@features/feature-2-course-list-management.md. Run npm run test:backend.
 ```
 
 **Step 4 — Frontend list service + MenuBar**
 ```
 Add listServices.js and MenuBar.vue. Introduce MenuBar in App.vue (hidden on login/register).
 Implement list sidebar on Dashboard per Screen Requirements in
-@features/feature-2-todo-list-management.md (v-dialog for create/rename/delete).
+@features/feature-2-course-list-management.md (v-dialog for create/rename/delete).
 ```
 
 **Step 5 — Frontend tests**
 ```
 Add Vitest tests for sidebar empty state, list selection, and validation per
-@features/feature-2-todo-list-management.md Test Coverage Map. Run npm test.
+@features/feature-2-course-list-management.md Test Coverage Map. Run npm test.
 ```
 
 **Manual check:** Create lists → rename → delete → another user's list ID returns 404 via API.
 
 ---
 
-### Feature 3 — Todo list item management
+### Feature 3 — courses list item management
 
-**Spec:** [features/feature-3-todo-list-item-management.md](features/feature-3-todo-list-item-management.md)  
-**Branch:** `feature/3-todo-list-item-management` (from `dev`, after Feature 2 is merged)
+**Spec:** [features/feature-3-course-list-item-management.md](features/feature-3-course-list-item-management.md)  
+**Branch:** `feature/3-course-list-item-management` (from `dev`, after Feature 2 is merged)
 
 **Depends on:** Features 1 and 2 complete.
 
-**Goal:** Todo item CRUD, dashboard main panel, cascade delete when list is removed.
+**Goal:** courses item CRUD, dashboard main panel, cascade delete when list is removed.
 
 #### Suggested Cursor prompts (in order)
 
-**Step 1 — Todo model**
+**Step 1 — courses model**
 ```
-Implement the todos Sequelize model, associations, and cascade delete on list removal
-per @features/feature-3-todo-list-item-management.md.
-Add getAccessibleTodoOrNull in backend/app/authorization/.
+Implement the courses Sequelize model, associations, and cascade delete on list removal
+per @features/feature-3-course-list-item-management.md.
+Add getAccessiblecoursesOrNull in backend/app/authorization/.
 ```
 
-**Step 2 — Todo API**
+**Step 2 — courses API**
 ```
-Implement GET/POST /todo/lists/:listId/todos and PUT/DELETE /todo/todos/:id
-per @features/feature-3-todo-list-item-management.md.
+Implement GET/POST /course/lists/:listId/courses and PUT/DELETE /course/courses/:id
+per @features/feature-3-course-list-item-management.md.
 Enforce parent list ownership and userId scoping on every operation.
 ```
 
 **Step 3 — Backend tests**
 ```
-Add Jest tests for all todo scenarios including cross-user 404 cases and list delete cascade
-in @features/feature-3-todo-list-item-management.md. Run npm run test:backend.
+Add Jest tests for all course scenarios including cross-user 404 cases and list delete cascade
+in @features/feature-3-course-list-item-management.md. Run npm run test:backend.
 ```
 
-**Step 4 — Frontend todo UI**
+**Step 4 — Frontend course UI**
 ```
-Extend Dashboard main panel: add todo, complete toggle, edit/delete v-dialogs
-per @features/feature-3-todo-list-item-management.md Screen Requirements.
-Add todoServices.js. Loading, empty, and error states required.
+Extend Dashboard main panel: add course, complete toggle, edit/delete v-dialogs
+per @features/feature-3-course-list-item-management.md Screen Requirements.
+Add courseServices.js. Loading, empty, and error states required.
 ```
 
 **Step 5 — Frontend tests + full regression**
 ```
-Add Vitest tests per @features/feature-3-todo-list-item-management.md Test Coverage Map.
+Add Vitest tests per @features/feature-3-course-list-item-management.md Test Coverage Map.
 Run npm test from repo root.
 ```
 
-**Manual check:** Add todos → complete → edit → delete → switch lists → delete list removes its todos.
+**Manual check:** Add courses → complete → edit → delete → switch lists → delete list removes its courses.
 
 ---
 

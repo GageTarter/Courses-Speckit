@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-08-26  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
@@ -27,7 +27,7 @@ Adopt **resource-oriented REST** over HTTP with **JSON** request/response bodies
 | **Success body** | Flat JSON resource or array — **no** `{ success, data }` wrapper |
 | **Error body** | `{ "message": "..." }` with appropriate 4xx/5xx |
 | **Auth header** | `Authorization: Bearer <token>` on authenticated routes |
-| **Todo mount** | `/todo/` (e.g. `POST /todo/login`, `GET /todo/lists`) |
+| **courses mount** | `/courses/` (e.g. `POST /courses/login`, `GET /courses/lists`) |
 | **Docs** | Feature API Requirements + living `features/reference/api.md` |
 
 ```text
@@ -50,7 +50,7 @@ Bearer token                     flat JSON out / { message } on error
 - Feature specs can list routes and JSON fields that map directly to Express routes and Vue services.
 - Widespread student familiarity with REST + JSON; easy to demo in Postman/curl.
 - Supertest and axios share the same mental model; living `api.md` stays short.
-- Aligns with existing Cursor rules and Todo Features 1–5.
+- Aligns with existing Cursor rules and courses Features 1–5.
 
 ### Negative / tradeoffs
 

@@ -1,8 +1,8 @@
 {
-  "name": "todo-speckit-backend",
+  "name": "courses-speckit-backend",
   "version": "1.0.0",
   "type": "module",
-  "description": "Todo example app — Node.js REST API (OC CS Speckit)",
+  "description": "courses example app — Node.js REST API (OC CS Speckit)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
