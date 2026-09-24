@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Bundle an SDD starter-kit zip for starting a NEW application (not the todo product).
+ * Bundle an SDD starter-kit zip for starting a NEW application (not the courses product).
  * Cross-platform (macOS, Windows, Linux) — Node only; no zsh/rsync required.
  *
  * Docs: docs/STARTER-KIT.md
@@ -294,8 +294,8 @@ function main() {
     removeMatching(join(target, "docs", "adr"), (name) => /^\d{4}-.*\.md$/i.test(name));
     removeIfExists(join(target, "docs", "oc-cs-speckit-specs.md"));
     removeIfExists(join(target, "docs", "oc-cs-speckit-specs.pdf"));
-    removeIfExists(join(target, "docs", "todo-app-specs.md"));
-    removeIfExists(join(target, "docs", "todo-app-specs.pdf"));
+    removeIfExists(join(target, "docs", "courses-app-specs.md"));
+    removeIfExists(join(target, "docs", "courses-app-specs.pdf"));
     removeIfExists(join(target, "docs", "app-specs.md"));
     removeIfExists(join(target, "docs", "app-specs.pdf"));
     removeMatching(join(target, "docs", "agility-import"), (name) => name.endsWith(".csv"));
