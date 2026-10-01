@@ -2,7 +2,7 @@
 
 **Feature ID:** 1
 **Branch pattern:** `feature/1-user-auth`
-**Status:** Draft
+**Status:** Ready
 **Created:** 2026-10-01
 **Input:** Students register themselves and sign in; admins sign in with elevated rights, so the course catalog and enrollment screens can tell the two roles apart
 **Related:** [ADR-0001 — Client–server multi-user architecture](../docs/adr/0001-client-server-multi-user-architecture.md), [ADR-0002 — Security architecture](../docs/adr/0002-security-architecture.md)
@@ -477,13 +477,13 @@ Do not implement behavior not in this spec.
 
 ## Definition of Done
 
-*   [ ] Backend and frontend implemented per this spec (**FR-00N** satisfied)
-*   [ ] **Success Criteria (SC-00N)** met
-*   [ ] All mapped tests pass (`npm test`)
-*   [ ] Test Coverage Map complete
-*   [ ] `features/reference/data-model.md` updated (if schema changed)
-*   [ ] `features/reference/api.md` updated (if API changed)
-*   [ ] `features/reference/behavior.md` updated (if product rules changed)
+*   [x] Backend and frontend implemented per this spec (**FR-001**–**FR-013** satisfied)
+*   [x] **Success Criteria (SC-001**–**SC-004)** met
+*   [x] All mapped tests pass (`npm test` — 20 Jest, 10 Vitest)
+*   [x] Test Coverage Map complete (24 scenarios, 24 matching `it` names)
+*   [x] `features/reference/data-model.md` updated — `users`, `sessions`
+*   [x] `features/reference/api.md` updated — register / login / logout
+*   [x] `features/reference/behavior.md` updated — identity, session, access, validation, UI rules
 
 ---
 
