@@ -1,7 +1,7 @@
 # Feature: Course Management
 
 **Feature ID:** 2
-**Branch pattern:** `feature/2-course-management`
+**Branch pattern:** `features/2-course-management`
 **Status:** Draft
 **Created:** 2026-9-24
 **Input:** Courses created and managed by the users with admin privelages
@@ -12,15 +12,15 @@
 
 ## User Stories
 
-### US-2.1 Add a course
-**As an** admin
+### US-2.1: Add a course
+**As a** admin
 **I want to** add a course with a required name and course ID, and an optional description and semester offered
 **So that** I can use it during enrollment
 **Priority:** P1
 **Independent test:** Submit the Add Course dialogue and see the course in the Courses table
 **Acceptance scenarios:** see ### US-2.1 under Acceptance Criteria
 
-### US-2.2 Browse the courses list
+### US-2.2: Browse the courses list
 **As a** signed-in user
 **I want to** see every course with its name, ID, description and semester offered
 **So that** I can see what courses are already in the system
@@ -28,16 +28,16 @@
 **Independent test:** Open the Courses page and confirm each row shows name, ID, description and semester offered
 **Acceptance scenarios:** see ### US-2.2 under Acceptance Criteria
 
-### US-2.3 Correct a course's data
-**As an** admin
+### US-2.3: Correct a course's data
+**As a** admin
 **I want to** edit a course's name, course ID, description, or semester offered
 **So that** the course entries contain updated data
 **Priority:** P2
 **Independent test:** Edit one course's name, ID, description or semester offered and confirm the table shows the new value
 **Acceptance scenarios:** see ### US-2.3 under Acceptance Criteria
 
-### US-2.4 Remove a course
-**As an** admin
+### US-2.4: Remove a course
+**As a** admin
 **I want to** remove a course that is no longer provided
 **So that** the old courses are not listed
 **Priority:** P3
@@ -70,7 +70,7 @@
 - Name longer than 100 characters → `400`.
 - Description longer than 300 characters → `400`.
 - Non-numeric `:id` → `400`.
-- `semesterOffered` present and not `YYYY-MM-DD` → `400`.
+- `semesterOffered` present and not `Fall`, `Spring`, `Summer` or `Winter` → `400`.
 
 ## Success Criteria
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
@@ -115,12 +115,12 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 
 **Create request body:** `name` and `courseID` are required. `description` and `semesterOffered` may be omitted.
 ```json
-{ "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "2026-01-12" }
+{ "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall" }
 ```
 
 **Create success** (`201`):
 ```json
-{ "id": 1, "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "2026-01-12" }
+{ "id": 1, "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall" }
 ```
 
 **Update request body:** `name` and `courseID` are required. `description` and `semesterOffered` are optional; omit them or send them blank to store `null` (**FR-004**).
@@ -138,7 +138,7 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 **Quoted validation (AC):**
 - Name longer than 100 characters → `400` `{ "message": "Course name must be 100 characters or fewer." }`
 - Description longer than 300 characters → `400` `{ "message": "Course description must be 300 characters or fewer." }`
-- `semesterOffered` present and not `YYYY-MM-DD` → `400` `{ "message": "Semester offered must be a YYYY-MM-DD date." }`
+- `semesterOffered` present and not `Fall`, `Spring`, `Summer`, or `Winter` → `400` `{ "message": "Semester offered must be Fall, Spring, Summer, or Winter." }`
 - Non-numeric `:id` → `400` `{ "message": "Course id must be a number." }`
 - Missing course id → `404` `{ "message": "Course not found." }`
 - Signed-in non-admin `POST` / `PUT` / `DELETE` → `403` `{ "message": "Admin privileges are required." }`
@@ -185,7 +185,7 @@ Course ID is a required field the user fills (Gherkin example `CMSC-1113-01`).
 | `name` | STRING(100) | Required; unique per (`name`); stored and displayed as typed |
 | `courseID` | STRING(100) | Required; stored and displayed as typed |
 | `description` | STRING(300) | Optional. `null` when omitted or blank. At most 300 characters when present |
-| `semesterOffered` | DATEONLY | Optional. `null` when omitted or blank. When present, `YYYY-MM-DD` |
+| `semesterOffered` | ENUM | Optional. `null` when omitted or blank. When present, `Fall`, `Spring`, `Summer`, or `Winter` |
 | `createdAt` | DATE | Sequelize timestamp |
 | `updatedAt` | DATE | Sequelize timestamp |
 
@@ -203,7 +203,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** I enter course name `Programming I`
 *   **And** I enter course ID `CMSC-1113-01`
 *   **And** I enter description `Introduction to programming`
-*   **And** I enter semester offered `2026-01-16`
+*   **And** I enter semester offered `Fall`
 *   **And** I confirm the dialog
 *   **Then** the API returns `201` with a course object containing `id`, `name`, `courseID`, `description`, and `semesterOffered`
 *   **And** `Programming I` appears in the courses view
@@ -261,8 +261,8 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 
 #### Scenario: User creates a course with an invalid semester offered
 *   **Given** I am signed in as an admin on the dashboard
-*   **When** I submit a semester offered that is not `YYYY-MM-DD`
-*   **Then** the API returns `400` with `{ "message": "Semester offered must be a YYYY-MM-DD date." }`
+*   **When** I submit a semester offered that is not `Fall`, `Spring`, `Summer` or `Winter`
+*   **Then** the API returns `400` with `{ "message": "Semester offered must be Fall, Spring, Summer, or Winter." }`
 *   **And** the error is displayed in a `<v-alert type="error">`
 *   **And** the course is not created
 
@@ -348,8 +348,8 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 
 #### Scenario: User edits a course with an invalid semester offered
 *   **Given** I am signed in as an admin on the dashboard
-*   **When** I submit a semester offered that is not `YYYY-MM-DD`
-*   **Then** the API returns `400` with `{ "message": "Semester offered must be a YYYY-MM-DD date." }`
+*   **When** I submit a semester offered that is not `Fall`, `Spring`, `Summer`, or `Winter`
+*   **Then** the API returns `400` with `{ "message": "Semester offered must be Fall, Spring, Summer, or Winter." }`
 *   **And** the error is displayed in a `<v-alert type="error">`
 *   **And** the course keeps its previous semester offered
 
