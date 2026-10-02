@@ -52,6 +52,23 @@ export const authenticate = async (req, res, next) => {
   return next();
 };
 
+export const requireStudent = (req, res, next) => {
+  if (req.user?.role !== "student") {
+    logger.warn(`Student route refused for user id=${req.user?.id}`);
+    return res.status(403).send({ message: "Forbidden! Student access required." });
+  }
+
+  return next();
+};
+
+export const getOwnedEnrollmentOrNull = async (req, enrollmentId) => {
+  const row = await db.enrollment.findOne({
+    where: { id: enrollmentId, userId: req.user.id },
+  });
+
+  return row ?? null;
+};
+
 export const requireAdmin = (req, res, next) => {
   if (req.user?.role !== "admin") {
     logger.warn(`Admin route refused for user id=${req.user?.id}`);

@@ -2,25 +2,27 @@
 
 **Feature ID:** 6
 **Branch pattern:** `feature/6-enrollment-management`
-**Status:** Draft
+**Status:** Ready
 **Created:** 2026-10-01
 **Input:** A signed-in student picks a semester, browses the sections offered in it, and enrolls in the ones they want; they can review and drop their own enrollments
-**Depends on:** [Feature 1 — User Authentication & Role-Based Access](./feature-1-user-auth.md), [Feature 2 — Course Management](./feature-2-course-management.md), [Feature 3 — Semester Management](./feature-3-semester-management.md), [Feature 5 — Section Management](./feature-5-section-management.md)
-**Related:** [ADR-0002 — Security architecture](../docs/adr/0002-security-architecture.md), `features/reference/api.md`
+**Depends on:** [Feature 1 — User Authentication & Role-Based Access](./feature-1-user-auth.md)
+**Related:** [ADR-0002 — Security architecture](../docs/adr/0002-security-architecture.md), `features/reference/api.md`. Features 2, 3, and 5 add **admin CRUD** on the catalog tables this feature introduces — they must not create a second `courses` / `semesters` / `sections` schema.
 
 ---
 
-## Contract dependencies
+## Catalog scaffold (so this feature can ship first)
 
-This feature **consumes** read endpoints owned by other features and **introduces** only the enrollment endpoints. The shapes below are the minimum this feature needs; confirm them against the owning specs before setting `Status: Ready`.
+Teammates do not have to finish Features 2, 3, and 5 before enrollment works. This feature **owns the minimum catalog schema and read APIs** enrollment needs. Admin create/update/delete for those tables stays out of scope.
 
-| Endpoint | Owner | This feature needs |
-|----------|-------|--------------------|
-| `GET /courses/semesters` | Feature 3 | `id`, `name` for the semester selector |
-| `GET /courses/sections?semesterId=N` | Feature 5 | `id`, `sectionNumber`, `capacity`, `semesterId`, and the parent course's `code` and `title` |
+| Endpoint | Owner | Shape |
+|----------|-------|--------|
+| `GET /courses/semesters` | This feature (handed to Feature 3 later) | `{ id, name }` |
+| `GET /courses/sections?semesterId=N` | This feature (handed to Feature 5 later) | `{ id, sectionNumber, capacity, remainingSeats, semesterId, courseId, course: { id, code, title } }` |
 
-- **[NEEDS CLARIFICATION: does Feature 5 expose sections filtered by `?semesterId=`, or only nested under `/courses/semesters/:id/sections`?]**
-- **[NEEDS CLARIFICATION: does the Feature 5 section payload embed the course object, or only `courseId`? If only the id, this feature needs a second request or an `include`.]**
+- Sections are filtered with query param `semesterId` (not a nested route).
+- Each section **embeds** the parent `course` object so the enroll view does not make a second request.
+- Missing `semesterId` on `GET /courses/sections` → `400` `{ "message": "semesterId is required." }`
+- Catalog rows in development/demo come from `npm run seed-catalog --prefix backend`. Tests insert their own rows. There is no public write API for catalog data in this feature.
 
 ---
 
@@ -103,8 +105,8 @@ This feature **consumes** read endpoints owned by other features and **introduce
 
 ## Assumptions
 
-- Features 1, 2, 3, and 5 are merged to `dev` before this feature is implemented; their models, seed data, and read endpoints exist.
-- Semesters, courses, and sections are maintained by admins; this feature never creates or edits them.
+- Feature 1 auth is on this branch (User, Session, `authenticate`, `requireAdmin`).
+- Features 2, 3, and 5 may still be unwritten. This feature ships the catalog **tables and read APIs**; admin maintenance UIs remain theirs.
 - A student self-registers through Feature 1; there is no separate `students` table — a student is a `users` row with role `student`.
 - Registration windows, holds, prerequisites, and waitlists are not modelled; any section with a free seat is enrollable.
 - Seat counts are computed per request. Two students racing for the last seat is handled by the unique constraint and capacity check, not by row locking.
@@ -140,7 +142,7 @@ Each student owns their enrollments exclusively. Semesters, courses, and section
 | **Create scope** | New enrollment rows are owned by the authenticated user; `userId` never comes from the request body |
 | **Cross-user access** | Another student's enrollment → `404` (not `403`) |
 | **Role guard** | Create and delete require role `student` → `403` for admins (role guard, distinct from the ownership `404`) |
-| **Catalog data** | Semesters, courses, and sections are readable by any authenticated user; this feature never writes them |
+| **Catalog data** | Semesters, courses, and sections are readable by any authenticated user. This feature has no public write API for them (seed script and tests only) |
 | **UI scope** | The schedule panel renders only what `GET /courses/enrollments` returned for the signed-in student |
 | **Implementation** | Ownership lookup lives in a shared helper in `backend/app/authorization/` — controllers must not duplicate the scope clause |
 
@@ -152,9 +154,11 @@ Endpoints introduced by this feature:
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
+| `GET` | `/courses/semesters` | Yes | List semesters for the selector |
+| `GET` | `/courses/sections?semesterId=N` | Yes | List sections in that semester, with `remainingSeats` and embedded `course` |
 | `GET` | `/courses/enrollments` | Yes | List the signed-in student's enrollments; optional `?semesterId=N` filter |
-| `POST` | `/courses/enrollments` | Yes | Enroll the signed-in student in a section |
-| `DELETE` | `/courses/enrollments/:id` | Yes | Drop one of the signed-in student's enrollments |
+| `POST` | `/courses/enrollments` | Yes (student) | Enroll the signed-in student in a section |
+| `DELETE` | `/courses/enrollments/:id` | Yes (student) | Drop one of the signed-in student's enrollments |
 
 **Create request body:**
 ```json
@@ -189,6 +193,26 @@ Endpoints introduced by this feature:
 ```
 
 **Delete success response:** `200` with `{ "message": "Enrollment dropped." }`
+
+**Semester list** (`200`):
+```json
+[{ "id": 3, "name": "Fall 2026" }]
+```
+
+**Section list** (`200`) for `GET /courses/sections?semesterId=3`:
+```json
+[
+  {
+    "id": 12,
+    "sectionNumber": "001",
+    "capacity": 30,
+    "remainingSeats": 2,
+    "semesterId": 3,
+    "courseId": 5,
+    "course": { "id": 5, "code": "CMSC 4123", "title": "Software Engineering IV" }
+  }
+]
+```
 
 **Error response:** `{ "message": "Human-readable explanation." }`
 
@@ -234,15 +258,37 @@ Single student-facing view with a selector, an available-sections table, and a s
 ## Key Entities
 
 - **Enrollment**: the link between one student and one section, created when the student enrolls and removed when they drop. Carries the moment of enrollment.
-- **Section** (read-only here): a scheduled offering of a course within a semester, with a seat capacity. Owned by Feature 5.
-- **Semester** (read-only here): the term a section belongs to. Owned by Feature 3.
-- **Course** (read-only here): the catalog entry a section offers. Owned by Feature 2.
+- **Section**: a scheduled offering of a course within a semester, with a seat capacity. Schema introduced here; admin CRUD deferred to Feature 5.
+- **Semester**: the term a section belongs to. Schema introduced here; admin CRUD deferred to Feature 3.
+- **Course**: the catalog entry a section offers. Schema introduced here; admin CRUD deferred to Feature 2.
 
 ---
 
 ## Data Model Requirements
 
-This feature introduces one table and adds no columns to existing ones.
+This feature introduces four tables. Features 2, 3, and 5 extend the catalog tables; they must not replace them.
+
+### `semesters` table
+| Field | Type | Rules |
+|-------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `name` | STRING | Required, unique |
+
+### `courses` table
+| Field | Type | Rules |
+|-------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `code` | STRING | Required, unique |
+| `title` | STRING | Required |
+
+### `sections` table
+| Field | Type | Rules |
+|-------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `sectionNumber` | STRING | Required |
+| `capacity` | INTEGER | Required, ≥ 1 |
+| `semesterId` | INTEGER FK | Required, references `semesters.id` |
+| `courseId` | INTEGER FK | Required, references `courses.id` |
 
 ### `enrollments` table
 | Field | Type | Rules |
@@ -257,10 +303,14 @@ This feature introduces one table and adds no columns to existing ones.
 ### Associations
 *   `User hasMany Enrollment`
 *   `Enrollment belongsTo User`
+*   `Semester hasMany Section`
+*   `Course hasMany Section`
+*   `Section belongsTo Semester`
+*   `Section belongsTo Course`
 *   `Section hasMany Enrollment`
 *   `Enrollment belongsTo Section`
 
-Associations are wired in `backend/app/models/index.js`. The `Section belongsTo Course` and `Section belongsTo Semester` associations are owned by Feature 5; this feature reads through them via `include` and does not redefine them.
+Associations are wired in `backend/app/models/index.js`.
 
 ---
 
@@ -467,7 +517,7 @@ Copy when asking Cursor to implement this feature (`@` this file):
 Implement Feature 6 from @features/feature-6-enrollment-management.md on branch `feature/6-enrollment-management`.
 
 Follow layer order in @features/framework.md (models → routes → backend tests → frontend → frontend tests).
-Read semesters and sections through the endpoints owned by Features 3 and 5 — do not create or modify semester, course, or section models.
+Read semesters and sections through this feature's catalog read APIs. Introduce the minimum `semesters`, `courses`, and `sections` tables plus `GET /courses/semesters` and `GET /courses/sections?semesterId=`. Do not add admin create/update/delete for catalog data.
 Map every Gherkin scenario in the Test Coverage Map; run `npm test` before finishing.
 If API routes, payloads, schema, or product rules changed per this spec, update @features/reference/api.md, @features/reference/data-model.md, and/or @features/reference/behavior.md in the same PR to match shipped code.
 Complete Definition of Done and the merge checklist in @features/framework.md.
@@ -480,20 +530,19 @@ Do not implement behavior not in this spec.
 
 ## Definition of Done
 
-*   [ ] Backend and frontend implemented per this spec (**FR-00N** satisfied)
-*   [ ] **Success Criteria (SC-00N)** met
-*   [ ] All mapped tests pass (`npm test`)
-*   [ ] Test Coverage Map complete
-*   [ ] `features/reference/data-model.md` updated (if schema changed)
-*   [ ] `features/reference/api.md` updated (if API changed)
-*   [ ] `features/reference/behavior.md` updated (if product rules changed)
-*   [ ] Both `[NEEDS CLARIFICATION]` items in **Contract dependencies** resolved against Features 3 and 5
+*   [x] Backend and frontend implemented per this spec (**FR-001**–**FR-015** satisfied)
+*   [x] **Success Criteria (SC-001**–**SC-005)** met
+*   [x] All mapped tests pass (`npm test`)
+*   [x] Test Coverage Map complete (24 scenarios, 24 matching `it` names)
+*   [x] `features/reference/data-model.md` updated
+*   [x] `features/reference/api.md` updated
+*   [x] `features/reference/behavior.md` updated
 
 ---
 
 ## Out of Scope
 
-*   Creating or editing semesters ([Feature 3](./feature-3-semester-management.md)), courses ([Feature 2](./feature-2-course-management.md)), or sections ([Feature 5](./feature-5-section-management.md))
+*   Admin create/update/delete UI or HTTP for semesters, courses, or sections (Features 2, 3, 5 reuse the tables this feature adds)
 *   Admin views of class rosters
 *   Waitlists when a section is full
 *   Meeting-time conflict detection between enrolled sections

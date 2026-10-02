@@ -52,3 +52,29 @@ export const tokenForNewStudent = async (overrides = {}) => {
   const res = await registerUser(overrides);
   return res.body.token;
 };
+
+export const authHeader = (token) => ({ Authorization: `Bearer ${token}` });
+
+/** Minimum catalog Feature 6 needs so enrollment tests do not wait on Features 2/3/5. */
+export const seedCatalog = async () => {
+  const fall = await db.semester.create({ name: "Fall 2026" });
+  const spring = await db.semester.create({ name: "Spring 2027" });
+  const course = await db.course.create({
+    code: "CMSC 4123",
+    title: "Software Engineering IV",
+  });
+  const s001 = await db.section.create({
+    sectionNumber: "001",
+    capacity: 30,
+    semesterId: fall.id,
+    courseId: course.id,
+  });
+  const s002 = await db.section.create({
+    sectionNumber: "002",
+    capacity: 30,
+    semesterId: fall.id,
+    courseId: course.id,
+  });
+
+  return { fall, spring, course, s001, s002 };
+};
