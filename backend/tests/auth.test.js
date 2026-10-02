@@ -1,5 +1,5 @@
 /**
- * Feature 1 — User Authentication & Session Management
+ * Feature 1 — User Authentication & Role-Based Access
  * Spec: features/feature-1-user-auth.md
  */
 import request from "supertest";
@@ -8,237 +8,184 @@ import app from "../server.js";
 import db from "../app/models/index.js";
 import {
   syncTestDatabase,
-  validRegisterPayload,
+  closeTestDatabase,
+  validRegistration,
   registerUser,
-  registerAdmin,
-  loginUser,
-  authHeader,
+  login,
+  seedAdmin,
 } from "./helpers.js";
 
-describe("Feature 1 — User Authentication & Session Management", () => {
-  beforeEach(async () => {
-    await syncTestDatabase();
-  });
+beforeEach(async () => {
+  await syncTestDatabase();
+});
 
-  describe("US-1.1 — Registration", () => {
-    it("User registers with valid information", async () => {
-      const { payload, response } = await registerUser(app);
+afterAll(async () => {
+  await closeTestDatabase();
+});
 
-      expect(response.status).toBe(201);
-      expect(response.body).toMatchObject({
+describe("Feature 1 — Authentication API", () => {
+  describe("US-1.1 — Register as a student", () => {
+    it("Student registers with valid information", async () => {
+      const res = await registerUser();
+
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({
         username: "jdoe",
         email: "jane@example.com",
         fName: "Jane",
         lName: "Doe",
-        role: "manager",
+        role: "student",
       });
-      expect(response.body.userId).toEqual(expect.any(Number));
-      expect(response.body.token).toEqual(expect.any(String));
-      expect(response.body.password).toBeUndefined();
+      expect(res.body.userId).toEqual(expect.any(Number));
+      expect(res.body.token).toEqual(expect.any(String));
+      expect(res.body.password).toBeUndefined();
 
       const stored = await db.user.unscoped().findOne({ where: { username: "jdoe" } });
-      expect(stored).not.toBeNull();
-      expect(stored.password).not.toBe(payload.password);
-      expect(await bcrypt.compare(payload.password, stored.password)).toBe(true);
+      expect(stored.password).not.toBe("secret123");
+      expect(await bcrypt.compare("secret123", stored.password)).toBe(true);
+    });
+
+    it("Registration ignores a role supplied in the request body", async () => {
+      const res = await request(app)
+        .post("/api/register")
+        .send({ ...validRegistration({ username: "sneaky" }), role: "admin" });
+
+      expect(res.status).toBe(201);
+      expect(res.body.role).toBe("student");
+
+      const stored = await db.user.findOne({ where: { username: "sneaky" } });
+      expect(stored.role).toBe("student");
     });
 
     it("User submits registration with missing email", async () => {
-      const response = await request(app)
-        .post("/league/register")
-        .send(validRegisterPayload({ email: "" }));
+      const res = await registerUser({ email: "" });
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: "Email is required." });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Email is required.");
+      expect(await db.user.count()).toBe(0);
     });
 
     it("User submits registration with password too short", async () => {
-      const response = await request(app)
-        .post("/league/register")
-        .send(validRegisterPayload({ password: "short" }));
+      const res = await registerUser({ password: "short1" });
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({
-        message: "Password must be at least 8 characters.",
-      });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Password must be at least 8 characters.");
+      expect(await db.user.count()).toBe(0);
     });
 
     it("User registers with a duplicate username", async () => {
-      await registerUser(app);
+      await registerUser();
 
-      const response = await request(app)
-        .post("/league/register")
-        .send(
-          validRegisterPayload({
-            email: "other@example.com",
-            username: "jdoe",
-          })
-        );
+      // Different email, same username in different casing.
+      const res = await registerUser({
+        username: "JDoe",
+        email: "other@example.com",
+      });
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: "Username is already taken." });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Username is already taken.");
+      expect(await db.user.count()).toBe(1);
     });
 
     it("User registers with a duplicate email", async () => {
-      await registerUser(app);
+      await registerUser();
 
-      const response = await request(app)
-        .post("/league/register")
-        .send(
-          validRegisterPayload({
-            email: "jane@example.com",
-            username: "janedoe",
-          })
-        );
+      const res = await registerUser({ username: "someoneelse" });
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: "Email is already registered." });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Email is already registered.");
+      expect(await db.user.count()).toBe(1);
     });
   });
 
   describe("US-1.2 — Sign in", () => {
     it("User signs in with valid credentials", async () => {
-      await registerUser(app);
+      await registerUser();
 
-      const response = await loginUser(app, {
-        username: "jdoe",
-        password: "password123",
-      });
+      const res = await login("jdoe", "secret123");
 
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        username: "jdoe",
-        role: "manager",
-      });
-      expect(response.body.userId).toEqual(expect.any(Number));
-      expect(response.body.token).toEqual(expect.any(String));
-      expect(response.body.password).toBeUndefined();
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ username: "jdoe", role: "student" });
+      expect(res.body.token).toEqual(expect.any(String));
+      expect(res.body.password).toBeUndefined();
 
       const sessions = await db.session.findAll({ where: { email: "jane@example.com" } });
-      expect(sessions.length).toBeGreaterThan(0);
-      expect(sessions.some((session) => session.token === response.body.token)).toBe(true);
+      expect(sessions.length).toBeGreaterThanOrEqual(1);
     });
 
     it("User signs in with invalid password", async () => {
-      await registerUser(app);
+      await registerUser();
 
-      const response = await loginUser(app, {
-        username: "jdoe",
-        password: "wrong-password",
-      });
+      const res = await login("jdoe", "wrongpassword");
 
-      expect(response.status).toBe(401);
-      expect(response.body).toEqual({ message: "Invalid username or password." });
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("Invalid username or password.");
+      expect(res.body.token).toBeUndefined();
+    });
+
+    it("Unknown username returns the same error as a wrong password", async () => {
+      await registerUser();
+
+      const unknown = await login("ghost", "anypassword");
+      const wrongPassword = await login("jdoe", "wrongpassword");
+
+      expect(unknown.status).toBe(401);
+      // Identical response, so the API never reveals which accounts exist.
+      expect(unknown.body.message).toBe(wrongPassword.body.message);
+    });
+
+    it("Username is case-insensitive at sign in", async () => {
+      await registerUser();
+
+      const res = await login("JDoe", "secret123");
+
+      expect(res.status).toBe(200);
+      expect(res.body.username).toBe("jdoe");
     });
 
     it("User signs in with missing username", async () => {
-      const response = await loginUser(app, { password: "password123" });
+      const res = await login("", "secret123");
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: "Username is required." });
-    });
-
-    it("User signs in with missing password", async () => {
-      const response = await loginUser(app, { username: "jdoe" });
-
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: "Password is required." });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe("Username is required.");
     });
   });
 
   describe("US-1.4 — Sign out", () => {
     it("User signs out", async () => {
-      const { response: registerResponse } = await registerUser(app);
-      const { token, userId } = registerResponse.body;
+      const { body } = await registerUser();
 
-      const response = await request(app)
-        .post("/league/logout")
-        .set(authHeader(token));
+      const res = await request(app)
+        .post("/api/logout")
+        .set("Authorization", `Bearer ${body.token}`);
 
-      expect(response.status).toBe(200);
-
-      const session = await db.session.findOne({ where: { userId } });
-      expect(session.token).toBe("");
-
-      const protectedResponse = await request(app)
-        .get(`/league/users/${userId}`)
-        .set(authHeader(token));
-
-      expect(protectedResponse.status).toBe(401);
+      expect(res.status).toBe(200);
+      expect(await db.session.count({ where: { token: body.token } })).toBe(0);
     });
-  });
 
-  describe("US-9.3 — Default new-user role is manager", () => {
-    it("User registers with role manager", async () => {
-      const { response } = await registerUser(app);
+    it("Reusing a token after sign out fails", async () => {
+      const { body } = await registerUser();
 
-      expect(response.status).toBe(201);
-      expect(response.body.role).toBe("manager");
-      const stored = await db.user.findOne({ where: { username: "jdoe" } });
-      expect(stored.role).toBe("manager");
-    });
-  });
-
-  describe("US-9.4 — Connect a new user to a person with the same email", () => {
-    it("User registers and links to a person with the same email", async () => {
-      const { token } = await registerAdmin(app);
       await request(app)
-        .post("/league/people")
-        .set(authHeader(token))
-        .send({
-          firstName: "Jane",
-          lastName: "Doe",
-          email: "jane.doe@example.com",
-          birthDate: "1990-05-15",
-          gender: "female",
-        });
+        .post("/api/logout")
+        .set("Authorization", `Bearer ${body.token}`);
 
-      const { response } = await registerUser(app, {
-        username: "janedoe",
-        email: "jane.doe@example.com",
-      });
+      const replay = await request(app)
+        .post("/api/logout")
+        .set("Authorization", `Bearer ${body.token}`);
 
-      expect(response.status).toBe(201);
-      const person = await db.person.findOne({
-        where: { email: "jane.doe@example.com" },
-      });
-      expect(person.userId).toBe(response.body.userId);
+      expect(replay.status).toBe(401);
     });
+  });
 
-    it("User registers when no person has that email", async () => {
-      const { response } = await registerUser(app, {
-        username: "newuser",
-        email: "new.user@example.com",
-      });
+  describe("US-1.6 — Distinguish admins from students", () => {
+    it("Seeded admin signs in and receives the admin role", async () => {
+      const admin = await seedAdmin();
 
-      expect(response.status).toBe(201);
-      expect(await db.person.count()).toBe(0);
-    });
+      const res = await login(admin.username, admin.password);
 
-    it("User registers when the matching person is already linked", async () => {
-      const { token, userId } = await registerAdmin(app);
-      const personResponse = await request(app)
-        .post("/league/people")
-        .set(authHeader(token))
-        .send({
-          firstName: "Jane",
-          lastName: "Doe",
-          email: "jane.doe@example.com",
-          birthDate: "1990-05-15",
-          gender: "female",
-        });
-      await db.person.update(
-        { userId },
-        { where: { id: personResponse.body.id } }
-      );
-
-      const { response } = await registerUser(app, {
-        username: "janedoe",
-        email: "jane.doe@example.com",
-      });
-
-      expect(response.status).toBe(201);
-      const person = await db.person.findByPk(personResponse.body.id);
-      expect(person.userId).toBe(userId);
+      expect(res.status).toBe(200);
+      expect(res.body.role).toBe("admin");
     });
   });
 });

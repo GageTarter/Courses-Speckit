@@ -2,11 +2,6 @@ export default (sequelize, Sequelize) => {
   const User = sequelize.define(
     "user",
     {
-      id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-      },
       fName: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -32,19 +27,13 @@ export default (sequelize, Sequelize) => {
       role: {
         type: Sequelize.STRING(20),
         allowNull: false,
-        defaultValue: "manager",
+        defaultValue: "student",
       },
     },
     {
+      // Password hashes never leave the database unless explicitly unscoped.
       defaultScope: {
         attributes: { exclude: ["password"] },
-      },
-      hooks: {
-        beforeValidate(user) {
-          if (user.username) {
-            user.username = user.username.trim().toLowerCase();
-          }
-        },
       },
     }
   );

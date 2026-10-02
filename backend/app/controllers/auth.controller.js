@@ -1,3 +1,7 @@
+/**
+ * Feature 1 — User Authentication & Role-Based Access
+ * Spec: features/feature-1-user-auth.md
+ */
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Op } from "sequelize";
@@ -6,164 +10,145 @@ import authConfig from "../config/auth.config.js";
 import logger from "../config/logger.js";
 
 const SALT_ROUNDS = 10;
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+const SESSION_TTL_SECONDS = 86400;
+const MIN_PASSWORD_LENGTH = 8;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const buildAuthResponse = (user, token) => ({
+const exports = {};
+
+const sessionPayload = (user, session) => ({
   userId: user.id,
   username: user.username,
   email: user.email,
   fName: user.fName,
   lName: user.lName,
   role: user.role,
-  token,
+  token: session.token,
 });
 
-const createOrReuseSession = async (user) => {
-  const existingSession = await db.session.findOne({
-    where: {
-      userId: user.id,
-      email: user.email,
-      expirationDate: { [Op.gte]: new Date() },
-      token: { [Op.ne]: "" },
-    },
+/** Reuse a live session for this user before minting another token. */
+const issueSession = async (user) => {
+  const existing = await db.session.findOne({
+    where: { userId: user.id, expirationDate: { [Op.gt]: new Date() } },
   });
 
-  if (existingSession) {
-    return existingSession.token;
+  if (existing) {
+    return existing;
   }
 
-  const expirationDate = new Date(Date.now() + SESSION_TTL_MS);
-  const token = jwt.sign(
-    { userId: user.id, email: user.email },
-    authConfig.secret,
-    { expiresIn: 86400 }
-  );
-
-  await db.session.create({
-    token,
-    email: user.email,
-    expirationDate,
-    userId: user.id,
+  const token = jwt.sign({ id: user.id, role: user.role }, authConfig.secret, {
+    expiresIn: SESSION_TTL_SECONDS,
   });
 
-  return token;
+  return db.session.create({
+    token,
+    email: user.email,
+    expirationDate: new Date(Date.now() + SESSION_TTL_SECONDS * 1000),
+    userId: user.id,
+  });
 };
 
-const exports = {};
-
 exports.register = async (req, res) => {
+  const fName = (req.body.fName || "").trim();
+  const lName = (req.body.lName || "").trim();
+  const email = (req.body.email || "").trim();
+  const username = (req.body.username || "").trim().toLowerCase();
+  const password = req.body.password || "";
+
+  if (!fName) {
+    return res.status(400).send({ message: "First name is required." });
+  }
+
+  if (!lName) {
+    return res.status(400).send({ message: "Last name is required." });
+  }
+
+  if (!email) {
+    return res.status(400).send({ message: "Email is required." });
+  }
+
+  if (!EMAIL_REGEX.test(email)) {
+    return res.status(400).send({ message: "Enter a valid email address." });
+  }
+
+  if (!username) {
+    return res.status(400).send({ message: "Username is required." });
+  }
+
+  if (!password) {
+    return res.status(400).send({ message: "Password is required." });
+  }
+
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return res
+      .status(400)
+      .send({ message: "Password must be at least 8 characters." });
+  }
+
+  if (await db.user.findOne({ where: { username } })) {
+    return res.status(400).send({ message: "Username is already taken." });
+  }
+
+  if (await db.user.findOne({ where: { email } })) {
+    return res.status(400).send({ message: "Email is already registered." });
+  }
+
   try {
-    const { fName, lName, email, username, password } = req.body;
-
-    if (!fName?.trim()) {
-      return res.status(400).send({ message: "First name is required." });
-    }
-    if (!lName?.trim()) {
-      return res.status(400).send({ message: "Last name is required." });
-    }
-    if (!email?.trim()) {
-      return res.status(400).send({ message: "Email is required." });
-    }
-    if (!username?.trim()) {
-      return res.status(400).send({ message: "Username is required." });
-    }
-    if (!password) {
-      return res.status(400).send({ message: "Password is required." });
-    }
-    if (password.length < 8) {
-      return res.status(400).send({ message: "Password must be at least 8 characters." });
-    }
-
-    const normalizedUsername = username.trim().toLowerCase();
-
-    const existingUsername = await db.user.findOne({
-      where: { username: normalizedUsername },
-    });
-    if (existingUsername) {
-      return res.status(400).send({ message: "Username is already taken." });
-    }
-
-    const existingEmail = await db.user.findOne({
-      where: { email: email.trim() },
-    });
-    if (existingEmail) {
-      return res.status(400).send({ message: "Email is already registered." });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await db.user.create({
-      fName: fName.trim(),
-      lName: lName.trim(),
-      email: email.trim(),
-      username: normalizedUsername,
-      password: hashedPassword,
+      fName,
+      lName,
+      email,
+      username,
+      password: await bcrypt.hash(password, SALT_ROUNDS),
+      // Role is never taken from the request body — self-registration
+      // always produces a student (FR-007).
+      role: "student",
     });
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const matchingPeople = (await db.person.findAll()).filter((person) =>
-      person.email.trim().toLowerCase() === normalizedEmail
-    );
-    if (matchingPeople.length === 1 && matchingPeople[0].userId == null) {
-      await matchingPeople[0].update({ userId: user.id });
+    const session = await issueSession(user);
+
+    return res.status(201).send(sessionPayload(user, session));
+  } catch (err) {
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res
+        .status(400)
+        .send({ message: "Username or email is already registered." });
     }
 
-    const token = await createOrReuseSession(user);
-
-    return res.status(201).send(buildAuthResponse(user, token));
-  } catch (err) {
     logger.error(`Registration failed: ${err.message}`);
-    return res.status(500).send({ message: "Registration failed." });
+    return res.status(500).send({ message: "Could not create the account." });
   }
 };
 
 exports.login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
+  const username = (req.body.username || "").trim().toLowerCase();
+  const password = req.body.password || "";
 
-    if (!username?.trim()) {
-      return res.status(400).send({ message: "Username is required." });
-    }
-    if (!password) {
-      return res.status(400).send({ message: "Password is required." });
-    }
-
-    const normalizedUsername = username.trim().toLowerCase();
-    const user = await db.user.unscoped().findOne({
-      where: { username: normalizedUsername },
-    });
-
-    if (!user) {
-      return res.status(401).send({ message: "Invalid username or password." });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-      return res.status(401).send({ message: "Invalid username or password." });
-    }
-
-    const token = await createOrReuseSession(user);
-
-    return res.status(200).send(buildAuthResponse(user, token));
-  } catch (err) {
-    logger.error(`Login failed: ${err.message}`);
-    return res.status(500).send({ message: "Login failed." });
+  if (!username) {
+    return res.status(400).send({ message: "Username is required." });
   }
+
+  if (!password) {
+    return res.status(400).send({ message: "Password is required." });
+  }
+
+  // unscoped() so the password hash is available to compare against.
+  const user = await db.user.unscoped().findOne({ where: { username } });
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    logger.warn(`Failed login attempt for username=${username}`);
+    return res.status(401).send({ message: "Invalid username or password." });
+  }
+
+  const session = await issueSession(user);
+
+  return res.send(sessionPayload(user, session));
 };
 
 exports.logout = async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  await req.session.destroy();
 
-    if (token) {
-      await db.session.update({ token: "" }, { where: { token } });
-    }
-
-    return res.status(200).send({ message: "Signed out successfully." });
-  } catch (err) {
-    logger.error(`Logout failed: ${err.message}`);
-    return res.status(500).send({ message: "Logout failed." });
-  }
+  return res.send({ message: "Logged out." });
 };
 
 export default exports;
