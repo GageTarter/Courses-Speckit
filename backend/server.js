@@ -1,14 +1,14 @@
 import routes from "./app/routes/index.js";
 import express from "express";
 import cors from "cors";
-import morgan from "morgan";
 import db from "./app/models/index.js";
 import logger from "./app/config/logger.js";
 
 const shouldAlterSchema =
   process.env.SEQUELIZE_SYNC_ALTER === "true" ||
   process.env.SEQUELIZE_SYNC_ALTER === "1" ||
-  (process.env.NODE_ENV === "development" && process.env.SEQUELIZE_SYNC_ALTER !== "false");
+  (process.env.NODE_ENV === "development" &&
+    process.env.SEQUELIZE_SYNC_ALTER !== "false");
 
 const syncOptions = shouldAlterSchema ? { alter: true } : {};
 
@@ -28,8 +28,6 @@ if (process.env.NODE_ENV !== "test") {
 
 const app = express();
 
-app.use(morgan("combined", { stream: logger.stream }));
-
 app.use(
   cors({
     origin: "http://localhost:8082",
@@ -40,15 +38,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/todo", routes);
+app.use("/api", routes);
 
-const PORT = process.env.PORT || 3200;
+const PORT = process.env.PORT || 3201;
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    logger.info(`Todo API running on port ${PORT}`);
+    logger.info(`Courses API running on port ${PORT}`);
   });
 }
 
 export { logger };
+
 export default app;
