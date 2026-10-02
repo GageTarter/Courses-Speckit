@@ -198,8 +198,17 @@ const handleLogout = async () => {
 <v-btn
   variant="text"
   color="white"
-  to="/sections"
+  to="/courses"
   class="ml-4"
+>
+  Courses
+</v-btn>
+
+<v-btn
+  variant="text"
+  color="white"
+  to="/sections"
+  class="ml-2"
 >
   Sections
 </v-btn>
