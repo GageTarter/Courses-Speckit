@@ -6,6 +6,7 @@ import { flushPromises } from "@vue/test-utils";
 import { vi } from "vitest";
 import CourseList from "../src/views/CourseList.vue";
 import CourseServices from "../src/services/courseServices.js";
+import Utils from "../src/config/utils.js";
 import { mountWithPlugins } from "./testUtils.js";
 
 vi.mock("../src/services/courseServices.js", () => ({
@@ -93,8 +94,13 @@ function clickEdit() {
 }
 
 describe("Feature 2 — Course Management", () => {
+  beforeEach(() => {
+    Utils.setStore("user", { role: "admin", token: "admin-token", username: "admin" });
+  });
+
   afterEach(() => {
     document.body.innerHTML = "";
+    localStorage.clear();
     vi.clearAllMocks();
   });
 

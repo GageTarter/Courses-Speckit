@@ -22,12 +22,10 @@ const editDescription = ref("");
 const editSemester = ref("");
 const activeCourse = ref(null);
 
-//const isAdmin = computed(() => {
-//  const role = Utils.getStore("user")?.role;
-//  return role === "admin" || role === "superadmin";
-//});
-
-const isAdmin = computed(() => true);
+const isAdmin = computed(() => {
+  const role = Utils.getStore("user")?.role;
+  return role === "admin" || role === "superadmin";
+});
 
 const duplicateNameMessage = "Course name is in use. Enter a different course name.";
 
