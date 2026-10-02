@@ -1,27 +1,27 @@
 # C4 Level 1 — System context
 
-**Todo** (the OC CS Speckit example application) stores each registered user's private lists and todos in MySQL through a server API. There are no external SaaS dependencies.
+**courses** (the OC CS Speckit example application) stores each registered user's private lists and coursess in MySQL through a server API. There are no external SaaS dependencies.
 
 ```mermaid
 C4Context
-title System Context — Todo
+title System Context — courses
 
 UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 
-Person(user, "Registered User", "Owns private lists and todos.")
-System(todoApp, "Todo", "Web application for private lists and todos.")
+Person(user, "Registered User", "Owns private lists and coursess.")
+System(coursesApp, "courses", "Web application for private lists and coursess.")
 SystemDb_Ext(mysql, "MySQL", "Application system of record.")
 
-Rel(user, todoApp, "Uses", "HTTPS")
-Rel(todoApp, mysql, "Reads and writes", "Sequelize")
+Rel(user, coursesApp, "Uses", "HTTPS")
+Rel(coursesApp, mysql, "Reads and writes", "Sequelize")
 
-UpdateRelStyle(user, todoApp, $offsetY="-20")
-UpdateRelStyle(todoApp, mysql, $offsetX="15")
+UpdateRelStyle(user, coursesApp, $offsetY="-20")
+UpdateRelStyle(coursesApp, mysql, $offsetX="15")
 ```
 
 ## Notes
 
-- The Todo system contains the Vue SPA and Express API; the [container diagram](./c4-container.md) expands that boundary.
+- The courses system contains the Vue SPA and Express API; the [container diagram](./c4-container.md) expands that boundary.
 - The API is the source of truth. Browser storage is only a session/UX hint.
 
 **Related:** [ADR-0001](../adr/0001-client-server-multi-user-architecture.md) · [ADR-0003](../adr/0003-mysql-relational-database.md)

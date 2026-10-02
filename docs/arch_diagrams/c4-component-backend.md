@@ -7,7 +7,7 @@ C4Component
 title Component Diagram — API
 
 Container_Boundary(api, "API Application") {
-  Component(routes, "Routes", "app/routes/*", "Resource routers under /todo.")
+  Component(routes, "Routes", "app/routes/*", "Resource routers under /courses.")
   Component(authz, "Authorization", "app/authorization/*", "Session auth and ownership helpers.")
   Component(controllers, "Controllers", "app/controllers/*", "Validation, feature rules, and responses.")
   Component(models, "Models", "app/models/*", "Sequelize entities and associations.")

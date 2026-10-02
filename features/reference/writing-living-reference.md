@@ -19,7 +19,7 @@ A student guide for maintaining `features/reference/` — the **current integrat
 | **ADRs** | *Why* cross-cutting architecture | Indirectly (constraints) |
 | **Cursor rules** | *How* to code | Patterns, not product scope |
 
-Feature specs are **deltas**. Reference files are **current state**. After Feature 5 ships, `api.md` shows the full `/todo/` surface; Feature 5’s spec only describes the due-date delta.
+Feature specs are **deltas**. Reference files are **current state**. After Feature 5 ships, `api.md` shows the full `/courses/` surface; Feature 5’s spec only describes the due-date delta.
 
 Reference is **not** auto-generated from specs. Update it in the **same PR** as the implementation (required Definition of Done).
 
@@ -82,9 +82,9 @@ Many features touch **two or three** files (e.g. Feature 5: `dueDate` column →
 
 ### Example delta (Feature 5 style)
 
-- Keep existing todo routes.
+- Keep existing courses routes.
 - Extend create/update body and response docs with optional `dueDate`.
-- Add provenance row: Todo `dueDate` → Feature 5.
+- Add provenance row: courses `dueDate` → Feature 5.
 
 ---
 
@@ -127,7 +127,7 @@ Use a compact table shape:
 | State the rule in product language | Dump full Gherkin scenarios |
 | Point at enforcement (middleware, helper, UI) | “The app handles this somehow” |
 | Add a row when a **rule** changes | Duplicate every API path from api.md |
-| Group by area (Auth, Ownership, Lists, Todos, …) | One undifferentiated bullet blob |
+| Group by area (Auth, Ownership, Lists, coursess, …) | One undifferentiated bullet blob |
 
 **behavior.md vs Screen Requirements:** Screen Requirements in the feature authorize UI for that slice. After merge, durable UI **rules** (exact empty-state string, overdue condition) that others must not regress belong in **behavior.md**.
 
@@ -168,7 +168,7 @@ Keep a short “who introduced this” index in README and/or each file:
 | Lists CRUD + Dashboard lists view | Feature 2 |
 | … | … |
 
-**Principles:** one row per capability area; update when a **new** area appears; for field-level deltas, a row like `Todo dueDate` → Feature 5 is enough.
+**Principles:** one row per capability area; update when a **new** area appears; for field-level deltas, a row like `courses dueDate` → Feature 5 is enough.
 
 ---
 

@@ -8,7 +8,7 @@
 
 | Assignment | Purpose |
 |------------|---------|
-| [ASSIGNMENT-rebuild-todo.md](./ASSIGNMENT-rebuild-todo.md) | Strip Todo answer-key code and rebuild from specs |
+| [ASSIGNMENT-rebuild-courses.md](./ASSIGNMENT-rebuild-courses.md) | Strip courses answer-key code and rebuild from specs |
 | [ASSIGNMENT-starter-kit.md](./ASSIGNMENT-starter-kit.md) | Start a **new** product from the starter kit zip |
 
 ---
@@ -31,16 +31,16 @@ SDD does **not** mean “never change the code.” It means **requirements are t
 **OC CS Speckit** is Oklahoma Christian’s course/kit for practicing SDD with AI-assisted coding in [Cursor](https://cursor.com). It is both:
 
 1. A **methodology package** — feature templates, Cursor rules, ADRs, NFR guidance, living reference docs, and tooling (tests, PDF export, Agility import, deploy scripts).
-2. A **Todo example application** — a small multi-user Todo app (auth, lists, items, profile, due dates) that shows the process end to end: specs → rules → Vue/Express code → tests.
+2. A **courses example application** — a small multi-user courses app (auth, lists, items, profile, due dates) that shows the process end to end: specs → rules → Vue/Express code → tests.
 
-| Layer | Stack (Todo example) |
+| Layer | Stack (courses example) |
 |-------|----------------------|
 | Frontend | Vue 3, Vuetify 4, Vite, vue-router, axios |
 | Backend | Node.js (ES modules), Express, Sequelize, MySQL |
 | Auth | bcryptjs, JWT, server-side Session table |
 | Tests | Jest + supertest (backend), Vitest (frontend) |
 
-The Todo API is mounted at `/todo/`. List and todo data are **per-user**; accessing another user’s data returns **404** (not 403).
+The courses API is mounted at `/courses/`. List and courses data are **per-user**; accessing another user’s data returns **404** (not 403).
 
 Think of Speckit as three questions answered in three places:
 
@@ -56,7 +56,7 @@ Think of Speckit as three questions answered in three places:
 ## 3. Bird’s-eye map of the repository
 
 ```
-todo-speckit/
+courses-speckit/
 ├── README.md                 # Project overview and getting started
 ├── package.json              # Root scripts (test, PDF, starter zip, reset, …)
 ├── features/                 # Specs = product source of truth
@@ -84,9 +84,9 @@ This folder is the **product** source of truth for SDD.
 | [features/framework.md](../features/framework.md) | How to write specs (template, FR/SC, DoD, workflow) |
 | [features/writing-feature-requirements.md](../features/writing-feature-requirements.md) | Student guide: stories, FRs, Gherkin, initial data |
 | [features/writing-feature-design.md](../features/writing-feature-design.md) | Student guide: ownership, API, screens, test map |
-| `features/feature-1-user-auth.md` … `feature-5-….md` | **Todo** feature specs (one file per feature) |
+| `features/feature-1-user-auth.md` … `feature-5-….md` | **courses** feature specs (one file per feature) |
 | [features/reference/](../features/reference/) | **Living reference** — current integrated API / schema / behavior |
-| `features/reference/api.md` | Current REST API under `/todo/` |
+| `features/reference/api.md` | Current REST API under `/courses/` |
 | `features/reference/data-model.md` | Current tables and associations |
 | `features/reference/behavior.md` | Current product rules (ownership, sort, validation, UI) |
 | `features/reference/writing-living-reference.md` | How to update reference in the same PR as code |
@@ -95,13 +95,13 @@ This folder is the **product** source of truth for SDD.
 A `feature-N-*.md` file describes a **change** (what this feature adds or alters).  
 `features/reference/*` describes **what exists now** after features have been merged (the integrated snapshot).
 
-**Todo features (example app):**
+**courses features (example app):**
 
 | # | Spec | Delivers |
 |---|------|----------|
 | 1 | User auth | Register, login, logout, session, route guards |
-| 2 | Todo lists | List CRUD, dashboard sidebar |
-| 3 | Todo items | Item CRUD, dashboard main panel |
+| 2 | courses lists | List CRUD, dashboard sidebar |
+| 3 | courses items | Item CRUD, dashboard main panel |
 | 4 | User profile | Profile edit |
 | 5 | Due dates | Optional due dates, overdue display |
 
@@ -150,7 +150,7 @@ Cursor loads these `.mdc` rules so Agent/Chat follow the same conventions as the
 | [docs/agility-import/](./agility-import/README.md) | Export specs into Digital.ai Agility |
 | [docs/STARTER-KIT.md](./STARTER-KIT.md) | How to build/use the empty-app starter zip |
 | `docs/ASSIGNMENT-*.md` | Student assignments (this tour, rebuild, starter kit) |
-| `docs/todo-app-specs.md` / `.pdf` | Generated product-focused export |
+| `docs/courses-app-specs.md` / `.pdf` | Generated product-focused export |
 | `docs/oc-cs-speckit-specs.md` / `.pdf` | Generated full pack (rules + docs + features) |
 | `docs/ui/` | Optional screen/Figma exports (create as needed) |
 
@@ -181,8 +181,8 @@ Generated PDF/Markdown exports are **convenience copies**. Edit the source Markd
 | Path | Meaning |
 |------|---------|
 | `backend/package.json` | Backend deps and scripts |
-| `backend/server.js` | HTTP server entry; mounts API (Todo: `/todo/`) |
-| `backend/app/models/` | Sequelize models (`user`, `session`, `list`, `todo`, …) |
+| `backend/server.js` | HTTP server entry; mounts API (courses: `/courses/`) |
+| `backend/app/models/` | Sequelize models (`user`, `session`, `list`, `courses`, …) |
 | `backend/app/controllers/` | Request handlers |
 | `backend/app/routes/` | Express routers; `index.js` wires them |
 | `backend/app/authorization/` | `authenticate` middleware, access helpers |
@@ -213,8 +213,8 @@ Useful root scripts (conceptual):
 | Script | Purpose |
 |--------|---------|
 | `npm test` | Backend + frontend tests |
-| `npm run reset:example` | Strip Todo **code**, keep Todo **specs** (for rebuild lab) |
-| `npm run starter:zip` | Build empty-app zip (**no** Todo specs) for a new product |
+| `npm run reset:example` | Strip courses **code**, keep courses **specs** (for rebuild lab) |
+| `npm run starter:zip` | Build empty-app zip (**no** courses specs) for a new product |
 | `npm run specs:pdf` / `specs:pdf:app` | Export Markdown/PDF packs |
 
 ---
@@ -235,7 +235,7 @@ Useful root scripts (conceptual):
                                ▼
   ┌──────────────┐    HTTP     ┌──────────────┐
   │  frontend/   │◄───────────►│  backend/    │──► MySQL
-  │  Vue :8082   │   /todo/    │  Express     │
+  │  Vue :8082   │   /courses/    │  Express     │
   └──────┬───────┘             └──────┬───────┘
          │                            │
          └──────── tests prove ───────┘
@@ -251,7 +251,7 @@ Useful root scripts (conceptual):
 Answer in your own words (a few bullets each):
 
 1. What is SDD, and how does it differ from “code first, document later”?
-2. What is OC CS Speckit (methodology + Todo example)?
+2. What is OC CS Speckit (methodology + courses example)?
 3. Where do you look for **what** vs **how** vs **why** vs **what exists now**?
 4. What is the difference between a `feature-N-*.md` file and `features/reference/api.md`?
 5. What are `main`, `dev`, and `feature/*` for?
@@ -264,7 +264,7 @@ Answer in your own words (a few bullets each):
 
 | If you want to… | Open |
 |-----------------|------|
-| Run the Todo app | Root [README.md](../README.md) → Getting started |
-| Rebuild Todo from specs | [ASSIGNMENT-rebuild-todo.md](./ASSIGNMENT-rebuild-todo.md) |
+| Run the courses app | Root [README.md](../README.md) → Getting started |
+| Rebuild courses from specs | [ASSIGNMENT-rebuild-courses.md](./ASSIGNMENT-rebuild-courses.md) |
 | Start your own product | [ASSIGNMENT-starter-kit.md](./ASSIGNMENT-starter-kit.md) + [STARTER-KIT.md](./STARTER-KIT.md) |
 | Write a new feature properly | [features/framework.md](../features/framework.md) |

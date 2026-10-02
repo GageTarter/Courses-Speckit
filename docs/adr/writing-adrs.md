@@ -44,12 +44,12 @@ ADRs outlive a single feature. Feature 2 and Feature 5 both rely on ADR-0001’s
 
 | ADR | Why it is an ADR (not a story) |
 |-----|--------------------------------|
-| **0001** Client–server multi-user | Affects every feature: SPA vs server truth, `/todo/`, JWT+session, monorepo |
+| **0001** Client–server multi-user | Affects every feature: SPA vs server truth, `/courses/`, JWT+session, monorepo |
 | **0002** Layered security | Trust boundary, `404` vs `403`, bcrypt, “API enforces / UI is UX only” |
 | **0003** MySQL relational DB | Engine + Sequelize + separate test DB — not “add lists table” (that is Feature 2) |
 | **0004** Vue 3 frontend | SPA framework + Vite/Vuetify path — not “add Login.vue” (that is Feature 1) |
 | **0005** Vuetify 4 UI library | Component/theming system — not “use a maroon button on Login” (Screen Requirements + ui-style rule) |
-| **0006** Node + Express API | Runtime and HTTP framework — not “add POST /todo/login” (that is Feature 1) |
+| **0006** Node + Express API | Runtime and HTTP framework — not “add POST /courses/login” (that is Feature 1) |
 | **0007** REST + flat JSON | API style and payload shape — not “lists return title and id” (feature API Requirements) |
 | **0008** Sequelize ORM | How Node maps to MySQL models — not “add lists table columns” (feature data model + ADR-0003) |
 
@@ -75,7 +75,7 @@ docs/adr/
 
 ### Naming principles
 
-1. **Name the decision, not the whole product.** Good: `Layered security architecture`. Weak: `How the Todo app works`.
+1. **Name the decision, not the whole product.** Good: `Layered security architecture`. Weak: `How the courses app works`.
 2. **Be specific enough to find later.** Prefer `MySQL relational database` over `Database`.
 3. **Match file slug to title.** Same words, kebab-case in the filename.
 4. **One decision per file.** Do not combine “use MySQL” and “use bcrypt” unless they are inseparable; security got its own ADR-0002.
@@ -149,7 +149,7 @@ Copy from [README.md](./README.md#template) or use this filled outline:
 7. **Link both ways.** ADR → features/rules; feature header `**Related:**` → ADR.
 8. **Update when the decision changes.** Do not leave an Accepted ADR that contradicts the code — supersede or amend with a clear date/note.
 9. **Stay concise.** A few pages max. Deep API tables belong in feature **API Requirements** or `features/reference/api.md`.
-10. **Use this project’s voice.** Deciders line can note OC CS Speckit / Todo example when the decision is kit-wide vs product-specific.
+10. **Use this project’s voice.** Deciders line can note OC CS Speckit / courses example when the decision is kit-wide vs product-specific.
 
 ---
 

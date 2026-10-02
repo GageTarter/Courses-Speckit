@@ -109,7 +109,7 @@ defineExpose({ validate });
       item-title="label"
       item-value="id"
       density="comfortable"
-      no-data-text="No courses found. Start the course app on port 3200."
+      no-data-text="No courses yet. Create one on the Courses page."
       :rules="courseRules"
       @update:model-value="updateField('courseId', $event)"
     />

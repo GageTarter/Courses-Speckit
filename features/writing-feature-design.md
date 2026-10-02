@@ -4,7 +4,7 @@ A student guide for drafting the **design / plan** half of a feature specificati
 
 **Write requirements first:** [writing-feature-requirements.md](./writing-feature-requirements.md) (header, stories, FRs, initial data model, Gherkin AC).  
 **Full process:** [framework.md](./framework.md).  
-**Canonical example:** [feature-2-todo-list-management.md](./feature-2-todo-list-management.md) (rich API + Screen) · [feature-1-user-auth.md](./feature-1-user-auth.md) (Test Coverage Map + DoD).
+**Canonical example:** [feature-2-courses-list-management.md](./feature-2-courses-list-management.md) (rich API + Screen) · [feature-1-user-auth.md](./feature-1-user-auth.md) (Test Coverage Map + DoD).
 
 This portion answers: *How do we structure ownership, contracts, UI, and verification so implementers (and Cursor) can build without guessing?*
 
@@ -89,7 +89,7 @@ Each user owns their <resources> exclusively. …
 | Align with ADR-0002 / security rules | Invent `403` for “not owned” when the kit standard is `404` |
 | Mention UI scope (what the SPA may show) | Assume the frontend will “just filter” unsafe API data |
 
-**Example (Feature 2):** lists are private; `GET /todo/lists` returns only the caller’s rows; wrong-owner `PUT`/`DELETE` → `404`.
+**Example (Feature 2):** lists are private; `GET /courses/lists` returns only the caller’s rows; wrong-owner `PUT`/`DELETE` → `404`.
 
 ---
 
@@ -106,8 +106,8 @@ The HTTP contract for this feature: methods, paths, auth, bodies, success/error 
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/todo/…` | Yes | … |
-| `POST` | `/todo/…` | Yes | … |
+| `GET` | `/courses/…` | Yes | … |
+| `POST` | `/courses/…` | Yes | … |
 
 **Create request body:**
 ```json
@@ -128,12 +128,12 @@ The HTTP contract for this feature: methods, paths, auth, bodies, success/error 
 1. **List every endpoint this feature introduces or changes** — not the whole app API.
 2. **Mark Auth Yes/No** for each row; protected routes assume Feature 1 session/`Bearer` token.
 3. **Show request and response JSON** for create/update (and errors that AC quotes).
-4. **Use this app’s mount prefix** (`/todo/…` in the Todo example). Stay consistent with existing routes in `features/reference/api.md`.
+4. **Use this app’s mount prefix** (`/courses/…` in the courses example). Stay consistent with existing routes in `features/reference/api.md`.
 5. **Flat JSON** — no `{ success, data }` envelope (per API conventions).
 6. **Status codes must match AC** (`201` create, `400` validation, `401` unauthenticated, `404` missing/not owned).
 7. **Do not invent query params or fields** that no FR/AC mentions.
 
-**Delta features:** if you only add a field (e.g. Feature 5 `dueDate`), document the changed endpoints and the new field — not a rewrite of all todo routes.
+**Delta features:** if you only add a field (e.g. Feature 5 `dueDate`), document the changed endpoints and the new field — not a rewrite of all courses routes.
 
 ---
 
@@ -297,8 +297,8 @@ Explicit **non-goals** for this feature so readers do not assume missing pieces 
 ## Out of Scope
 
 *   Password reset
-*   Full todo dashboard ([Feature 2](./feature-2-todo-list-management.md))
-*   Todo items inside lists ([Feature 3](./feature-3-todo-list-item-management.md))
+*   Full courses dashboard ([Feature 2](./feature-2-courses-list-management.md))
+*   courses items inside lists ([Feature 3](./feature-3-courses-list-item-management.md))
 ```
 
 ### Principles

@@ -38,7 +38,7 @@ App-wide non-functional targets for **this** product.
 | **Availability** | e.g. demo uptime ≥ **95%** of lab session | | | Deferred | |
 | **Performance** | e.g. p95 API **&lt; 200 ms** local; first paint **&lt; 2 s** | | | Deferred | |
 | **Observability** | e.g. **100%** unhandled errors logged; retain logs **≥ 7 days** | | | Deferred | |
-| **Usability** | e.g. core happy path in **≤ 3 minutes**; **≤ 2** clicks to add a todo on an existing list | | | Deferred | |
+| **Usability** | e.g. core happy path in **≤ 3 minutes**; **≤ 2** clicks to add a courses on an existing list | | | Deferred | |
 | **Accessibility (a11y)** | e.g. aim **WCAG 2.2 AA** for primary flows | | | Deferred | |
 | **Internationalization (i18n)** | e.g. **1** locale | | | Out of scope | |
 | **Maintainability** | **100%** Gherkin scenarios mapped before merge; `npm test` green | Cursor rules + feature specs as source of truth | Merge checklist; `npm test` | Accepted | [framework.md](../../features/framework.md), [quality-attributes.mdc](../../.cursor/rules/quality-attributes.mdc) |

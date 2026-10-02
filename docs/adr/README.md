@@ -92,7 +92,7 @@ What we chose, in one or two sentences. Be specific (technologies, boundaries, i
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [0001](./0001-client-server-multi-user-architecture.md) | Client–server architecture for multi-user todo data | Accepted |
+| [0001](./0001-client-server-multi-user-architecture.md) | Client–server architecture for multi-user courses data | Accepted |
 | [0002](./0002-security-architecture.md) | Layered security architecture | Accepted |
 | [0003](./0003-mysql-relational-database.md) | MySQL relational database | Accepted |
 | [0004](./0004-vue-frontend-framework.md) | Vue 3 as the frontend framework | Accepted |

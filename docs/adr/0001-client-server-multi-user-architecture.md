@@ -1,12 +1,12 @@
-# ADR-0001: Client–server architecture for multi-user todo data
+# ADR-0001: Client–server architecture for multi-user courses data
 
 **Status:** Accepted  
 **Date:** 2026-07-07  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
-The **Todo** example application shipped with OC CS Speckit is a **multi-user** todo app: each registered user owns private lists and items. No user may read or modify another user's data. The kit must be teachable as a Spec-Driven Development reference — clear boundaries between specification, frontend, backend, and tests.
+The **courses** example application shipped with OC CS Speckit is a **multi-user** courses app: each registered user owns private lists and items. No user may read or modify another user's data. The kit must be teachable as a Spec-Driven Development reference — clear boundaries between specification, frontend, backend, and tests.
 
 We needed to decide:
 
@@ -25,23 +25,23 @@ Adopt a **classic client–server split** with a **stateless REST API** and **se
 | **Client** | Vue 3 SPA (Vite), Vuetify 4, axios |
 | **Server** | Node.js + Express + Sequelize (ES modules) |
 | **Database** | MySQL — single shared database, rows scoped by `userId` |
-| **Transport** | JSON over HTTPS; API base path `/todo/` |
+| **Transport** | JSON over HTTPS; API base path `/courses/` |
 | **Auth** | Username + password; bcrypt hashes; **JWT + Session table** (token stored server-side, revocable on logout) |
 | **Client session hint** | Login response stored in `localStorage` key `user`; axios attaches `Authorization: Bearer <token>` on every request |
-| **Authorization** | `authenticate` middleware sets `req.user.id`; all list/todo queries filter by `userId`; create writes use `req.user.id`, never body; cross-user access returns **404** (not 403) |
+| **Authorization** | `authenticate` middleware sets `req.user.id`; all list/courses queries filter by `userId`; create writes use `req.user.id`, never body; cross-user access returns **404** (not 403) |
 | **Repo layout** | Monorepo: `frontend/` + `backend/` + `features/` specs |
 
 ```text
 Browser (Vue SPA)                    Express API                 MySQL
 ─────────────────                    ───────────                 ─────
 localStorage["user"]  ──Bearer──►   authenticate middleware  ──► sessions, users
-router guards (UI)                   controllers + auth helpers    lists, todos
+router guards (UI)                   controllers + auth helpers    lists, coursess
                                      userId in every WHERE clause
 ```
 
 **Invariants** (must hold in every feature):
 
-1. The server is the **source of truth** for lists, todos, and profile data.
+1. The server is the **source of truth** for lists, coursess, and profile data.
 2. Every authenticated request resolves to **exactly one** `req.user.id` from a valid session row.
 3. **No endpoint** returns or mutates rows owned by another user.
 4. The client never sends a trusted `userId` on create — the server assigns ownership.
@@ -66,7 +66,7 @@ router guards (UI)                   controllers + auth helpers    lists, todos
 
 | Option | Why not |
 |--------|---------|
-| **localStorage-only todos (no backend)** | No shared database, no real multi-user isolation, does not match course API/testing goals. |
+| **localStorage-only coursess (no backend)** | No shared database, no real multi-user isolation, does not match course API/testing goals. |
 | **JWT in cookie only, no Session table** | Harder to revoke on logout; server cannot invalidate a stolen token without extra infrastructure. |
 | **GraphQL or tRPC** | Heavier stack; REST + flat JSON matches existing rules and Agility export simplicity. |
 | **403 Forbidden on cross-user IDs** | Leaks that a resource exists; **404** treats other users' rows as not found (see `security.mdc`). |
@@ -76,6 +76,6 @@ router guards (UI)                   controllers + auth helpers    lists, todos
 
 - ADRs: [ADR-0002 — Layered security architecture](./0002-security-architecture.md), [ADR-0003 — MySQL relational database](./0003-mysql-relational-database.md), [ADR-0004 — Vue 3 as the frontend framework](./0004-vue-frontend-framework.md), [ADR-0006 — Node.js and Express as the API runtime](./0006-node-express-api.md), [ADR-0007 — REST and flat JSON](./0007-rest-json-api.md)
 - C4 diagrams: [docs/arch_diagrams/](../arch_diagrams/README.md) (context, container, component)
-- Feature specs: [Feature 1 — User Authentication](../../features/feature-1-user-auth.md) (identity foundation); Features 2–3 (list/todo isolation)
+- Feature specs: [Feature 1 — User Authentication](../../features/feature-1-user-auth.md) (identity foundation); Features 2–3 (list/courses isolation)
 - Cursor rules: [auth-patterns.mdc](../../.cursor/rules/auth-patterns.mdc), [security.mdc](../../.cursor/rules/security.mdc), [frontend-services.mdc](../../.cursor/rules/frontend-services.mdc), [project-structure.mdc](../../.cursor/rules/project-structure.mdc)
 - Reference: [api.md](../../features/reference/api.md), [data-model.md](../../features/reference/data-model.md)

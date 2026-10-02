@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import SectionList from "./views/SectionList.vue";
+import CourseList from "./views/CourseList.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
       path: "/sections",
       name: "sections",
       component: SectionList,
+    },
+    {
+      path: "/courses",
+      name: "courses",
+      component: CourseList,
     },
     {
       path: "/:pathMatch(.*)*",

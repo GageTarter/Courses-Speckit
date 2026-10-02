@@ -1,6 +1,6 @@
 # Speckit Starter Kit
 
-Use this zip to start a **new** Spec-Driven Development (SDD) application — not to rebuild the **Todo** example application that ships with OC CS Speckit.
+Use this zip to start a **new** Spec-Driven Development (SDD) application — not to rebuild the **courses** example application that ships with OC CS Speckit.
 
 This package is the **SDD factory**: methodology, Cursor rules, empty Vue + Express + MySQL shells, test harness, and tooling. You write **new** feature specs for your product, then implement them with Cursor.
 
@@ -13,9 +13,9 @@ This package is the **SDD factory**: methodology, Cursor rules, empty Vue + Expr
 | Goal | Use this kit? |
 |------|----------------|
 | Start a **new** app with the same SDD process + stack | **Yes** |
-| Clone / continue the **Todo** example application | **No** — clone this repo’s `dev` branch instead |
-| Rebuild Todo locally from `features/feature-*.md` (strip answer-key code) | **No** — use `npm run reset:example -- --yes` in this repo |
-| Instructor answer key with full Todo implementation | **No** — use the full OC CS Speckit repo |
+| Clone / continue the **courses** example application | **No** — clone this repo’s `dev` branch instead |
+| Rebuild courses locally from `features/feature-*.md` (strip answer-key code) | **No** — use `npm run reset:example -- --yes` in this repo |
+| Instructor answer key with full courses implementation | **No** — use the full OC CS Speckit repo |
 
 ---
 
@@ -27,7 +27,7 @@ This package is the **SDD factory**: methodology, Cursor rules, empty Vue + Expr
 |------|----------|
 | **Methodology** | `features/framework.md`, empty catalog, student writing guides (requirements, design, living reference) |
 | **Cursor rules** | All `.cursor/rules/*.mdc` (constitution, **agent-behavior**, structure, API, auth, security, UI, testing, services) |
-| **ADRs** | `docs/adr/README.md` + template + [writing-adrs.md](../docs/adr/writing-adrs.md) (no todo-specific numbered ADRs) |
+| **ADRs** | `docs/adr/README.md` + template + [writing-adrs.md](../docs/adr/writing-adrs.md) (no courses-specific numbered ADRs) |
 | **NFRs** | `docs/nfr/` — quality-attributes stub + [writing-quality-attributes.md](../docs/nfr/writing-quality-attributes.md) |
 | **Reference stubs** | Empty `features/reference/data-model.md`, `api.md`, and `behavior.md` + [writing-living-reference.md](../features/reference/writing-living-reference.md) |
 | **Tooling** | PDF export, Agility CSV/API scripts, deploy bundle scripts, CI workflows |
@@ -35,12 +35,12 @@ This package is the **SDD factory**: methodology, Cursor rules, empty Vue + Expr
 | **Backend shell** | Express + Sequelize config + empty models/routes + harness tests |
 | **Env examples** | `backend/.env.example`, `.env.test.example`, `.env.agility.example` |
 
-### Exclude (todo-specific — not in the zip)
+### Exclude (courses-specific — not in the zip)
 
 | Exclude | Why |
 |---------|-----|
-| `features/feature-1` … `feature-5-*.md` | Todo product requirements |
-| Populated `features/reference/api.md` / `data-model.md` / `behavior.md` | Todo integrated snapshot |
+| `features/feature-1` … `feature-5-*.md` | courses product requirements |
+| Populated `features/reference/api.md` / `data-model.md` / `behavior.md` | courses integrated snapshot |
 | Feature models, routes, controllers, services, views | Built from *your* specs |
 | Feature tests (`auth.test.js`, `Dashboard.test.js`, …) | Written with each feature |
 | Generated PDFs / Agility CSVs | Regenerate after you have specs |
@@ -52,7 +52,7 @@ This package is the **SDD factory**: methodology, Cursor rules, empty Vue + Expr
 
 Works on **macOS, Windows, and Linux** (Node.js only — no zsh required).
 
-From the **OC CS Speckit** repository root (this repo; directory may still be named `todo-speckit`):
+From the **OC CS Speckit** repository root (this repo; directory may still be named `courses-speckit`):
 
 ```bash
 npm run starter:zip
@@ -176,7 +176,7 @@ cd frontend && npm run dev     # SPA on :8082
 
 ### 6. Do not
 
-- Copy todo feature specs into the new repo as if they were your product.
+- Copy courses feature specs into the new repo as if they were your product.
 - Implement on `main` — keep `main` as the starter baseline; work on `dev` / `feature/*`.
 - Commit `.env` or Agility tokens.
 
@@ -194,10 +194,10 @@ When you improve rules, framework, or overlay shells in **OC CS Speckit**:
 
 ## Overlay source of truth
 
-Empty shells that replace todo implementation live in:
+Empty shells that replace courses implementation live in:
 
 ```text
 scripts/starter-kit/overlay/
 ```
 
-The bundle script always applies this overlay **after** copying shared files from the repo, so the zip never ships Dashboard, MenuBar, list/todo models, or feature-1…5 specs.
+The bundle script always applies this overlay **after** copying shared files from the repo, so the zip never ships Dashboard, MenuBar, list/courses models, or feature-1…5 specs.

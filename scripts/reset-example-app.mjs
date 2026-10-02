@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Strip the Todo example implementation so you can rebuild it from feature specs.
+ * Strip the courses example implementation so you can rebuild it from feature specs.
  *
  * Keeps: features/feature-*.md, framework, Cursor rules, ADRs, NFRs, C4 diagrams, tooling.
  * Removes: models/controllers/routes/views/services/feature tests (product code).
  * Resets: empty app shells + empty features/reference/* stubs (from starter-kit overlay).
  *
- * API mount stays `/todo` so Feature 1–5 specs still match.
+ * API mount stays `/courses` so Feature 1–5 specs still match.
  *
  * Usage:
  *   npm run reset:example -- --yes
  *   node scripts/reset-example-app.mjs --yes
  *   node scripts/reset-example-app.mjs --dry-run
  *
- * Related: npm run starter:zip (new product without Todo specs) — docs/STARTER-KIT.md
+ * Related: npm run starter:zip (new product without courses specs) — docs/STARTER-KIT.md
  */
 
 import {
@@ -56,22 +56,22 @@ const OVERLAY_APPLY = [
 const REMOVE_PATHS = [
   "backend/app/controllers/auth.controller.js",
   "backend/app/controllers/list.controller.js",
-  "backend/app/controllers/todo.controller.js",
+  "backend/app/controllers/courses.controller.js",
   "backend/app/controllers/user.controller.js",
   "backend/app/models/user.model.js",
   "backend/app/models/session.model.js",
   "backend/app/models/list.model.js",
-  "backend/app/models/todo.model.js",
+  "backend/app/models/courses.model.js",
   "backend/app/routes/auth.routes.js",
   "backend/app/routes/user.routes.js",
   "backend/app/routes/list.routes.js",
-  "backend/app/routes/list-todo.routes.js",
-  "backend/app/routes/todo.routes.js",
+  "backend/app/routes/list-courses.routes.js",
+  "backend/app/routes/courses.routes.js",
   "backend/app/utils/dueDate.js",
   "backend/tests/auth.test.js",
   "backend/tests/authenticate.test.js",
   "backend/tests/lists.test.js",
-  "backend/tests/todos.test.js",
+  "backend/tests/coursess.test.js",
   "backend/tests/users.test.js",
   "frontend/src/components/MenuBar.vue",
   "frontend/src/views/Login.vue",
@@ -80,7 +80,7 @@ const REMOVE_PATHS = [
   "frontend/src/services/authServices.js",
   "frontend/src/services/userServices.js",
   "frontend/src/services/listServices.js",
-  "frontend/src/services/todoServices.js",
+  "frontend/src/services/coursesServices.js",
   "frontend/tests/Login.test.js",
   "frontend/tests/Register.test.js",
   "frontend/tests/Dashboard.test.js",
@@ -89,7 +89,7 @@ const REMOVE_PATHS = [
 ];
 
 function printHelp() {
-  console.log(`Reset Todo example app code (keep feature specs)
+  console.log(`Reset courses example app code (keep feature specs)
 
 Usage:
   npm run reset:example -- --yes
@@ -134,30 +134,30 @@ function ensureGitkeep(dir, dryRun) {
 }
 
 /**
- * Overlay shells use /api for new products; Todo feature specs require /todo.
+ * Overlay shells use /api for new products; courses feature specs require /courses.
  */
-function retargetTodoApiPrefix(dryRun) {
+function retargetcoursesApiPrefix(dryRun) {
   const patches = [
     {
       relative: "backend/server.js",
       from: 'app.use("/api", routes);',
-      to: 'app.use("/todo", routes);',
+      to: 'app.use("/courses", routes);',
     },
     {
       relative: "backend/server.js",
       from: "Speckit App API running on port",
-      to: "Todo API running on port",
+      to: "courses API running on port",
     },
     {
       relative: "frontend/src/services/services.js",
       from: 'baseURL: import.meta.env.DEV ? "http://localhost:3200/api/" : "/api/",',
-      to: 'baseURL: import.meta.env.DEV ? "http://localhost:3200/todo/" : "/todo/",',
+      to: 'baseURL: import.meta.env.DEV ? "http://localhost:3200/courses/" : "/courses/",',
     },
   ];
 
   for (const { relative, from, to } of patches) {
     if (dryRun) {
-      console.log(`  ~ ${relative}: ${from.slice(0, 40)}… → /todo`);
+      console.log(`  ~ ${relative}: ${from.slice(0, 40)}… → /courses`);
       continue;
     }
     const path = join(ROOT_DIR, relative);
@@ -167,14 +167,14 @@ function retargetTodoApiPrefix(dryRun) {
     const before = readFileSync(path, "utf8");
     if (!before.includes(from)) {
       if (before.includes(to)) {
-        console.log(`  · ${relative} already uses /todo`);
+        console.log(`  · ${relative} already uses /courses`);
       } else {
         console.warn(`  ! skip retarget (pattern not found): ${relative}`);
       }
       continue;
     }
     writeFileSync(path, before.replace(from, to), "utf8");
-    console.log(`  ~ ${relative} → /todo`);
+    console.log(`  ~ ${relative} → /courses`);
   }
 }
 
@@ -241,8 +241,8 @@ function main() {
   }
 
   console.log("");
-  console.log("Retargeting API prefix to /todo (match feature specs)…");
-  retargetTodoApiPrefix(options.dryRun);
+  console.log("Retargeting API prefix to /courses (match feature specs)…");
+  retargetcoursesApiPrefix(options.dryRun);
 
   if (!options.dryRun) {
     ensureGitkeep(join(ROOT_DIR, "frontend", "src", "components"), false);

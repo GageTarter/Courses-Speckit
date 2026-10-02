@@ -75,10 +75,10 @@ Agility import **creates new items only**; it does not update existing ones. Re-
 ## Hierarchy in Agility
 
 ```text
-Portfolio Item (Epic)     Todo Item Management
+Portfolio Item (Epic)     courses Item Management
   └── Story               US-3.1: Add tasks to a list
-        └── Test          User adds a todo to the selected list
-        └── Test          User adds a todo with an empty title
+        └── Test          User adds a courses to the selected list
+        └── Test          User adds a courses with an empty title
         └── …
 ```
 
@@ -97,8 +97,8 @@ Portfolio Item (Epic)     Todo Item Management
 
 Add columns to the CSV / template for your org, e.g.:
 
-- **Spec URL** — path `features/feature-3-todo-list-item-management.md`
-- **Branch** — `feature/3-todo-list-item-management`
+- **Spec URL** — path `features/feature-3-courses-list-item-management.md`
+- **Branch** — `feature/3-courses-list-item-management`
 
 Column titles must match Agility **system names** (ask admin or query `meta.v1` API).
 

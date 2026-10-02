@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-08-26  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
@@ -14,7 +14,7 @@ Constraints:
 2. **Vue 3 native** — Material-style components that integrate with Vite and `<script setup>`.
 3. **Academic brand** — OC maroon / academic tokens live in one place (`plugins/vuetify.js`); views use theme names, not scattered hex.
 4. **Agent guardrails** — Cursor rules must be able to say “Vuetify only” without debating CSS frameworks every prompt.
-5. **Teachable forms & dialogs** — Login, Register, Dashboard list/todo CRUD, and profile flows need dialogs, text fields, and navigation chrome out of the box.
+5. **Teachable forms & dialogs** — Login, Register, Dashboard list/courses CRUD, and profile flows need dialogs, text fields, and navigation chrome out of the box.
 
 Without a fixed UI library, Feature 1–5 specs would either over-specify CSS or accept inconsistent UIs that fail visual and testing conventions.
 
@@ -53,7 +53,7 @@ views / components  ──►  Vuetify 4 components (v-btn, v-dialog, v-text-fie
 - Screen Requirements can reference familiar Vuetify patterns (forms, `v-dialog`, app bars) without inventing a custom kit.
 - One theme file keeps OC Academic branding consistent across Login, Dashboard, and MenuBar.
 - Cursor agents get a hard “Vuetify only / no Tailwind” rule, reducing stack thrash.
-- Matches Vue 3 + Vite choice (ADR-0004) and existing starter-kit / Todo shells.
+- Matches Vue 3 + Vite choice (ADR-0004) and existing starter-kit / courses shells.
 
 ### Negative / tradeoffs
 

@@ -2,11 +2,11 @@
 
 **Status:** Accepted  
 **Date:** 2026-08-26  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
-[ADR-0001](./0001-client-server-multi-user-architecture.md) establishes a **client–server** Todo example: a browser SPA talks to an Express REST API. We still needed an explicit choice of **SPA framework** for Speckit’s frontend shell (starter kit and Todo answer key).
+[ADR-0001](./0001-client-server-multi-user-architecture.md) establishes a **client–server** courses example: a browser SPA talks to an Express REST API. We still needed an explicit choice of **SPA framework** for Speckit’s frontend shell (starter kit and courses answer key).
 
 Constraints for the kit:
 
@@ -36,7 +36,7 @@ Adopt **Vue 3** (with **Vite**) as the SPA framework for OC CS Speckit:
 features/ Screen Requirements
         │
         ▼
-frontend/src/views/*.vue  ←── services/*Services.js  ←── axios ──► Express /todo/
+frontend/src/views/*.vue  ←── services/*Services.js  ←── axios ──► Express /courses/
         │
         └── components/ + Vuetify 4 (ui-style-system.mdc)
 ```
@@ -68,7 +68,7 @@ frontend/src/views/*.vue  ←── services/*Services.js  ←── axios ─�
 | Option | Why not |
 |--------|---------|
 | **React + Vite** | Strong ecosystem, but breaks Vuetify-first UI rules and OC CS Vue continuity; would require rewriting frontend rules and starter shell. |
-| **Angular** | Heavier framework and tooling for a small Todo/SPA teaching kit; steeper curve for feature-by-feature SDD slices. |
+| **Angular** | Heavier framework and tooling for a small courses/SPA teaching kit; steeper curve for feature-by-feature SDD slices. |
 | **Svelte / Solid** | Excellent DX, but weaker match to course materials and Vuetify; fewer shared patterns in OC CS Speckit docs. |
 | **Plain JS / jQuery SPA** | Insufficient structure for services layer, router guards, and Vitest component tests tied to Gherkin. |
 | **Nuxt / Vue SSR** | Extra deployment and auth complexity; ADR-0001 targets a Vite SPA talking to Express. |

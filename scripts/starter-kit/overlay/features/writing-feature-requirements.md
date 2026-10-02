@@ -4,7 +4,7 @@ A student guide for drafting the **beginning** of a feature specification: heade
 
 This is the **what**, **what data exists**, and **how we know it’s done** part of the file. Save API contracts and screen layouts for after these are clear. Full section order and process live in [framework.md](./framework.md). Canonical example: [feature-1-user-auth.md](./feature-1-user-auth.md).
 
-**File name:** `features/feature-N-short-name.md` (e.g. `feature-2-todo-list-management.md`)
+**File name:** `features/feature-N-short-name.md` (e.g. `feature-2-courses-list-management.md`)
 
 **Status while writing:** leave `Draft` until stories, FRs, initial data model, and Gherkin are complete and consistent; then set `Ready`.
 
@@ -31,10 +31,10 @@ A **user story** is one outcome *inside* that feature — something a person (or
 | Feature | Why it is a feature (not a story) |
 |---------|-----------------------------------|
 | [1 — User Authentication & Session Management](./feature-1-user-auth.md) | Whole identity boundary: register, session, protect routes. Foundation for every later feature. |
-| [2 — Todo List Management](./feature-2-todo-list-management.md) | Users own **lists** as a first-class thing (create/view/rename/delete + privacy). |
-| [3 — Todo List Item Management](./feature-3-todo-list-item-management.md) | Users own **items inside lists** (add/complete/edit/delete). Distinct entity and UI from Feature 2. |
-| [4 — User Profile Management](./feature-4-user-profile-management.md) | Profile view/edit and logout placement — account UX, not list/todo CRUD. |
-| [5 — Todo Due Date](./feature-5-todo-due-date.md) | A focused **delta** on existing todos (optional `dueDate` + overdue display). Still its own feature because it has its own FRs, AC, and branch. |
+| [2 — courses List Management](./feature-2-courses-list-management.md) | Users own **lists** as a first-class thing (create/view/rename/delete + privacy). |
+| [3 — courses List Item Management](./feature-3-courses-list-item-management.md) | Users own **items inside lists** (add/complete/edit/delete). Distinct entity and UI from Feature 2. |
+| [4 — User Profile Management](./feature-4-user-profile-management.md) | Profile view/edit and logout placement — account UX, not list/courses CRUD. |
+| [5 — courses Due Date](./feature-5-courses-due-date.md) | A focused **delta** on existing coursess (optional `dueDate` + overdue display). Still its own feature because it has its own FRs, AC, and branch. |
 
 ### Stories inside a feature (examples)
 
@@ -50,16 +50,16 @@ Feature 1 is one capability (**auth**). Its stories are the outcomes that make u
 
 Feature 2 is **list management**; stories carve that into create / view / manage rows / rename-delete / privacy — all one feature, five stories.
 
-Feature 5 is smaller but still a feature: the *capability* is “due dates on todos.” Stories are set / view / edit-clear / overdue highlighting — not four separate features.
+Feature 5 is smaller but still a feature: the *capability* is “due dates on coursess.” Stories are set / view / edit-clear / overdue highlighting — not four separate features.
 
 ### Common mistakes
 
 | Mistake | Better split |
 |---------|----------------|
-| One “mega feature” for the whole Todo app | Split like this repo: auth → lists → items → profile / due date |
+| One “mega feature” for the whole courses app | Split like this repo: auth → lists → items → profile / due date |
 | One feature file per tiny UI tweak with no shared release intent | Often a story (or a small delta feature like Feature 5 if it has its own AC/branch) |
 | Treating “Sign in” as Feature 1 and “Register” as Feature 2 | Same capability area → one feature, two stories (as in Feature 1) |
-| Putting list CRUD and todo-item CRUD in one feature | Separate features when entities, APIs, and screens diverge (Features 2 vs 3) |
+| Putting list CRUD and courses-item CRUD in one feature | Separate features when entities, APIs, and screens diverge (Features 2 vs 3) |
 
 **Dependencies:** features may depend on earlier features (`Depends on:`). Stories within a feature share that feature’s branch and ship together.
 
@@ -71,32 +71,32 @@ The feature name appears in three places that must stay aligned:
 
 | Place | Form | Example |
 |-------|------|---------|
-| Spec title (`# Feature: …`) | Title Case, human-readable | `Todo List Management` |
-| File name | `feature-N-short-name.md` | `feature-2-todo-list-management.md` |
-| Git branch | `feature/N-short-name` | `feature/2-todo-list-management` |
+| Spec title (`# Feature: …`) | Title Case, human-readable | `courses List Management` |
+| File name | `feature-N-short-name.md` | `feature-2-courses-list-management.md` |
+| Git branch | `feature/N-short-name` | `feature/2-courses-list-management` |
 
 The **short-name** is a kebab-case slug of the title (no Feature ID words like `feature` inside the slug). Epic titles in Agility export come from `# Feature: …`, so name it carefully.
 
 ### Principles
 
-1. **Name the capability, not a single action.** Prefer a noun phrase for the product area (“User Authentication”, “Todo List Management”) over one verb story (“Sign In”, “Create List”).
-2. **Be specific enough to tell features apart.** “Lists” vs “List Items” matters — this repo uses **Todo List Management** (Feature 2) and **Todo List Item Management** (Feature 3) on purpose.
+1. **Name the capability, not a single action.** Prefer a noun phrase for the product area (“User Authentication”, “courses List Management”) over one verb story (“Sign In”, “Create List”).
+2. **Be specific enough to tell features apart.** “Lists” vs “List Items” matters — this repo uses **courses List Management** (Feature 2) and **courses List Item Management** (Feature 3) on purpose.
 3. **Keep it short (about 2–5 words).** Long enough to be clear; short enough for a branch name. Drop filler (“The Amazing New…”, “Module”, “System”, “Implementation”).
 4. **Use product language, not stack language.** Good: `User Profile Management`. Bad: `Sequelize User Controller` / `Vuetify MenuBar Dropdown`.
-5. **Prefer durable domain terms.** Name what the product *is* about, not a temporary UI widget. Good: `Todo Due Date`. Weaker: `Orange Date Picker On Dashboard`.
+5. **Prefer durable domain terms.** Name what the product *is* about, not a temporary UI widget. Good: `courses Due Date`. Weaker: `Orange Date Picker On Dashboard`.
 6. **Match title ↔ file ↔ branch.** Same words, same order. If you rename the title, rename the file and branch pattern (and update the catalog).
 7. **Do not put story verbs in the feature title.** Story titles carry the verbs (`Register an account`, `Sign in`). The feature title names the whole area those stories belong to.
-8. **Delta features still get a clear capability name.** Feature 5 is `Todo Due Date` — not `Update Feature 3` or `Misc Todo Tweaks`.
+8. **Delta features still get a clear capability name.** Feature 5 is `courses Due Date` — not `Update Feature 3` or `Misc courses Tweaks`.
 
 ### Good vs weak names (this project)
 
 | Prefer | Avoid | Why |
 |--------|-------|-----|
 | User Authentication & Session Management | Login Page | Capability vs one screen/story |
-| Todo List Management | CRUD for lists | Product term, not tech jargon |
-| Todo List Item Management | Todos | Too vague — lists vs items collide |
+| courses List Management | CRUD for lists | Product term, not tech jargon |
+| courses List Item Management | coursess | Too vague — lists vs items collide |
 | User Profile Management | MenuBar Changes | Names the capability, not the widget |
-| Todo Due Date | Add dueDate Column | Product outcome, not a schema ticket |
+| courses Due Date | Add dueDate Column | Product outcome, not a schema ticket |
 
 ### Checklist before you freeze the name
 
@@ -186,8 +186,8 @@ List every meaningful outcome this feature delivers. Number them **`US-<feature-
 5. **Keep the story thin; put rules in FRs and examples in AC.** The story states the outcome. Password length, exact error strings, and HTTP codes belong in FRs / Gherkin — not stuffed into the “I want” line.
 6. **Make it independently testable.** The **Independent test** line should be something you could try in one pass (API or UI) even if sibling stories are incomplete.
 7. **Prioritize honestly.** `P1` = must ship with this feature; `P2` = important; `P3` = nice-to-have. Do not mark everything P1.
-8. **Align the title with the AC heading.** Story `US-2.1: Create todo lists` ↔ `### US-2.1 — Create todo lists` under Acceptance Criteria.
-9. **Stay inside the feature’s capability.** Feature 2 stories are about **lists**; do not sneak in “complete a todo” (that is Feature 3).
+8. **Align the title with the AC heading.** Story `US-2.1: Create courses lists` ↔ `### US-2.1 — Create courses lists` under Acceptance Criteria.
+9. **Stay inside the feature’s capability.** Feature 2 stories are about **lists**; do not sneak in “complete a courses” (that is Feature 3).
 10. **Write for a teammate and for tests.** A developer should know what “done” means; a tester should know what to exercise. Ambiguous stories produce ambiguous code.
 
 ### Template
@@ -237,10 +237,10 @@ List every meaningful outcome this feature delivers. Number them **`US-<feature-
 
 | Story | Why it works |
 |-------|----------------|
-| US-2.1 Create todo lists | One clear outcome; lists only |
+| US-2.1 Create courses lists | One clear outcome; lists only |
 | US-2.5 Private lists only | System-as-actor style outcome (isolation), still one testable goal |
 | US-3.3 Complete tasks | Verb + object matches a single behavior |
-| US-5.4 Spot overdue todos | User-visible outcome, not “set CSS class on overdue rows” |
+| US-5.4 Spot overdue coursess | User-visible outcome, not “set CSS class on overdue rows” |
 
 Aim for **3–8 stories** for a typical feature. If you need more than ~10, the feature is probably too big — split it.
 
@@ -329,7 +329,7 @@ Name the things in the domain and how they relate. **No column types here.**
 
 - **User**: registered account; owns lists and sessions
 - **Session**: server-side record tying a login token to a user
-- **List**: named group of todos; belongs to one user
+- **List**: named group of coursess; belongs to one user
 ```
 
 **Tips**
@@ -372,7 +372,7 @@ Turn entities into **tables and fields** this feature will persist. This is stil
 | Align fields with FRs and AC (if AC mentions email, the table needs email) | Add columns “just in case” with no story/FR |
 | Use `[NEEDS CLARIFICATION: …]` for undecided types/lengths | Leave required fields unnamed |
 
-**Delta features:** if Feature N only adds a column (e.g. `dueDate` on `todos`), document **only the change** — new/changed fields — and point at existing tables in `features/reference/data-model.md` rather than rewriting the whole schema.
+**Delta features:** if Feature N only adds a column (e.g. `dueDate` on `coursess`), document **only the change** — new/changed fields — and point at existing tables in `features/reference/data-model.md` rather than rewriting the whole schema.
 
 **Check against stories:** every piece of data a story creates, updates, or displays should appear as an entity/field (or be explicitly out of scope).
 
@@ -409,7 +409,7 @@ AC proves each user story with concrete scenarios. Group scenarios under a headi
 8. **One When (conceptually).** The action under test should be clear. Extra clicks that are part of the same action can be **And** under When; do not hide a second unrelated behavior in the same scenario.
 9. **Align with FRs and the data model.** If FR-003 requires bcrypt and AC never mentions a stored hash (where relevant), something is missing. If AC mentions `dueDate`, the data model must include it.
 10. **Write only what you can automate.** Every scenario will need at least one automated test before merge. If you cannot imagine a Jest/Vitest assertion, rewrite the Then.
-11. **Stay inside the story.** US-2.1 scenarios are about creating lists — not completing todos (Feature 3) or editing profile (Feature 4).
+11. **Stay inside the story.** US-2.1 scenarios are about creating lists — not completing coursess (Feature 3) or editing profile (Feature 4).
 12. **Use consistent actors and data.** Reuse stable examples (`jdoe`, list name `"Groceries"`) across scenarios so readers can follow the narrative.
 
 ### Template
@@ -436,7 +436,7 @@ AC proves each user story with concrete scenarios. Group scenarios under a headi
 | Step | Use for | Example |
 |------|---------|---------|
 | **Given** | Preconditions | “I am on the login page”, “a user with username `jdoe` exists” |
-| **When** | The action under test | “I click **Sign in**”, “I send `POST /todo/login` …” |
+| **When** | The action under test | “I click **Sign in**”, “I send `POST /courses/login` …” |
 | **Then** | Pass/fail outcome | “the API returns `401`”, “I am redirected to home” |
 | **And** | Extra outcomes on the same scenario | “the error is displayed in a `<v-alert type="error">`” |
 

@@ -1,6 +1,6 @@
 # Architecture diagrams (C4)
 
-C4 views for the **Todo** example application in **OC CS Speckit**, as Mermaid. Source of truth for *why* the shape exists: [ADR-0001](../adr/0001-client-server-multi-user-architecture.md).
+C4 views for the **courses** example application in **OC CS Speckit**, as Mermaid. Source of truth for *why* the shape exists: [ADR-0001](../adr/0001-client-server-multi-user-architecture.md).
 
 | File | C4 level | Shows |
 |------|----------|--------|

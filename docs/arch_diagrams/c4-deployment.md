@@ -4,7 +4,7 @@ Logical deployment: the **User PC** runs the SPA in a browser; the **Web Server*
 
 ```mermaid
 C4Deployment
-title Deployment Diagram — Todo
+title Deployment Diagram — courses
 
 Deployment_Node(userPc, "User PC", "Developer / end-user computer") {
   Container(spa, "Web SPA", "Browser + Vue", "Loaded from Apache; runs on the user PC.")
@@ -12,8 +12,8 @@ Deployment_Node(userPc, "User PC", "Developer / end-user computer") {
 
 Deployment_Node(webServer, "Web Server", "Classroom or CI deploy host") {
   Container(staticAssets, "Static Assets", "Apache", "Built Vue dist and .htaccess.")
-  Container(api, "API", "Node.js + Express", "REST /todo on port 3200.")
-  ContainerDb(db, "Database", "MySQL", "Users, sessions, lists, and todos.")
+  Container(api, "API", "Node.js + Express", "REST /courses on port 3200.")
+  ContainerDb(db, "Database", "MySQL", "Users, sessions, lists, and coursess.")
 }
 
 Rel(staticAssets, spa, "Serves", "HTTPS")

@@ -48,15 +48,15 @@ export function formatDueDate(value) {
   }).format(new Date(year, month - 1, day));
 }
 
-export function isTodoOverdue(todo) {
-  if (!todo?.dueDate || todo.completed) {
+export function iscoursesOverdue(courses) {
+  if (!courses?.dueDate || courses.completed) {
     return false;
   }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [year, month, day] = todo.dueDate.split("-").map(Number);
+  const [year, month, day] = courses.dueDate.split("-").map(Number);
   const dueDate = new Date(year, month - 1, day);
 
   return dueDate < today;

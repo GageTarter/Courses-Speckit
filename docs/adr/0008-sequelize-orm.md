@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date:** 2026-08-26  
-**Deciders:** OC CS Speckit project (SDD kit; Todo example application)
+**Deciders:** OC CS Speckit project (SDD kit; courses example application)
 
 ## Context
 
@@ -25,7 +25,7 @@ Adopt **Sequelize 6** (with **`mysql2`**) as the ORM for OC CS Speckit backends:
 | **ORM** | Sequelize 6 |
 | **Driver** | `mysql2` |
 | **Instance** | Shared `sequelizeInstance.js`; models register in `models/index.js` |
-| **Associations** | Defined in models / `index.js` (User–Session, User–List, List–Todo) |
+| **Associations** | Defined in models / `index.js` (User–Session, User–List, List–courses) |
 | **Schema in v1** | Model definitions + `sequelize.sync` (see ADR-0003 for env strategies) |
 | **Queries** | `findOne` / `findAll` / `create` / `update` / `destroy` with explicit `where` |
 
@@ -49,8 +49,8 @@ controllers / auth helpers (userId in WHERE)
 ### Positive
 
 - Models read like the data-model section of a feature spec — good for teaching and Cursor prompts.
-- Associations and FK cascades (e.g. list → todos) are declarative.
-- Fits Express controllers and Jest setup already used in the Todo answer key and starter shell.
+- Associations and FK cascades (e.g. list → coursess) are declarative.
+- Fits Express controllers and Jest setup already used in the courses answer key and starter shell.
 - `unscoped()` / default scopes support hiding password hashes except where bcrypt needs them.
 
 ### Negative / tradeoffs

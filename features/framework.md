@@ -1,6 +1,6 @@
 # Spec-Driven Development Framework
 
-How **OC CS Speckit** writes, traces, and ships **feature specifications** (illustrated here by the Todo example application).  
+How **OC CS Speckit** writes, traces, and ships **feature specifications** (illustrated here by the courses example application).  
 This document is the methodology handbook; individual feature files are the requirements.
 
 **Related:** [Feature catalog](./README.md) · [ADRs](../docs/adr/README.md) · [Quality attributes (NFRs)](../docs/nfr/README.md) · [Living reference](./reference/README.md) · [Constitution](../.cursor/rules/constitution.mdc)
@@ -172,8 +172,8 @@ Conceptual model before **Data Model Requirements** (GitHub Spec Kit alignment):
 ```markdown
 ## Key Entities
 
-- **User**: account owner; has many lists and todos
-- **List**: named group of todos; belongs to one user
+- **User**: account owner; has many lists and coursess
+- **List**: named group of coursess; belongs to one user
 ```
 
 No column types here — those belong in **Data Model Requirements** or `features/reference/data-model.md`.
@@ -200,7 +200,7 @@ Every scenario must appear in the **Test Coverage Map** and have at least one au
 
 ## GitHub Spec Kit alignment
 
-This repo uses one merged `feature-N-*.md` per capability (Todo example app + fixed stack). [GitHub Spec Kit](https://github.com/github/spec-kit) splits **spec** (what/why) from **plan** (how). Map phases as follows:
+This repo uses one merged `feature-N-*.md` per capability (courses example app + fixed stack). [GitHub Spec Kit](https://github.com/github/spec-kit) splits **spec** (what/why) from **plan** (how). Map phases as follows:
 
 | Spec Kit phase | OC CS Speckit artifact |
 |----------------|----------------------|
@@ -232,10 +232,10 @@ Export backlog: `npm run agility:export` or `npm run agility:push` (see [docs/ag
 Tests must link back to the spec in three layers:
 
 ```text
-feature-3-todo-list-item-management.md
+feature-3-courses-list-item-management.md
   └── US-3.1 — Add tasks to a list
-        └── Scenario: User adds a todo to the selected list
-              └── backend/tests/todos.test.js → it("User adds a todo…")
+        └── Scenario: User adds a courses to the selected list
+              └── backend/tests/coursess.test.js → it("User adds a courses…")
 ```
 
 ### File header
@@ -244,8 +244,8 @@ Every feature test file starts with:
 
 ```javascript
 /**
- * Feature 3 — Todo List Item Management
- * Spec: features/feature-3-todo-list-item-management.md
+ * Feature 3 — courses List Item Management
+ * Spec: features/feature-3-courses-list-item-management.md
  */
 ```
 
@@ -254,10 +254,10 @@ Harness-only files (`app.test.js`, `App.test.js`) are exempt — they verify the
 ### Nested `describe` blocks
 
 ```javascript
-describe("Feature 3 — Todo API", () => {
+describe("Feature 3 — courses API", () => {
   describe("US-3.1 — Add tasks to a list", () => {
-    it("User adds a todo to the selected list", async () => { /* … */ });
-    it("User adds a todo with an empty title", async () => { /* … */ });
+    it("User adds a courses to the selected list", async () => { /* … */ });
+    it("User adds a courses with an empty title", async () => { /* … */ });
   });
 });
 ```
@@ -272,8 +272,8 @@ The map is the authoritative index. Prefer this column layout:
 
 | Story | Scenario | Test file | Test name |
 |-------|----------|-----------|-----------|
-| US-3.1 | User adds a todo to the selected list | `backend/tests/todos.test.js` | `it("User adds a todo to the selected list")` |
-| US-3.1 | User adds a todo with an empty title | `frontend/tests/Dashboard.test.js` | `it("User adds a todo with an empty title")` |
+| US-3.1 | User adds a courses to the selected list | `backend/tests/coursess.test.js` | `it("User adds a courses to the selected list")` |
+| US-3.1 | User adds a courses with an empty title | `frontend/tests/Dashboard.test.js` | `it("User adds a courses with an empty title")` |
 
 ### Auditing coverage
 
@@ -282,7 +282,7 @@ The map is the authoritative index. Prefer this column layout:
 rg "US-3.1" features/ backend/tests frontend/tests
 
 # Find a scenario across spec and tests
-rg "User adds a todo with an empty title" features/ backend/tests frontend/tests
+rg "User adds a courses with an empty title" features/ backend/tests frontend/tests
 ```
 
 Every `#### Scenario` in the spec must have ≥1 matching `it`. Every feature `it` must trace to a scenario.
@@ -479,7 +479,7 @@ One feature file + the style rule is usually enough — you do not need to `@` t
 **Screen Requirements only (most common):**
 
 ```text
-I updated Screen Requirements in @features/feature-2-todo-list-management.md.
+I updated Screen Requirements in @features/feature-2-courses-list-management.md.
 
 Revise the dashboard sidebar UI to match the spec:
 - + New List button placement and class oc-cta
@@ -494,7 +494,7 @@ No API or test changes unless Gherkin scenario text changed.
 
 ```text
 Per @.cursor/rules/ui-style-system.mdc and
-@features/feature-3-todo-list-item-management.md Screen Requirements,
+@features/feature-3-courses-list-item-management.md Screen Requirements,
 apply the oc-cta button style to Add and align with Edit Profile.
 
 Update Dashboard.vue and MenuBar.vue if needed.
@@ -667,7 +667,7 @@ Example: Feature 2 (lists) and Feature 4 (profile) can ship in the same sprint, 
 
 | Command | Output |
 |---------|--------|
-| `npm run specs:pdf:app` | ADRs + NFRs + C4 + feature specs → `docs/todo-app-specs.pdf` (no rules / writing guides / reference) |
+| `npm run specs:pdf:app` | ADRs + NFRs + C4 + feature specs → `docs/courses-app-specs.pdf` (no rules / writing guides / reference) |
 | `npm run specs:pdf` | Rules + ADRs + NFRs + C4 diagrams + specs + reference → `docs/oc-cs-speckit-specs.pdf` (auto-discovers; Mermaid/C4 rendered) |
 | `npm run agility:export` | CSV backlog for Agility Excel import (auto-discovers `feature-N-*.md`) |
 | `npm run agility:push` | Push epics, stories, tests via Agility API |
