@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import authServices from "../services/authServices.js";
 import Utils from "../config/utils.js";
+import { isStudent } from "../config/roles.js";
 
 const router = useRouter();
 
@@ -37,7 +38,7 @@ const signOut = async () => {
     </p>
 
     <v-btn
-      v-if="user?.role === 'student'"
+      v-if="isStudent(user)"
       :to="{ name: 'enroll' }"
       color="primary"
       variant="elevated"

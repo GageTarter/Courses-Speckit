@@ -4,6 +4,11 @@
  *
  * Shared request guards. Controllers call these instead of re-checking
  * tokens or roles inline.
+ *
+ * Teammates (Features 2, 3, 5 — courses, semesters, sections, faculty):
+ *   catalog writes → [authenticate, requireAdmin]
+ *   enrollment writes → [authenticate, requireStudent]
+ * Role comes from the session user (req.user.role), never from the body.
  */
 import jwt from "jsonwebtoken";
 import db from "../models/index.js";

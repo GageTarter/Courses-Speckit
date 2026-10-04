@@ -495,7 +495,7 @@ Each scenario above must map to at least one automated test.
 | US-6.3 | Student enrolls in a full section | `backend/tests/enrollments.test.js` | `Student enrolls in a full section` |
 | US-6.3 | Student enrolls without a section id | `backend/tests/enrollments.test.js` | `Student enrolls without a section id` |
 | US-6.3 | Student enrolls in a section that does not exist | `backend/tests/enrollments.test.js` | `Student enrolls in a section that does not exist` |
-| US-6.3 | Admin cannot enroll | `backend/tests/enrollments.test.js` | `Admin cannot enroll` |
+| US-6.3 | Admin cannot enroll | `backend/tests/enrollments.test.js`, `frontend/tests/router.test.js` | `Admin cannot enroll` |
 | US-6.3 | Unauthenticated enrollment request is rejected | `backend/tests/enrollments.test.js` | `Unauthenticated enrollment request is rejected` |
 | US-6.4 | Student sees only their own enrollments | `backend/tests/enrollments.test.js` | `Student sees only their own enrollments` |
 | US-6.4 | Schedule is filtered by the selected semester | `backend/tests/enrollments.test.js` | `Schedule is filtered by the selected semester` |
