@@ -3,7 +3,6 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import Utils from "../config/utils.js";
 import { emailRules } from "../config/validation.js";
 import authServices from "../services/authServices.js";
-import userServices from "../services/userServices.js";
 
 const user = ref(Utils.getStore("user"));
 const profileMenuOpen = ref(false);
@@ -85,7 +84,7 @@ const populateEditForm = (profile) => {
   resetPasswordFields();
 };
 
-const openEditDialog = async () => {
+const openEditDialog = () => {
   profileMenuOpen.value = false;
   profileError.value = "";
 
@@ -93,20 +92,9 @@ const openEditDialog = async () => {
     return;
   }
 
-  try {
-    const response = await userServices.getUser(user.value.userId);
-
-    populateEditForm(response.data);
-    editDialogOpen.value = true;
-  } catch (error) {
-    populateEditForm(user.value);
-
-    profileError.value =
-      error.response?.data?.message ||
-      "Failed to load profile.";
-
-    editDialogOpen.value = true;
-  }
+  // Feature 1 has no mounted /users API yet — use the signed-in session.
+  populateEditForm(user.value);
+  editDialogOpen.value = true;
 };
 
 const closeEditDialog = () => {
@@ -127,35 +115,21 @@ const handleSaveProfile = async () => {
   savingProfile.value = true;
 
   try {
-    const payload = {
-      fName: fName.value.trim(),
-      lName: lName.value.trim(),
-      email: email.value.trim(),
-      username: username.value.trim(),
-      role: role.value.trim(),
-    };
-
     if (password.value) {
-      payload.password = password.value;
+      profileError.value =
+        "Password changes need a profile API. Sign out and use a new admin account for now.";
+      return;
     }
-
-    const response = await userServices.updateUser(
-      user.value.userId,
-      payload,
-    );
 
     const currentUser = Utils.getStore("user");
 
     Utils.setStore("user", {
       ...currentUser,
-      ...response.data,
-      userId: response.data.id,
-      fName: response.data.fName,
-      lName: response.data.lName,
-      email: response.data.email,
-      username: response.data.username,
-      role: response.data.role,
-      token: currentUser.token,
+      fName: fName.value.trim(),
+      lName: lName.value.trim(),
+      email: email.value.trim(),
+      username: username.value.trim(),
+      role: role.value.trim() || currentUser.role,
     });
 
     refreshUser();
@@ -205,6 +179,7 @@ const handleLogout = async () => {
 </v-btn>
 
 <v-btn
+  v-if="user?.role === 'admin'"
   variant="text"
   color="white"
   to="/sections"

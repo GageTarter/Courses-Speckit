@@ -5,9 +5,6 @@ import { parseId } from "../helpers/fields.js";
 
 const exports = {};
 
-// TEMPORARY DEVELOPMENT USER
-// Replace this with req.user.id when authentication is ready.
-const DEV_USER_ID = 1;
 const OFFERED_SEMESTER_IDS = new Set([1, 2, 3, 4]);
 
 const parseSectionNumber = (value) => {
@@ -39,7 +36,7 @@ const isValidTime = (value) => {
 exports.findAll = async (req, res) => {
   try {
     const sections = await db.section.findAll({
-      where: { userId: DEV_USER_ID },
+      where: { userId: req.user.id },
       order: [["sectionNumber", "ASC"]],
     });
 
@@ -132,7 +129,7 @@ exports.create = async (req, res) => {
     }
 
     const section = await db.section.create({
-      userId: DEV_USER_ID,
+      userId: req.user.id,
       sectionNumber,
       semesterId,
       courseId,
@@ -165,7 +162,7 @@ exports.update = async (req, res) => {
     const section = await db.section.findOne({
       where: {
         id: sectionId,
-        userId: DEV_USER_ID,
+        userId: req.user.id,
       },
     });
 
@@ -264,7 +261,7 @@ exports.update = async (req, res) => {
       {
         where: {
           id: sectionId,
-          userId: DEV_USER_ID,
+          userId: req.user.id,
         },
       }
     );
@@ -294,7 +291,7 @@ exports.remove = async (req, res) => {
     const section = await db.section.findOne({
       where: {
         id: sectionId,
-        userId: DEV_USER_ID,
+        userId: req.user.id,
       },
     });
 
@@ -307,7 +304,7 @@ exports.remove = async (req, res) => {
     await db.section.destroy({
       where: {
         id: sectionId,
-        userId: DEV_USER_ID,
+        userId: req.user.id,
       },
     });
 

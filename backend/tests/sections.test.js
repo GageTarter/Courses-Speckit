@@ -5,6 +5,7 @@
 import request from "supertest";
 import app from "../server.js";
 import db from "../app/models/index.js";
+import { seedAdmin, login, registerUser } from "./helpers.js";
 
 const validSection = {
   sectionNumber: 1,
@@ -16,14 +17,20 @@ const validSection = {
   endTime: "12:50",
 };
 
+let adminToken;
+
 async function createSection(overrides = {}) {
   return request(app)
     .post("/api/sectionapi/sections")
+    .set("Authorization", `Bearer ${adminToken}`)
     .send({ ...validSection, ...overrides });
 }
 
 beforeAll(async () => {
   await db.sequelize.sync({ force: true });
+  const admin = await seedAdmin();
+  const signedIn = await login(admin.username, admin.password);
+  adminToken = signedIn.body.token;
 });
 
 afterAll(async () => {
@@ -36,6 +43,27 @@ beforeEach(async () => {
 
 describe("Feature 5 — Section Management", () => {
   describe("US-5.1 — Create a Section", () => {
+    it("An unsigned request cannot access sections", async () => {
+      const response = await request(app).get("/api/sectionapi/sections");
+
+      expect(response.status).toBe(401);
+    });
+
+    it("A signed-in student cannot access sections", async () => {
+      const student = await registerUser({
+        username: "student1",
+        email: "student1@example.com",
+      });
+      const response = await request(app)
+        .get("/api/sectionapi/sections")
+        .set("Authorization", `Bearer ${student.body.token}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual({
+        message: "Forbidden! Admin access required.",
+      });
+    });
+
     it("Start time equal to end time returns 400", async () => {
       const response = await createSection({
         startTime: "11:40",
@@ -107,6 +135,7 @@ describe("Feature 5 — Section Management", () => {
     it("Update with a non-numeric id returns 400", async () => {
       const response = await request(app)
         .put("/api/sectionapi/sections/abc")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(validSection);
 
       expect(response.status).toBe(400);
@@ -116,6 +145,7 @@ describe("Feature 5 — Section Management", () => {
     it("Update a section id that does not exist returns 404", async () => {
       const response = await request(app)
         .put("/api/sectionapi/sections/999")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(validSection);
 
       expect(response.status).toBe(404);
@@ -127,18 +157,18 @@ describe("Feature 5 — Section Management", () => {
 
   describe("US-5.4 — Delete a Section", () => {
     it("Delete with a non-numeric id returns 400", async () => {
-      const response = await request(app).delete(
-        "/api/sectionapi/sections/abc",
-      );
+      const response = await request(app)
+        .delete("/api/sectionapi/sections/abc")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "Invalid section id." });
     });
 
     it("Delete a section id that does not exist returns 404", async () => {
-      const response = await request(app).delete(
-        "/api/sectionapi/sections/999",
-      );
+      const response = await request(app)
+        .delete("/api/sectionapi/sections/999")
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
