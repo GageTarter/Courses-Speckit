@@ -11,6 +11,6 @@ router.get("/health", (_req, res) => {
 
 router.use("/", authRoutes);
 router.use("/courses", courseRoutes);
-router.use("/sectionapi/sections", sectionRoutes);
+router.use("/sections", sectionRoutes);
 
 export default router;

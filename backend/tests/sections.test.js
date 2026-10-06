@@ -21,7 +21,7 @@ let adminToken;
 
 async function createSection(overrides = {}) {
   return request(app)
-    .post("/api/sectionapi/sections")
+    .post("/courses/sections")
     .set("Authorization", `Bearer ${adminToken}`)
     .send({ ...validSection, ...overrides });
 }
@@ -44,7 +44,7 @@ beforeEach(async () => {
 describe("Feature 5 — Section Management", () => {
   describe("US-5.1 — Create a Section", () => {
     it("An unsigned request cannot access sections", async () => {
-      const response = await request(app).get("/api/sectionapi/sections");
+      const response = await request(app).get("/courses/sections");
 
       expect(response.status).toBe(401);
     });
@@ -55,7 +55,7 @@ describe("Feature 5 — Section Management", () => {
         email: "student1@example.com",
       });
       const response = await request(app)
-        .get("/api/sectionapi/sections")
+        .get("/courses/sections")
         .set("Authorization", `Bearer ${student.body.token}`);
 
       expect(response.status).toBe(403);
@@ -134,7 +134,7 @@ describe("Feature 5 — Section Management", () => {
   describe("US-5.3 — Update a section's details", () => {
     it("Update with a non-numeric id returns 400", async () => {
       const response = await request(app)
-        .put("/api/sectionapi/sections/abc")
+        .put("/courses/sections/abc")
         .set("Authorization", `Bearer ${adminToken}`)
         .send(validSection);
 
@@ -144,7 +144,7 @@ describe("Feature 5 — Section Management", () => {
 
     it("Update a section id that does not exist returns 404", async () => {
       const response = await request(app)
-        .put("/api/sectionapi/sections/999")
+        .put("/courses/sections/999")
         .set("Authorization", `Bearer ${adminToken}`)
         .send(validSection);
 
@@ -158,7 +158,7 @@ describe("Feature 5 — Section Management", () => {
   describe("US-5.4 — Delete a Section", () => {
     it("Delete with a non-numeric id returns 400", async () => {
       const response = await request(app)
-        .delete("/api/sectionapi/sections/abc")
+        .delete("/courses/sections/abc")
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(400);
@@ -167,7 +167,7 @@ describe("Feature 5 — Section Management", () => {
 
     it("Delete a section id that does not exist returns 404", async () => {
       const response = await request(app)
-        .delete("/api/sectionapi/sections/999")
+        .delete("/courses/sections/999")
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);

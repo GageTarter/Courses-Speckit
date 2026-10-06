@@ -47,7 +47,7 @@ describe("Feature 1 — Authentication API", () => {
 
     it("Registration ignores a role supplied in the request body", async () => {
       const res = await request(app)
-        .post("/api/register")
+        .post("/courses/register")
         .send({ ...validRegistration({ username: "sneaky" }), role: "admin" });
 
       expect(res.status).toBe(201);
@@ -156,7 +156,7 @@ describe("Feature 1 — Authentication API", () => {
       const { body } = await registerUser();
 
       const res = await request(app)
-        .post("/api/logout")
+        .post("/courses/logout")
         .set("Authorization", `Bearer ${body.token}`);
 
       expect(res.status).toBe(200);
@@ -167,11 +167,11 @@ describe("Feature 1 — Authentication API", () => {
       const { body } = await registerUser();
 
       await request(app)
-        .post("/api/logout")
+        .post("/courses/logout")
         .set("Authorization", `Bearer ${body.token}`);
 
       const replay = await request(app)
-        .post("/api/logout")
+        .post("/courses/logout")
         .set("Authorization", `Bearer ${body.token}`);
 
       expect(replay.status).toBe(401);

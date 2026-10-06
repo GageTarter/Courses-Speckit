@@ -38,7 +38,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", routes);
+app.use("/courses", routes);
 
 const PORT = process.env.PORT || 3201;
 

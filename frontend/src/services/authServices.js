@@ -3,7 +3,7 @@ import Utils from "../config/utils.js";
 import router from "../router.js";
 
 const authClient = axios.create({
-  baseURL: import.meta.env.DEV ? "http://localhost:3201/api/" : "/api/",
+  baseURL: import.meta.env.DEV ? "http://localhost:3201/courses/" : "/courses/",
   withCredentials: true,
 });
 

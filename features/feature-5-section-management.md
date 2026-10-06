@@ -123,18 +123,18 @@ Each admin owns their sections exclusively. Another authenticated admin must not
 
 ## API Requirements
 
-Mount prefix is `/api/sectionapi`.
+Mount prefix is `/courses`.
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/api/sectionapi/sections` | Yes | List the sections owned by the signed-in admin |
-| `POST` | `/api/sectionapi/sections` | Yes | Create a new section |
-| `PUT` | `/api/sectionapi/sections/:id` | Yes | Update a section owned by the signed-in admin |
-| `DELETE` | `/api/sectionapi/sections/:id` | Yes | Delete a section owned by the signed-in admin |
+| `GET` | `/courses/sections` | Yes | List the sections owned by the signed-in admin |
+| `POST` | `/courses/sections` | Yes | Create a new section |
+| `PUT` | `/courses/sections/:id` | Yes | Update a section owned by the signed-in admin |
+| `DELETE` | `/courses/sections/:id` | Yes | Delete a section owned by the signed-in admin |
 
 `:id` is the section primary key. A non-numeric `id` MUST return `400` with `"Invalid section id."`.
 
-This feature does not add `GET /api/sectionapi/sections/:id` or delete-all.
+This feature does not add `GET /courses/sections/:id` or delete-all.
 
 
 **Create request body:**
@@ -354,7 +354,7 @@ Do not implement behavior not in this spec.
 
 ## Out of Scope
 
-*   `GET /api/sectionapi/sections/:id` and delete-all
+*   `GET /courses/sections/:id` and delete-all
 *   A menu of faculty names (Feature 4 — Faculty Management)
 *   A year on the semester, such as Fall 2026 (Feature 2 — Semester Management)
 *   Enrollment (Feature 6 — Enrollment Management)
