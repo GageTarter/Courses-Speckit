@@ -294,6 +294,8 @@ Feature 5 — Section Management associates **Section** belongsTo **Faculty** (`
 *   **Then** no delete request is sent
 *   **And** the faculty member remains listed
 
+---
+
 ## Test Coverage Map
 
 Each scenario above must map to at least one automated test.
