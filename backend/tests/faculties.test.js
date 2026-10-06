@@ -5,13 +5,7 @@
 import request from "supertest";
 import app from "../server.js";
 import db from "../app/models/index.js";
-import {
-  syncTestDatabase,
-  closeTestDatabase,
-  seedAdmin,
-  login,
-  registerUser,
-} from "./helpers.js";
+import { seedAdmin, login, registerUser } from "./helpers.js";
 
 const validFaculty = {
   firstName: "Ada",
@@ -29,20 +23,18 @@ async function createFaculty(overrides = {}, token = adminToken) {
 }
 
 beforeAll(async () => {
-  await syncTestDatabase();
-}, 30000);
-
-beforeEach(async () => {
-  await db.faculty.destroy({ where: {} });
-  await db.session.destroy({ where: {} });
-  await db.user.destroy({ where: {} });
+  await db.sequelize.sync({ force: true });
   const admin = await seedAdmin();
   const signedIn = await login(admin.username, admin.password);
   adminToken = signedIn.body.token;
-}, 30000);
+});
 
 afterAll(async () => {
-  await closeTestDatabase();
+  await db.sequelize.close();
+});
+
+beforeEach(async () => {
+  await db.faculty.destroy({ where: {} });
 });
 
 describe("Feature 4 — Faculty Management", () => {
@@ -72,6 +64,26 @@ describe("Feature 4 — Faculty Management", () => {
         message: "Forbidden! Admin access required.",
       });
       expect(await db.faculty.count()).toBe(0);
+    });
+  });
+
+  describe("US-4.2 — Browse the faculty list", () => {
+    it("Non-admin cannot list faculty", async () => {
+      await createFaculty();
+
+      const student = await registerUser({
+        username: "student2",
+        email: "student2@example.com",
+      });
+
+      const response = await request(app)
+        .get("/courses/facultyapi/faculties")
+        .set("Authorization", `Bearer ${student.body.token}`);
+
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual({
+        message: "Forbidden! Admin access required.",
+      });
     });
   });
 

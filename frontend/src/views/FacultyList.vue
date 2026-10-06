@@ -1,11 +1,12 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import facultyServices from "../services/facultyServices.js";
 import Utils from "../config/utils.js";
 
 const faculties = ref([]);
 const loading = ref(false);
 const listError = ref("");
+const user = ref(Utils.getStore("user"));
 
 const formDialogOpen = ref(false);
 const deleteDialogOpen = ref(false);
@@ -22,7 +23,11 @@ const form = ref({
   dept: "",
 });
 
-const isAdmin = computed(() => Utils.getStore("user")?.role === "admin");
+const isAdmin = computed(() => user.value?.role === "admin");
+
+const refreshUser = () => {
+  user.value = Utils.getStore("user");
+};
 
 const formTitle = computed(() =>
   editing.value ? "Edit Faculty" : "Add Faculty",
@@ -151,7 +156,14 @@ const confirmDeleteFaculty = async () => {
 };
 
 onMounted(() => {
+  window.addEventListener("user-logged-in", refreshUser);
+  window.addEventListener("user-logged-out", refreshUser);
   retrieveFaculties();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("user-logged-in", refreshUser);
+  window.removeEventListener("user-logged-out", refreshUser);
 });
 </script>
 

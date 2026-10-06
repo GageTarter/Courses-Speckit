@@ -19,16 +19,7 @@ All routes are mounted under `/courses` (see `backend/server.js`).
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/courses/facultyapi/faculties` | Yes | List every faculty member |
-| `POST` | `/courses/facultyapi/faculties` | Admin | Create a faculty member |
-| `PUT` | `/courses/facultyapi/faculties/:id` | Admin | Update a faculty member |
-| `DELETE` | `/courses/facultyapi/faculties/:id` | Admin | Delete a faculty member |
-
-### Faculty — [Feature 4](../feature-4-faculty-management.md)
-
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| `GET` | `/courses/facultyapi/faculties` | Yes | List every faculty member |
+| `GET` | `/courses/facultyapi/faculties` | Admin | List every faculty member |
 | `POST` | `/courses/facultyapi/faculties` | Admin | Create a faculty member |
 | `PUT` | `/courses/facultyapi/faculties/:id` | Admin | Update a faculty member |
 | `DELETE` | `/courses/facultyapi/faculties/:id` | Admin | Delete a faculty member |

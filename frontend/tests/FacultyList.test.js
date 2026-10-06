@@ -86,9 +86,9 @@ describe("Feature 4 — Faculty Management", () => {
   });
 
   describe("US-4.2 — Browse the faculty list", () => {
-    it("User views existing faculty", async () => {
+    it("Admin views existing faculty", async () => {
       facultyServices.getAll.mockResolvedValue({ data: [ada] });
-      const wrapper = await mountList("student");
+      const wrapper = await mountList("admin");
 
       expect(wrapper.text()).toContain("Ada");
       expect(wrapper.text()).toContain("Lovelace");
@@ -96,8 +96,8 @@ describe("Feature 4 — Faculty Management", () => {
       wrapper.unmount();
     });
 
-    it("User has no existing faculty", async () => {
-      const wrapper = await mountList("student");
+    it("Admin has no existing faculty", async () => {
+      const wrapper = await mountList("admin");
 
       expect(wrapper.text()).toContain(
         "No faculty yet. Create your first faculty member.",

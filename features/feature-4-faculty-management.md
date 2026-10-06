@@ -21,7 +21,7 @@
 **Acceptance scenarios:** see ### US-4.1 under Acceptance Criteria
 
 ### US-4.2: Browse the faculty list
-**As a** signed-in user
+**As a** signed-in admin
 **I want to** see every faculty member with first name, last name, and department
 **So that** I know who can teach a section
 **Priority:** P1
@@ -50,10 +50,10 @@
 
 ### Functional Requirements
 
-- **FR-001**: An admin MUST be signed in to create, update, or delete a faculty member.
+- **FR-001**: An admin MUST be signed in to view, create, update, or delete a faculty member.
 - **FR-002**: The system MUST require `firstName`, `lastName`, and `dept` when creating or updating a faculty member.
-- **FR-003**: Created faculty are a shared catalogue. Every signed-in user can view every faculty member. A faculty row has no owner and no `userId`.
-- **FR-004**: Only an admin can create, edit, or delete a faculty member. A signed-in non-admin can list faculty and cannot change them.
+- **FR-003**: Created faculty are a shared catalogue. Every signed-in admin can view every faculty member. A faculty row has no owner and no `userId`.
+- **FR-004**: Only an admin can view, create, edit, or delete a faculty member. A signed-in non-admin cannot access Faculty Management.
 - **FR-005**: On edit, `firstName`, `lastName`, and `dept` are required.
 - **FR-006**: Edited information MUST be saved on the affected faculty row when an admin confirms the edit.
 - **FR-007**: A faculty member MUST be completely erased when an admin confirms delete.
@@ -64,15 +64,15 @@
 ## Assumptions
 
 - Feature 1 authentication and session handling MUST be merged to `dev` before implementing this feature.
-- Only authenticated users with admin privileges can create, edit, or delete faculty.
-- Every signed-in user can browse the faculty list.
+- Only authenticated users with admin privileges can access Faculty Management (view, create, edit, or delete).
 - Faculty members are referenced later by Section Management through `facultyId` (Feature 5).
 - Deleting a faculty member who is still referenced by a section is out of scope for conflict messaging beyond a normal database/API failure, unless a later feature adds that rule.
 
 ## Edge Cases
 
 - An unauthenticated user attempts to access Faculty Management → redirect or `401`.
-- A signed-in non-admin attempts `POST`, `PUT`, or `DELETE` → `403`.
+- A signed-in non-admin attempts `GET`, `POST`, `PUT`, or `DELETE` → `403`.
+- A signed-in non-admin opens `/faculty` → redirect to home.
 - Empty or whitespace-only `firstName`, `lastName`, or `dept` → `400`.
 - `firstName`, `lastName`, or `dept` longer than 100 characters → `400`.
 - Non-numeric `:id` → `400` with `"Invalid faculty id."`.
@@ -81,23 +81,23 @@
 ## Success Criteria
 
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
-- **SC-002**: Every signed-in user can view every faculty member on one screen. An admin can create, edit, and delete faculty on that screen.
+- **SC-002**: A signed-in admin can view every faculty member on one screen and can create, edit, and delete faculty on that screen. Students cannot open Faculty Management.
 - **SC-003**: `npm test` passes for the faculty API and the Faculty page.
 
 ---
 
 ## Data Ownership & Isolation
 
-Faculty are a shared catalogue. A faculty member has no owner and no `userId`. Every signed-in user sees the same rows (**FR-003**). Only an admin can create, edit, or delete (**FR-004**).
+Faculty are a shared catalogue among admins. A faculty member has no owner and no `userId`. Every signed-in admin sees the same rows (**FR-003**). Only an admin can view, create, edit, or delete (**FR-004**).
 
 | Rule | Requirement |
 |------|-------------|
-| **Read scope** | `GET /courses/facultyapi/faculties` returns every faculty member, ordered by `lastName` then `firstName` ascending (**FR-008**). Do not filter by `req.user.id` |
+| **Read scope** | `GET /courses/facultyapi/faculties` returns every faculty member, ordered by `lastName` then `firstName` ascending (**FR-008**). Do not filter by `req.user.id`. Caller must be an admin |
 | **Write scope** | `PUT` / `DELETE /courses/facultyapi/faculties/:id` update or erase the row with that primary key. Missing id → `404`. Caller must be an admin |
 | **Create scope** | `POST /courses/facultyapi/faculties` inserts a shared row. Do not set `userId` from the session or the body. Caller must be an admin |
-| **Non-admin write** | A signed-in user who is not an admin → `403` on `POST`, `PUT`, and `DELETE` |
-| **UI scope** | `FacultyList.vue` shows the full list from the API. Show **+ New Faculty**, **Edit faculty**, and **Delete faculty** only when the signed-in user is an admin |
-| **Implementation** | Protect all four routes with `authenticate`. Protect `POST`, `PUT`, and `DELETE` with `requireAdmin`. Do not scope queries by `req.user.id` |
+| **Non-admin access** | A signed-in user who is not an admin → `403` on `GET`, `POST`, `PUT`, and `DELETE`. UI redirects non-admins away from `/faculty` |
+| **UI scope** | `FacultyList.vue` is an admin-only screen. Show **+ New Faculty**, **Edit faculty**, and **Delete faculty** for the signed-in admin |
+| **Implementation** | Protect all four routes with `authenticate` and `requireAdmin`. Do not scope queries by `req.user.id` |
 
 Unauthenticated callers → `401`.
 
@@ -111,7 +111,7 @@ Mount prefix is `/courses/facultyapi`. The app mounts routes under `/courses` in
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/courses/facultyapi/faculties` | Yes | List every faculty member, alphabetical by last name then first name (**FR-003**, **FR-008**, US-4.2) |
+| `GET` | `/courses/facultyapi/faculties` | Admin | List every faculty member, alphabetical by last name then first name (**FR-003**, **FR-008**, US-4.2) |
 | `POST` | `/courses/facultyapi/faculties` | Admin | Create a faculty member (**FR-001**, **FR-002**, **FR-004**, US-4.1) |
 | `PUT` | `/courses/facultyapi/faculties/:id` | Admin | Replace first name, last name, or department of an existing faculty member (**FR-005**, **FR-006**, US-4.3) |
 | `DELETE` | `/courses/facultyapi/faculties/:id` | Admin | Erase an existing faculty member (**FR-004**, **FR-007**, US-4.4) |
@@ -151,7 +151,7 @@ This feature does **not** add `GET /courses/facultyapi/faculties/:id` or delete-
 - Field longer than 100 characters → `400` with a message naming that field
 - Non-numeric `:id` → `400` `{ "message": "Invalid faculty id." }`
 - Missing id → `404` `{ "message": "Cannot find faculty with id=${id}." }`
-- Signed-in non-admin `POST` / `PUT` / `DELETE` → `403` `{ "message": "Forbidden! Admin access required." }`
+- Signed-in non-admin `GET` / `POST` / `PUT` / `DELETE` → `403` `{ "message": "Forbidden! Admin access required." }`
 
 **Other errors:** empty or whitespace-only required fields → `400`; unauthenticated → `401`. Flat JSON — no `{ success, data }` envelope.
 
@@ -163,10 +163,10 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 
 *   **Route:** `/faculty` → `frontend/src/views/FacultyList.vue`.
 *   **Heading:** **Faculty**
-*   **Purpose:** One screen where every signed-in user browses every faculty member, and an admin creates, edits, and deletes faculty (**SC-002**).
-*   **Primary action:** **+ New Faculty** (`oc-cta`) — opens the add dialog (US-4.1). Shown only for admins.
+*   **Purpose:** One screen where a signed-in admin browses every faculty member and creates, edits, and deletes faculty (**SC-002**).
+*   **Primary action:** **+ New Faculty** (`oc-cta`) — opens the add dialog (US-4.1).
 *   **Table columns:** First Name, Last Name, Department, Actions (US-4.2).
-*   **Row actions (icon-only, `size="small"`), admins only:**
+*   **Row actions (icon-only, `size="small"`):**
     *   **Edit faculty** — `aria-label="Edit faculty"`; opens the edit dialog (US-4.3).
     *   **Delete faculty** — `aria-label="Delete faculty"`; opens the delete confirm dialog (US-4.4).
 *   **Add dialog:** title **Add Faculty**. Fields: First Name, Last Name, Department — all required. **Create** submits create. **Cancel** dismisses without saving. The dialog closes after a successful create.
@@ -179,7 +179,8 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 
 **App chrome**
 
-*   `MenuBar` **Faculty** button (`:to="{ name: 'faculty' }"`) reaches US-4.2. Admins and students who are signed in may open the list; only admins see create/edit/delete controls.
+*   `MenuBar` **Faculty** button (`:to="{ name: 'faculty' }"`) reaches US-4.2. Shown only when `role === "admin"`.
+*   Router sends non-admins who open `/faculty` to home.
 *   MenuBar stays hidden on login (Feature 1).
 
 ## Data Model Requirements
@@ -234,18 +235,23 @@ Feature 5 — Section Management associates **Section** belongsTo **Faculty** (`
 
 ### US-4.2 — Browse the faculty list
 
-#### Scenario: User views existing faculty
-*   **Given** I am signed in
+#### Scenario: Admin views existing faculty
+*   **Given** I am signed in as an admin
 *   **And** faculty members exist
 *   **When** I open the faculty menu
 *   **Then** existing faculty are displayed in alphabetical order by last name then first name
 *   **And** each row shows first name, last name, and department
 
-#### Scenario: User has no existing faculty
-*   **Given** I am signed in
+#### Scenario: Admin has no existing faculty
+*   **Given** I am signed in as an admin
 *   **And** there are no faculty members
 *   **When** I open the faculty menu
 *   **Then** I see `"No faculty yet. Create your first faculty member."`
+
+#### Scenario: Non-admin cannot list faculty
+*   **Given** I am signed in as a non-admin
+*   **When** I send `GET /courses/facultyapi/faculties`
+*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
 
 ---
 
@@ -297,8 +303,9 @@ Each scenario above must map to at least one automated test.
 | US-4.1 | Admin creates a new faculty member | `backend/tests/faculties.test.js` | Admin creates a new faculty member |
 | US-4.1 | Admin creates a faculty member with a missing required field | `frontend/tests/FacultyList.test.js` | Admin creates a faculty member with a missing required field |
 | US-4.1 | Non-admin cannot create a faculty member | `backend/tests/faculties.test.js` | Non-admin cannot create a faculty member |
-| US-4.2 | User views existing faculty | `frontend/tests/FacultyList.test.js` | User views existing faculty |
-| US-4.2 | User has no existing faculty | `frontend/tests/FacultyList.test.js` | User has no existing faculty |
+| US-4.2 | Admin views existing faculty | `frontend/tests/FacultyList.test.js` | Admin views existing faculty |
+| US-4.2 | Admin has no existing faculty | `frontend/tests/FacultyList.test.js` | Admin has no existing faculty |
+| US-4.2 | Non-admin cannot list faculty | `backend/tests/faculties.test.js` | Non-admin cannot list faculty |
 | US-4.3 | Admin edits a faculty member's information | `backend/tests/faculties.test.js` | Admin edits a faculty member's information |
 | US-4.3 | Admin edits a faculty member with a missing required field | `frontend/tests/FacultyList.test.js` | Admin edits a faculty member with a missing required field |
 | US-4.4 | Admin deletes a faculty member | `backend/tests/faculties.test.js` | Admin deletes a faculty member |
