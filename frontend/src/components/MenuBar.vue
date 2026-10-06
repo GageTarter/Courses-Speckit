@@ -1,9 +1,11 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import Utils from "../config/utils.js";
 import { emailRules } from "../config/validation.js";
 import authServices from "../services/authServices.js";
 
+const router = useRouter();
 const user = ref(Utils.getStore("user"));
 const profileMenuOpen = ref(false);
 const editDialogOpen = ref(false);
@@ -154,44 +156,57 @@ const handleLogout = async () => {
 
   try {
     await authServices.logoutUser();
+  } catch {
+    // Clear local session even if the API call fails.
   } finally {
+    Utils.removeItem("user");
+    window.dispatchEvent(new CustomEvent("user-logged-out"));
     loggingOut.value = false;
+    router.push({ name: "login" });
   }
 };
 </script>
 
 <template>
   <v-app-bar
+    v-if="user"
     color="primary"
     density="comfortable"
   >
-    <v-app-bar-title>
-  Course Management System
-</v-app-bar-title>
+    <v-app-bar-title>Course Management System</v-app-bar-title>
 
-<v-btn
-  variant="text"
-  color="white"
-  to="/courses"
-  class="ml-4"
->
-  Courses
-</v-btn>
+    <v-btn
+      variant="text"
+      color="white"
+      to="/courses"
+      class="ml-4"
+    >
+      Courses
+    </v-btn>
 
-<v-btn
-  v-if="user?.role === 'admin'"
-  variant="text"
-  color="white"
-  to="/sections"
-  class="ml-2"
->
-  Sections
-</v-btn>
+    <v-btn
+      v-if="user?.role === 'admin'"
+      variant="text"
+      color="white"
+      to="/sections"
+      class="ml-2"
+    >
+      Sections
+    </v-btn>
 
-<v-spacer />
-    <!-- Profile Menu -->
+    <v-btn
+      v-if="user?.role === 'admin'"
+      variant="text"
+      color="white"
+      to="/faculty"
+      class="ml-2"
+    >
+      Faculty
+    </v-btn>
+
+    <v-spacer />
+
     <v-menu
-      v-if="user"
       v-model="profileMenuOpen"
       :close-on-content-click="false"
     >
@@ -242,7 +257,6 @@ const handleLogout = async () => {
       </v-card>
     </v-menu>
 
-    <!-- Edit Profile Dialog -->
     <v-dialog
       v-model="editDialogOpen"
       max-width="560"
