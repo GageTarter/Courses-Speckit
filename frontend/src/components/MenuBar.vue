@@ -1,10 +1,11 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import Utils from "../config/utils.js";
 import { emailRules } from "../config/validation.js";
 import authServices from "../services/authServices.js";
 
+const route = useRoute();
 const router = useRouter();
 const user = ref(Utils.getStore("user"));
 const profileMenuOpen = ref(false);
@@ -141,6 +142,14 @@ const handleSaveProfile = async () => {
     );
 
     closeEditDialog();
+
+    const nextRole = Utils.getStore("user")?.role;
+    if (
+      nextRole !== "admin" &&
+      (route.name === "faculty" || route.name === "sections")
+    ) {
+      router.push({ name: "home" });
+    }
   } catch (error) {
     profileError.value =
       error.response?.data?.message ||
@@ -188,20 +197,20 @@ const handleLogout = async () => {
       v-if="user?.role === 'admin'"
       variant="text"
       color="white"
-      to="/sections"
+      to="/faculty"
       class="ml-2"
     >
-      Sections
+      Faculty
     </v-btn>
 
     <v-btn
       v-if="user?.role === 'admin'"
       variant="text"
       color="white"
-      to="/faculty"
+      to="/sections"
       class="ml-2"
     >
-      Faculty
+      Sections
     </v-btn>
 
     <v-spacer />

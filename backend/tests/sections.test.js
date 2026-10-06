@@ -18,12 +18,13 @@ const validSection = {
 };
 
 let adminToken;
+let facultyId;
 
 async function createSection(overrides = {}) {
   return request(app)
     .post("/courses/sections")
     .set("Authorization", `Bearer ${adminToken}`)
-    .send({ ...validSection, ...overrides });
+    .send({ ...validSection, facultyId, ...overrides });
 }
 
 beforeAll(async () => {
@@ -39,6 +40,13 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await db.section.destroy({ where: {} });
+  await db.faculty.destroy({ where: {} });
+  const faculty = await db.faculty.create({
+    firstName: "Ada",
+    lastName: "Lovelace",
+    dept: "Computer Science",
+  });
+  facultyId = faculty.id;
 });
 
 describe("Feature 5 — Section Management", () => {
@@ -111,6 +119,15 @@ describe("Feature 5 — Section Management", () => {
       });
     });
 
+    it("Unknown faculty id returns 404", async () => {
+      const response = await createSection({ facultyId: 999 });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({
+        message: "Cannot find faculty with id=999.",
+      });
+    });
+
     it("A section number can be reused for a different course or semester", async () => {
       const first = await createSection({ courseId: 1, semesterId: 1 });
       const otherCourse = await createSection({ courseId: 2, semesterId: 1 });
@@ -136,7 +153,7 @@ describe("Feature 5 — Section Management", () => {
       const response = await request(app)
         .put("/courses/sections/abc")
         .set("Authorization", `Bearer ${adminToken}`)
-        .send(validSection);
+        .send({ ...validSection, facultyId });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "Invalid section id." });
@@ -146,7 +163,7 @@ describe("Feature 5 — Section Management", () => {
       const response = await request(app)
         .put("/courses/sections/999")
         .set("Authorization", `Bearer ${adminToken}`)
-        .send(validSection);
+        .send({ ...validSection, facultyId });
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({

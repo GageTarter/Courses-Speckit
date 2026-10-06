@@ -341,7 +341,6 @@ Do not implement behavior not in this spec.
 
 *   `GET /courses/facultyapi/faculties/:id` and delete-all
 *   Faculty login accounts (Feature 1 roles stay `student` and `admin` only)
-*   Section faculty name menu wiring beyond providing the catalogue (Feature 5 may still send numeric `facultyId` until it is updated to use this list)
 *   Enrollment (Feature 6 — Enrollment Management)
 *   Student course listing (Feature 7 — Student Course Listing)
 *   Section student listing (Feature 8 — Section Student Listing)

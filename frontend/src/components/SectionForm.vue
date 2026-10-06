@@ -5,6 +5,7 @@ import { offeredSemesters } from "../utils/semesters.js";
 const props = defineProps({
   modelValue: { type: Object, required: true },
   courses: { type: Array, default: () => [] },
+  faculties: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(["update:modelValue", "submit"]);
@@ -54,6 +55,13 @@ const courseOptions = computed(() =>
 const courseRules = [
   (value) => !!value || "Required",
 ];
+
+const facultyOptions = computed(() =>
+  props.faculties.map((faculty) => ({
+    id: faculty.id,
+    label: `${faculty.firstName} ${faculty.lastName}`.trim(),
+  })),
+);
 
 const facultyRules = [
   (value) => !!value || "Required",
@@ -114,11 +122,14 @@ defineExpose({ validate });
       @update:model-value="updateField('courseId', $event)"
     />
 
-    <v-text-field
+    <v-select
       :model-value="modelValue.facultyId"
-      label="Faculty ID"
-      type="number"
+      label="Faculty"
+      :items="facultyOptions"
+      item-title="label"
+      item-value="id"
       density="comfortable"
+      no-data-text="No faculty yet. Create one on the Faculty page."
       :rules="facultyRules"
       @update:model-value="updateField('facultyId', $event)"
     />

@@ -33,6 +33,19 @@ const isValidTime = (value) => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 };
 
+const assertFacultyExists = async (facultyId) => {
+  const faculty = await db.faculty.findByPk(facultyId);
+
+  if (!faculty) {
+    return {
+      status: 404,
+      message: `Cannot find faculty with id=${facultyId}.`,
+    };
+  }
+
+  return null;
+};
+
 exports.findAll = async (req, res) => {
   try {
     const sections = await db.section.findAll({
@@ -89,6 +102,14 @@ exports.create = async (req, res) => {
     if (facultyId === null) {
       return res.status(400).send({
         message: "facultyId is required.",
+      });
+    }
+
+    const missingFaculty = await assertFacultyExists(facultyId);
+
+    if (missingFaculty) {
+      return res.status(missingFaculty.status).send({
+        message: missingFaculty.message,
       });
     }
 
@@ -209,6 +230,14 @@ exports.update = async (req, res) => {
     if (facultyId === null) {
       return res.status(400).send({
         message: "facultyId is required.",
+      });
+    }
+
+    const missingFaculty = await assertFacultyExists(facultyId);
+
+    if (missingFaculty) {
+      return res.status(missingFaculty.status).send({
+        message: missingFaculty.message,
       });
     }
 

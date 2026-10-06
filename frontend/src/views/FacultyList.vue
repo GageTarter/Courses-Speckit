@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import facultyServices from "../services/facultyServices.js";
 import Utils from "../config/utils.js";
 
+const router = useRouter();
 const faculties = ref([]);
 const loading = ref(false);
 const listError = ref("");
@@ -27,6 +29,10 @@ const isAdmin = computed(() => user.value?.role === "admin");
 
 const refreshUser = () => {
   user.value = Utils.getStore("user");
+
+  if (user.value?.role !== "admin") {
+    router.push({ name: "home" });
+  }
 };
 
 const formTitle = computed(() =>

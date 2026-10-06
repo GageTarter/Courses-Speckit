@@ -50,3 +50,5 @@ Shared catalogue — no `userId` / owner.
 
 - `User hasMany Session` (`foreignKey: userId`)
 - `Session belongsTo User` (`foreignKey: userId`)
+- `Faculty hasMany Section` (`foreignKey: facultyId`)
+- `Section belongsTo Faculty` (`foreignKey: facultyId`)

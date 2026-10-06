@@ -65,7 +65,7 @@
 - **FR-007**: The system MUST list only sections owned by the signed-in admin (`userId` equals that admin).
 - **FR-008**: The signed-in admin MUST be able to update `sectionNumber`, `semesterId`, `courseId`, `facultyId`, `daysOfWeek`, `startTime`, and `endTime` on sections they own. 
 - **FR-009**: The system MUST return `400` when `startTime` is equal to or later than `endTime`.
-- **FR-010**: The Sections page MUST display each section's section number as two digits (`01`), the semester name (Fall, Winter, Spring, or Summer), the numeric `courseId`, the numeric `facultyId`, the days of the week, the start time, and the end time.
+- **FR-010**: The Sections page MUST display each section's section number as two digits (`01`), the semester name (Fall, Winter, Spring, or Summer), the course code when available, the faculty member's first and last name when available (otherwise the numeric `facultyId`), the days of the week, the start time, and the end time.
 - **FR-011**: The system MUST NOT let an admin read, update, or delete a section owned by another admin. Such a request MUST return `404` with `` `Cannot find section with id=${id}.` `` rather than `403`.
 - **FR-012**: The system MUST return `404` with `` `Cannot find section with id=${id}.` `` when the requested section does not exist.
 - **FR-013**: Deleting a section MUST also remove that sections's details,leaving no orphaned rows.
@@ -170,12 +170,12 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 *   **Heading:** **Sections**
 *   **Purpose:** One screen to create, browse, edit, and delete the signed-in admin's sections (**SC-002**).
 *   **Primary action:** **+ New Section** (`oc-cta`) — opens the add dialog (US-5.1).
-*   **Table columns:** Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, Actions (US-5.2). Section Number displays as two digits (`1` shows as `01`). The stored value stays the integer. Semester displays as **Fall**, **Winter**, **Spring**, or **Summer**. Course displays `course.courseID` from the course list when that list loads, and the numeric `courseId` when it does not. Faculty displays the numeric `facultyId`.
+*   **Table columns:** Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, Actions (US-5.2). Section Number displays as two digits (`1` shows as `01`). The stored value stays the integer. Semester displays as **Fall**, **Winter**, **Spring**, or **Summer**. Course displays `course.courseID` from the course list when that list loads, and the numeric `courseId` when it does not. Faculty displays `firstName lastName` from the faculty list when that list loads, and the numeric `facultyId` when it does not.
 *   **Row actions (icon-only, `size="small"`):**
     *   **Edit section** — `aria-label="Edit section"`; opens the edit dialog (US-5.3).
     *   **Delete section** — `aria-label="Delete section"`; opens the delete confirm dialog (US-5.4).
-*   **Add dialog:** title **Add Section**. Fields: Section Number, Semester, Course ID, Faculty ID, Days of the Week, Start Time, End Time, all required. **Semester** is a select of **Fall**, **Winter**, **Spring**, and **Summer** (`semesterId` `1`, `4`, `2`, and `3`). **Course** is a select of courses from `http://localhost:3200/courseapi/courses`. Each item shows `courseID` and name. The saved value is `course.id`. Faculty ID is a number input. **Start Time** and **End Time** use the device time picker (`type="time"`); the value sent and shown is `HH:MM` (for example `11:40`). **Create** submits create. **Cancel** dismisses without saving. The dialog closes after a successful create.
-x*   **Edit dialog:** title **Edit Section**. Same fields as the add dialog, prefilled from the row. **Save Section** submits update. **Cancel** dismisses. The dialog closes after a successful update.
+*   **Add dialog:** title **Add Section**. Fields: Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, all required. **Semester** is a select of **Fall**, **Winter**, **Spring**, and **Summer** (`semesterId` `1`, `4`, `2`, and `3`). **Course** is a select of courses from the course catalogue. Each item shows `courseID` and name. The saved value is `course.id`. **Faculty** is a select of faculty from `GET /courses/facultyapi/faculties`. Each item shows `firstName lastName`. The saved value is `faculty.id`. **Start Time** and **End Time** use the device time picker (`type="time"`); the value sent and shown is `HH:MM` (for example `11:40`). **Create** submits create. **Cancel** dismisses without saving. The dialog closes after a successful create.
+*   **Edit dialog:** title **Edit Section**. Same fields as the add dialog, prefilled from the row. **Save Section** submits update. **Cancel** dismisses. The dialog closes after a successful update.
 *   **Delete dialog:** title **Delete Section**, body `"Delete this section?"`. **Delete Section** calls `DELETE`. **Cancel** leaves the row in place.
 *   **Inline validation:** required fields must be validated before sending the API request.
 *   **Empty state:** `"No sections yet. Create your first section."` when the signed-in admin has no sections (US-5.2).
@@ -355,7 +355,6 @@ Do not implement behavior not in this spec.
 ## Out of Scope
 
 *   `GET /courses/sections/:id` and delete-all
-*   A menu of faculty names (Feature 4 — Faculty Management)
 *   A year on the semester, such as Fall 2026 (Feature 2 — Semester Management)
 *   Enrollment (Feature 6 — Enrollment Management)
 *   Student course listing (Feature 7 — Student Course Listing)

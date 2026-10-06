@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import sectionServices from "../services/sectionServices.js";
+import facultyServices from "../services/facultyServices.js";
 import { getCourses } from "../services/courseCatalog.js";
 import { semesterName } from "../utils/semesters.js";
 import SectionForm from "../components/SectionForm.vue";
@@ -17,6 +18,7 @@ const emptyForm = () => ({
 
 const sections = ref([]);
 const courses = ref([]);
+const faculties = ref([]);
 const loading = ref(false);
 const listError = ref("");
 const formDialogOpen = ref(false);
@@ -37,12 +39,31 @@ const courseLabel = (courseId) => {
   return course?.courseID || courseId;
 };
 
+const facultyLabel = (facultyId) => {
+  const faculty = faculties.value.find((item) => item.id === Number(facultyId));
+
+  if (!faculty) {
+    return facultyId;
+  }
+
+  return `${faculty.firstName} ${faculty.lastName}`.trim();
+};
+
 const loadCourses = async () => {
   try {
     const response = await getCourses();
     courses.value = response.data || [];
   } catch {
     courses.value = [];
+  }
+};
+
+const loadFaculties = async () => {
+  try {
+    const response = await facultyServices.getAll();
+    faculties.value = response.data || [];
+  } catch {
+    faculties.value = [];
   }
 };
 
@@ -71,6 +92,7 @@ const retrieveSections = async () => {
 
 const openAddDialog = () => {
   loadCourses();
+  loadFaculties();
   isAddMode.value = true;
   editingId.value = null;
   form.value = emptyForm();
@@ -80,6 +102,7 @@ const openAddDialog = () => {
 
 const openEditDialog = (section) => {
   loadCourses();
+  loadFaculties();
   isAddMode.value = false;
   editingId.value = section.id;
 
@@ -184,6 +207,7 @@ const confirmDeleteSection = async () => {
 onMounted(() => {
   retrieveSections();
   loadCourses();
+  loadFaculties();
 });
 </script>
 
@@ -255,7 +279,7 @@ onMounted(() => {
 
               <td>{{ courseLabel(section.courseId) }}</td>
 
-              <td>{{ section.facultyId }}</td>
+              <td>{{ facultyLabel(section.facultyId) }}</td>
 
               <td>
                 {{
@@ -307,6 +331,7 @@ onMounted(() => {
             ref="formRef"
             v-model="form"
             :courses="courses"
+            :faculties="faculties"
             @submit="saveSection"
           />
 

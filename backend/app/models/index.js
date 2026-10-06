@@ -19,4 +19,7 @@ db.faculty = facultyModel(sequelize, Sequelize);
 db.user.hasMany(db.session, { foreignKey: "userId" });
 db.session.belongsTo(db.user, { foreignKey: "userId" });
 
+db.faculty.hasMany(db.section, { foreignKey: "facultyId" });
+db.section.belongsTo(db.faculty, { foreignKey: "facultyId" });
+
 export default db;

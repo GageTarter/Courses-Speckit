@@ -71,3 +71,5 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Only admins can view or change faculty | `authenticate` + `requireAdmin` on all faculty routes |
 | Faculty menu and `/faculty` are admin-only | `MenuBar.vue` `v-if="user?.role === 'admin'"`; router redirects non-admins to home |
 | List sort is last name, then first name | `faculty.controller.js` `findAll` order |
+| Section form picks faculty by name and stores `facultyId` | `SectionForm.vue` select; create/update reject unknown faculty with `404` |
+| Sections table shows faculty name when the list is loaded | `SectionList.vue` `facultyLabel` |
