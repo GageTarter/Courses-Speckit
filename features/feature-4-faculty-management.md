@@ -294,6 +294,14 @@ Feature 5 — Section Management associates **Section** belongsTo **Faculty** (`
 *   **Then** no delete request is sent
 *   **And** the faculty member remains listed
 
+#### Scenario: Admin cancels deleting a faculty member
+*   **Given** I am signed in as an admin
+*   **And** a faculty member exists
+*   **When** I click **Delete faculty**
+*   **And** I click **Cancel**
+*   **Then** no delete request is sent
+*   **And** the faculty member remains listed
+
 ---
 
 ## Test Coverage Map

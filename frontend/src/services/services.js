@@ -1,9 +1,14 @@
 import axios from "axios";
+
 import Utils from "../config/utils.js";
+
 import router from "../router.js";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.DEV ? "http://localhost:3201/courses/" : "/courses/",
+  baseURL: import.meta.env.DEV
+    ? "http://localhost:3201/courses/"
+    : "/courses/",
+
   withCredentials: true,
 });
 
@@ -26,8 +31,12 @@ apiClient.interceptors.response.use(
   (error) => {
     const message = error.response?.data?.message || "";
 
-    if (error.response?.status === 401 || /Unauthorized/i.test(message)) {
+    if (
+      error.response?.status === 401 ||
+      /Unauthorized/i.test(message)
+    ) {
       Utils.removeItem("user");
+
       if (router.hasRoute("login")) {
         router.push({ name: "login" });
       }

@@ -71,6 +71,8 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Only admins can view or change faculty | `authenticate` + `requireAdmin` on all faculty routes |
 | Faculty menu and `/faculty` are admin-only | `MenuBar.vue` `v-if="user?.role === 'admin'"`; router redirects non-admins to home |
 | List sort is last name, then first name | `faculty.controller.js` `findAll` order |
+| Section form picks faculty by name and stores `facultyId` | `SectionForm.vue` select; create/update reject unknown faculty with `404` |
+| Sections table shows faculty name when the list is loaded | `SectionList.vue` `facultyLabel` |
 
 ## Enrollment — [Feature 6](../feature-6-enrollment-management.md)
 
@@ -81,5 +83,5 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | One enrollment per section | Unique (`userId`, `sectionId`) plus a `400` before insert |
 | One section per course per semester | Controller checks sibling sections |
 | Capacity is a hard cap | Count enrollments vs `section.capacity` |
-| Seats are not stored | `remainingSeats` on `GET /courses/sections` |
-| Catalog has no public write API | Seed script `seed-catalog`; Features 2/3/5 add admin CRUD later |
+| Seats are not stored | `remainingSeats` on `GET /courses/catalog/sections` |
+| Catalog browse for enrollment | `GET /courses/semesters` and `GET /courses/catalog/sections` |
