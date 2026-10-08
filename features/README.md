@@ -18,7 +18,7 @@ Regenerate writing-guide PDFs: `npm run writing-guides:pdf`
 |----|------|--------|--------|------------|
 | 1 | [feature-1-user-auth.md](./feature-1-user-auth.md) | `feature/1-user-auth` | Ready | — |
 | 2 | [feature-2-course-management.md](./feature-2-course-management.md) | `feature/2-course-management` | Draft | Feature 1 |
-| 3 | feature-3-semester-management.md | `feature/3-semester-management` | Not written | Feature 1 |
+| 3 | [feature-3-semester-management.md](./feature-3-semester-management.md) | `feature/3-semester-management` | Draft | Feature 1 |
 | 4 | [feature-4-faculty-management.md](./feature-4-faculty-management.md) | `feature/4-faculty-management` | Draft | Feature 1 |
 | 5 | [feature-5-section-management.md](./feature-5-section-management.md) | `feature/5-section-management` | Draft | Features 1, 2, 3, 4 |
 | 6 | [feature-6-enrollment-management.md](./feature-6-enrollment-management.md) | `feature/6-enrollment-management` | Draft | Features 1, 2, 3, 5 |

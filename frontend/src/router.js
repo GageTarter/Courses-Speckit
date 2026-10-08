@@ -5,7 +5,9 @@ import CourseList from "./views/CourseList.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
 import FacultyList from "./views/FacultyList.vue";
+import Enroll from "./views/Enroll.vue";
 import Utils from "./config/utils.js";
+import { ROLES } from "./config/roles.js";
 
 const PUBLIC_ROUTES = ["login", "register"];
 
@@ -43,6 +45,12 @@ const router = createRouter({
       component: Register,
     },
     {
+      path: "/enroll",
+      name: "enroll",
+      component: Enroll,
+      meta: { roles: [ROLES.STUDENT] },
+    },
+    {
       path: "/:pathMatch(.*)*",
       redirect: { name: "home" },
     },
@@ -66,6 +74,14 @@ router.beforeEach((to) => {
     Utils.getStore("user")?.role !== "admin"
   ) {
     return { name: "home" };
+  }
+
+  const allowedRoles = to.meta.roles;
+  if (allowedRoles?.length) {
+    const role = Utils.getStore("user")?.role;
+    if (!allowedRoles.includes(role)) {
+      return { name: "home" };
+    }
   }
 
   return true;

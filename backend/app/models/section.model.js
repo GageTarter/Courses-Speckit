@@ -40,10 +40,16 @@ export default (sequelize, Sequelize) => {
       type: Sequelize.STRING(5),
       allowNull: false,
     },
-    
+
     endTime: {
       type: Sequelize.STRING(5),
       allowNull: false,
+    },
+
+    capacity: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 30,
     },
   });
 

@@ -14,7 +14,7 @@ export default (sequelize, Sequelize) => {
       allowNull: true,
     },
     semesterOffered: {
-      type: Sequelize.ENUM('Fall', 'Spring', 'Summer', 'Winter'),
+      type: Sequelize.ENUM("Fall", "Spring", "Summer", "Winter"),
       allowNull: true,
     },
   });
