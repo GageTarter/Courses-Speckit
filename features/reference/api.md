@@ -15,15 +15,6 @@ All routes are mounted under `/courses` (see `backend/server.js`).
 | `POST` | `/courses/login` | No | Authenticate and return the session payload |
 | `POST` | `/courses/logout` | Yes | Delete the caller's session row |
 
-### Faculty — [Feature 4](../feature-4-faculty-management.md)
-
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| `GET` | `/courses/facultyapi/faculties` | Admin | List every faculty member |
-| `POST` | `/courses/facultyapi/faculties` | Admin | Create a faculty member |
-| `PUT` | `/courses/facultyapi/faculties/:id` | Admin | Update a faculty member |
-| `DELETE` | `/courses/facultyapi/faculties/:id` | Admin | Delete a faculty member |
-
 **Register request body:**
 ```json
 {

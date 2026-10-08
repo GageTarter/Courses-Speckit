@@ -60,17 +60,9 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Anonymous visitors are redirected to `login` | `router.beforeEach` in `frontend/src/router.js` |
 | Signed-in users are redirected away from `login` and `register` | Same guard |
 | Client validation blocks submission before any API call | `v-form` `validate()` gates both auth views |
+| There is no `MenuBar` yet | `App.vue` renders `router-view` only; **Sign out** lives on the home page until a later feature adds app chrome |
 | Home shows the signed-in first name and a role chip | `Home.vue` |
 | Students reach enrollment from Home **Section Enrollment**; admins are redirected away from `enroll` | `router.js` + `Home.vue` |
-
-## Faculty — [Feature 4](../feature-4-faculty-management.md)
-
-| Rule | Enforcement |
-|------|-------------|
-| Faculty are a shared catalogue with no owner / `userId` | `faculty.model.js`; list is not filtered by `req.user.id` |
-| Only admins can view or change faculty | `authenticate` + `requireAdmin` on all faculty routes |
-| Faculty menu and `/faculty` are admin-only | `MenuBar.vue` `v-if="user?.role === 'admin'"`; router redirects non-admins to home |
-| List sort is last name, then first name | `faculty.controller.js` `findAll` order |
 
 ## Enrollment — [Feature 6](../feature-6-enrollment-management.md)
 
