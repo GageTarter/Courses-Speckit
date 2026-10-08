@@ -18,7 +18,7 @@
     "specs:pdf:setup": "npx puppeteer browsers install chrome",
     "writing-guides:pdf": "node scripts/export-writing-guides-pdf.mjs",
     "assignments:pdf": "node scripts/export-assignments-pdf.mjs",
-    "agility:export": "node scripts/export-agility-import.mjs --project \"OC CS Speckit\"",
+    "agility:export": "node scripts/export-agility-import.mjs --project \"Courses Speckit\"",
     "agility:push": "node scripts/push-agility-api.mjs",
     "agility:push:dry-run": "node scripts/push-agility-api.mjs --dry-run",
     "agility:verify": "node scripts/push-agility-api.mjs --verify",

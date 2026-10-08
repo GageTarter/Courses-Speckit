@@ -33,7 +33,6 @@ Sequelize models live in `backend/app/models/`; associations are wired in `model
 | `createdAt` / `updatedAt` | DATE | Sequelize timestamps |
 
 A session row is deleted on logout, so a replayed token no longer resolves.
-
 ### `faculties` — [Feature 4](../feature-4-faculty-management.md)
 
 | Field | Type | Rules |
@@ -46,7 +45,23 @@ A session row is deleted on logout, so a replayed token no longer resolves.
 
 Shared catalogue — no `userId` / owner.
 
+### `semesters` / `courses` / `sections` / `enrollments` — [Feature 6](../feature-6-enrollment-management.md)
+
+| Table | Fields |
+|-------|--------|
+| `semesters` | `id`, unique `name` |
+| `courses` | `id`, unique `code`, `title` |
+| `sections` | `id`, `sectionNumber`, `capacity` (≥ 1), `semesterId`, `courseId` |
+| `enrollments` | `id`, `userId`, `sectionId`, `enrolledAt`; unique (`userId`, `sectionId`) |
+
+`remainingSeats` is computed (`capacity` minus enrollment count), not stored.
+
 ## Associations
 
 - `User hasMany Session` (`foreignKey: userId`)
 - `Session belongsTo User` (`foreignKey: userId`)
+- `User hasMany Enrollment`
+- `Enrollment belongsTo User`
+- `Semester hasMany Section` / `Section belongsTo Semester`
+- `Course hasMany Section` / `Section belongsTo Course`
+- `Section hasMany Enrollment` / `Enrollment belongsTo Section`

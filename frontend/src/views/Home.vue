@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import authServices from "../services/authServices.js";
 import Utils from "../config/utils.js";
+import { isStudent } from "../config/roles.js";
 
 const router = useRouter();
 
@@ -33,8 +34,18 @@ const signOut = async () => {
     </v-chip>
 
     <p class="text-body-1 mb-6">
-      Semesters, courses, sections, and enrollment arrive in later features.
+      Use Section Enrollment to pick a semester and add the sections you want.
     </p>
+
+    <v-btn
+      v-if="isStudent(user)"
+      :to="{ name: 'enroll' }"
+      color="primary"
+      variant="elevated"
+      class="oc-cta mr-4"
+    >
+      Section Enrollment
+    </v-btn>
 
     <v-btn
       color="primary"

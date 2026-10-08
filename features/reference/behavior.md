@@ -60,8 +60,8 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Anonymous visitors are redirected to `login` | `router.beforeEach` in `frontend/src/router.js` |
 | Signed-in users are redirected away from `login` and `register` | Same guard |
 | Client validation blocks submission before any API call | `v-form` `validate()` gates both auth views |
-| There is no `MenuBar` yet | `App.vue` renders `router-view` only; **Sign out** lives on the home page until a later feature adds app chrome |
 | Home shows the signed-in first name and a role chip | `Home.vue` |
+| Students reach enrollment from Home **Section Enrollment**; admins are redirected away from `enroll` | `router.js` + `Home.vue` |
 
 ## Faculty — [Feature 4](../feature-4-faculty-management.md)
 
@@ -71,3 +71,15 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Only admins can view or change faculty | `authenticate` + `requireAdmin` on all faculty routes |
 | Faculty menu and `/faculty` are admin-only | `MenuBar.vue` `v-if="user?.role === 'admin'"`; router redirects non-admins to home |
 | List sort is last name, then first name | `faculty.controller.js` `findAll` order |
+
+## Enrollment — [Feature 6](../feature-6-enrollment-management.md)
+
+| Rule | Enforcement |
+|------|-------------|
+| Only the signed-in student owns their enrollments | `userId` from `req.user.id`; `getOwnedEnrollmentOrNull` → `404` |
+| Only students may create or drop enrollments | `requireStudent` → `403` |
+| One enrollment per section | Unique (`userId`, `sectionId`) plus a `400` before insert |
+| One section per course per semester | Controller checks sibling sections |
+| Capacity is a hard cap | Count enrollments vs `section.capacity` |
+| Seats are not stored | `remainingSeats` on `GET /courses/sections` |
+| Catalog has no public write API | Seed script `seed-catalog`; Features 2/3/5 add admin CRUD later |
