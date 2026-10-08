@@ -22,7 +22,7 @@ Teammates do not have to finish Features 2, 3, and 5 before enrollment works. Th
 - Sections are filtered with query param `semesterId` (not a nested route).
 - Each section **embeds** the parent `course` object so the enroll view does not make a second request.
 - Missing `semesterId` on `GET /courses/sections` → `400` `{ "message": "semesterId is required." }`
-- Catalog rows in development/demo come from `npm run seed-catalog --prefix backend`. Tests insert their own rows. There is no public write API for catalog data in this feature.
+- Catalog rows come from Features 2, 3, and 5 (or test helpers). There is no public write API for catalog data in this feature.
 
 ---
 
@@ -142,7 +142,7 @@ Each student owns their enrollments exclusively. Semesters, courses, and section
 | **Create scope** | New enrollment rows are owned by the authenticated user; `userId` never comes from the request body |
 | **Cross-user access** | Another student's enrollment → `404` (not `403`) |
 | **Role guard** | Create and delete require role `student` → `403` for admins (role guard, distinct from the ownership `404`) |
-| **Catalog data** | Semesters, courses, and sections are readable by any authenticated user. This feature has no public write API for them (seed script and tests only) |
+| **Catalog data** | Semesters, courses, and sections are readable by any authenticated user. This feature has no public write API for them (Features 2/3/5 and tests only) |
 | **UI scope** | The schedule panel renders only what `GET /courses/enrollments` returned for the signed-in student |
 | **Implementation** | Ownership lookup lives in a shared helper in `backend/app/authorization/` — controllers must not duplicate the scope clause |
 

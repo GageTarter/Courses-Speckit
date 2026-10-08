@@ -105,7 +105,7 @@ A `role` sent in the register body is ignored; self-registration always produces
 A `userId` in the body is ignored.  
 **DELETE `200`:** `{ "message": "Enrollment dropped." }`
 
-Admin create/update/delete for catalog rows is not exposed. Demo data: `npm run seed-catalog --prefix backend`.
+Admin create/update/delete for catalog rows is not exposed here; Features 2, 3, and 5 own those writes.
 
 ## Conventions
 

@@ -213,110 +213,107 @@ onMounted(() => {
 
 <template>
   <v-container class="py-8">
-    <v-card rounded="lg">
-      <v-card-item>
-        <v-card-title>Sections</v-card-title>
-
-        <template #append>
-          <v-btn
-            color="primary"
-            variant="elevated"
-            class="oc-cta"
-            @click="openAddDialog"
-          >
-            + New Section
-          </v-btn>
-        </template>
-      </v-card-item>
-
-      <v-card-text>
-        <v-progress-linear
-          v-if="loading"
-          indeterminate
-          class="mb-4"
-        />
-
-        <v-alert
-          v-if="listError"
-          type="error"
-          density="compact"
-          class="mb-4"
+    <v-row align="center" class="mb-4">
+      <v-col>
+        <h1 class="text-h4">Sections</h1>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn
+          color="primary"
+          variant="elevated"
+          class="oc-cta"
+          @click="openAddDialog"
         >
-          {{ listError }}
-        </v-alert>
+          + New Section
+        </v-btn>
+      </v-col>
+    </v-row>
 
-        <p
-          v-if="!loading && sections.length === 0"
-          class="text-body-1"
+    <v-progress-linear
+      v-if="loading"
+      indeterminate
+      class="mb-4"
+    />
+
+    <v-alert
+      v-if="listError"
+      type="error"
+      density="compact"
+      class="mb-4"
+    >
+      {{ listError }}
+    </v-alert>
+
+    <p
+      v-if="!loading && sections.length === 0"
+      class="text-body-1"
+    >
+      No sections yet. Create your first section.
+    </p>
+
+    <v-table v-if="!loading && sections.length > 0">
+      <thead>
+        <tr>
+          <th class="text-left">Section Number</th>
+          <th class="text-left">Semester</th>
+          <th class="text-left">Course</th>
+          <th class="text-left">Faculty</th>
+          <th class="text-left">Days of the Week</th>
+          <th class="text-left">Start Time</th>
+          <th class="text-left">End Time</th>
+          <th class="text-left">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          v-for="section in sections"
+          :key="section.id"
         >
-          No sections yet. Create your first section.
-        </p>
+          <td>
+            {{ formatSectionNumber(section.sectionNumber) }}
+          </td>
 
-        <v-table v-if="!loading && sections.length > 0">
-          <thead>
-            <tr>
-              <th class="text-left">Section Number</th>
-              <th class="text-left">Semester</th>
-              <th class="text-left">Course</th>
-              <th class="text-left">Faculty</th>
-              <th class="text-left">Days of the Week</th>
-              <th class="text-left">Start Time</th>
-              <th class="text-left">End Time</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
+          <td>{{ semesterName(section.semesterId) }}</td>
 
-          <tbody>
-            <tr
-              v-for="section in sections"
-              :key="section.id"
-            >
-              <td>
-                {{ formatSectionNumber(section.sectionNumber) }}
-              </td>
+          <td>{{ courseLabel(section.courseId) }}</td>
 
-              <td>{{ semesterName(section.semesterId) }}</td>
+          <td>{{ facultyLabel(section.facultyId) }}</td>
 
-              <td>{{ courseLabel(section.courseId) }}</td>
+          <td>
+            {{
+              Array.isArray(section.daysOfWeek)
+                ? section.daysOfWeek.join(", ")
+                : section.daysOfWeek
+            }}
+          </td>
 
-              <td>{{ facultyLabel(section.facultyId) }}</td>
+          <td>{{ section.startTime }}</td>
 
-              <td>
-                {{
-                  Array.isArray(section.daysOfWeek)
-                    ? section.daysOfWeek.join(", ")
-                    : section.daysOfWeek
-                }}
-              </td>
+          <td>{{ section.endTime }}</td>
 
-              <td>{{ section.startTime }}</td>
+          <td>
+            <div class="d-flex align-center ga-6">
+              <v-icon
+                size="small"
+                aria-label="Edit section"
+                @click="openEditDialog(section)"
+              >
+                mdi-pencil
+              </v-icon>
 
-              <td>{{ section.endTime }}</td>
-
-              <td>
-              <div class="d-flex align-center ga-6">
-                <v-icon
-                  size="small"
-                  aria-label="Edit section"
-                  @click="openEditDialog(section)"
-                >
-                  mdi-pencil
-                </v-icon>
-
-                <v-icon
-                  size="small"
-                  aria-label="Delete section"
-                  @click="openDeleteDialog(section)"
-                >
-                  mdi-trash-can
-                </v-icon>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-card-text>
-    </v-card>
+              <v-icon
+                size="small"
+                aria-label="Delete section"
+                @click="openDeleteDialog(section)"
+              >
+                mdi-trash-can
+              </v-icon>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
 
     <!-- ADD / EDIT SECTION -->
     <v-dialog

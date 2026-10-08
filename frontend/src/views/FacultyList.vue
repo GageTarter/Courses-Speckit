@@ -175,93 +175,90 @@ onUnmounted(() => {
 
 <template>
   <v-container class="py-8">
-    <v-card rounded="lg">
-      <v-card-item>
-        <v-card-title>Faculty</v-card-title>
+    <v-row align="center" class="mb-4">
+      <v-col>
+        <h1 class="text-h4">Faculty</h1>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn
+          v-if="isAdmin"
+          color="primary"
+          variant="elevated"
+          class="oc-cta"
+          @click="openAddDialog"
+        >
+          + New Faculty
+        </v-btn>
+      </v-col>
+    </v-row>
 
-        <template #append>
-          <v-btn
+    <v-progress-linear
+      v-if="loading"
+      indeterminate
+      class="mb-4"
+    />
+
+    <v-alert
+      v-if="listError"
+      type="error"
+      density="compact"
+      class="mb-4"
+    >
+      {{ listError }}
+    </v-alert>
+
+    <p
+      v-if="!loading && faculties.length === 0"
+      class="text-body-1"
+    >
+      No faculty yet. Create your first faculty member.
+    </p>
+
+    <v-table v-if="!loading && faculties.length > 0">
+      <thead>
+        <tr>
+          <th class="text-left">First Name</th>
+          <th class="text-left">Last Name</th>
+          <th class="text-left">Department</th>
+          <th
             v-if="isAdmin"
-            color="primary"
-            variant="elevated"
-            class="oc-cta"
-            @click="openAddDialog"
+            class="text-left"
           >
-            + New Faculty
-          </v-btn>
-        </template>
-      </v-card-item>
+            Actions
+          </th>
+        </tr>
+      </thead>
 
-      <v-card-text>
-        <v-progress-linear
-          v-if="loading"
-          indeterminate
-          class="mb-4"
-        />
-
-        <v-alert
-          v-if="listError"
-          type="error"
-          density="compact"
-          class="mb-4"
+      <tbody>
+        <tr
+          v-for="faculty in faculties"
+          :key="faculty.id"
         >
-          {{ listError }}
-        </v-alert>
-
-        <p
-          v-if="!loading && faculties.length === 0"
-          class="text-body-1"
-        >
-          No faculty yet. Create your first faculty member.
-        </p>
-
-        <v-table v-if="!loading && faculties.length > 0">
-          <thead>
-            <tr>
-              <th class="text-left">First Name</th>
-              <th class="text-left">Last Name</th>
-              <th class="text-left">Department</th>
-              <th
-                v-if="isAdmin"
-                class="text-left"
+          <td>{{ faculty.firstName }}</td>
+          <td>{{ faculty.lastName }}</td>
+          <td>{{ faculty.dept }}</td>
+          <td v-if="isAdmin">
+            <div class="d-flex align-center ga-6">
+              <v-icon
+                size="small"
+                aria-label="Edit faculty"
+                @click="openEditDialog(faculty)"
               >
-                Actions
-              </th>
-            </tr>
-          </thead>
+                mdi-pencil
+              </v-icon>
 
-          <tbody>
-            <tr
-              v-for="faculty in faculties"
-              :key="faculty.id"
-            >
-              <td>{{ faculty.firstName }}</td>
-              <td>{{ faculty.lastName }}</td>
-              <td>{{ faculty.dept }}</td>
-              <td v-if="isAdmin">
-                <div class="d-flex align-center ga-6">
-                  <v-icon
-                    size="small"
-                    aria-label="Edit faculty"
-                    @click="openEditDialog(faculty)"
-                  >
-                    mdi-pencil
-                  </v-icon>
-
-                  <v-icon
-                    size="small"
-                    aria-label="Delete faculty"
-                    @click="openDeleteDialog(faculty)"
-                  >
-                    mdi-trash-can
-                  </v-icon>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-card-text>
-    </v-card>
+              <v-icon
+                size="small"
+                aria-label="Delete faculty"
+                @click="openDeleteDialog(faculty)"
+              >
+                mdi-trash-can
+              </v-icon>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
 
     <v-dialog
       v-model="formDialogOpen"
