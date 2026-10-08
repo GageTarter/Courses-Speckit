@@ -12,9 +12,9 @@ router.get("/health", (_req, res) => {
 });
 
 router.use("/", authRoutes);
+router.use("/facultyapi/faculties", facultyRoutes);
 router.use("/", enrollmentRoutes);
 router.use("/courses", courseRoutes);
 router.use("/sections", sectionRoutes);
-router.use("/facultyapi/faculties", facultyRoutes);
 
 export default router;

@@ -38,7 +38,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Team app uses /courses; Feature 2 tests/clients use /courseapi.
 app.use("/courses", routes);
+app.use("/courseapi", routes);
 
 const PORT = process.env.PORT || 3201;
 
