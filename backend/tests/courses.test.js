@@ -12,6 +12,9 @@ const validCourse = {
   courseID: "CMSC-1113-01",
   description: "Introduction to programming",
   semesterOffered: "Fall",
+  courseFrequency: "Every Semester",
+  courseHours: 3,
+  courseDept: "Computer Science",
 };
 
 const adminRequired = { message: "Forbidden! Admin access required." };
@@ -72,21 +75,30 @@ describe("Feature 2 — Course Management", () => {
         courseID: "CMSC-1113-01",
         description: "Introduction to programming",
         semesterOffered: "Fall",
+        courseFrequency: "Every Semester",
+        courseHours: 3,
+        courseDept: "Computer Science",
       });
       expect(response.body.id).toEqual(expect.any(Number));
     });
 
-    it("User creates a course without a description or semester offered", async () => {
+    it("User creates a course without a description, semester offered, course frequency, course hours, or course department", async () => {
       const response = await asAdmin(request(app).post("/courseapi/courses")).send({
         name: "Programming I",
         courseID: "CMSC-1113-01",
         description: "   ",
         semesterOffered: "",
+        courseFrequency: " ",
+        courseHours: "",
+        courseDept: "",
       });
 
       expect(response.status).toBe(201);
       expect(response.body.description).toBeNull();
       expect(response.body.semesterOffered).toBeNull();
+      expect(response.body.courseFrequency).toBeNull();
+      expect(response.body.courseHours).toBeNull();
+      expect(response.body.courseDept).toBeNull();
     });
 
     it("User creates a course with a name that is too long", async () => {
@@ -104,6 +116,24 @@ describe("Feature 2 — Course Management", () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         message: "Course description must be 300 characters or fewer.",
+      });
+    });
+
+    it("User creates a course with a frequency that is too long", async () => {
+      const response = await createCourse({ courseFrequency: "F".repeat(101) });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course frequency must be 100 characters or fewer.",
+      });
+    });
+
+    it("User creates a course with a department that is too long", async () => {
+      const response = await createCourse({ courseDept: "D".repeat(101) });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course department must be 100 characters or fewer.",
       });
     });
 
@@ -143,7 +173,7 @@ describe("Feature 2 — Course Management", () => {
     });
   });
 
-  describe("US-2.3 — Correct a course's name, ID, description or semester Offered", () => {
+  describe("US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department", () => {
     it("User edits a course's information", async () => {
       const created = await createCourse();
       const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
@@ -162,13 +192,16 @@ describe("Feature 2 — Course Management", () => {
       });
     });
 
-    it("User clears a course's description and semester offered", async () => {
+    it("User clears a course's description, semester offered, course frequency, course hours, and course department", async () => {
       const created = await createCourse();
       const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
         name: "Programming I",
         courseID: "CMSC-1113-01",
         description: "",
         semesterOffered: "",
+        courseFrequency: "",
+        courseHours: "",
+        courseDept: "",
       });
 
       expect(response.status).toBe(200);
@@ -177,6 +210,9 @@ describe("Feature 2 — Course Management", () => {
       const listed = await asAdmin(request(app).get("/courseapi/courses"));
       expect(listed.body[0].description).toBeNull();
       expect(listed.body[0].semesterOffered).toBeNull();
+      expect(listed.body[0].courseFrequency).toBeNull();
+      expect(listed.body[0].courseHours).toBeNull();
+      expect(listed.body[0].courseDept).toBeNull();
     });
 
     it("User edits a course with a name that is too long", async () => {
@@ -202,6 +238,32 @@ describe("Feature 2 — Course Management", () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         message: "Course description must be 300 characters or fewer.",
+      });
+    });
+
+    it("User edits a course with a course frequency that is too long", async () => {
+      const created = await createCourse();
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        courseFrequency: "F".repeat(101),
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course frequency must be 100 characters or fewer.",
+      });
+    });
+
+    it("User edits a course with a course department that is too long", async () => {
+      const created = await createCourse();
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        courseDept: "D".repeat(101),
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course department must be 100 characters or fewer.",
       });
     });
 

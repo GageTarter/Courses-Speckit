@@ -13,6 +13,9 @@ const newName = ref("");
 const newCourseID = ref("");
 const newDescription = ref("");
 const newSemester = ref("");
+const newFrequency = ref("");
+const newHours = ref("");
+const newDept = ref("");
 const editOpen = ref(false);
 const deleteOpen = ref(false);
 const editForm = ref(null);
@@ -20,6 +23,9 @@ const editName = ref("");
 const editCourseID = ref("");
 const editDescription = ref("");
 const editSemester = ref("");
+const editFrequency = ref("");
+const editHours = ref("");
+const editDept = ref("");
 const activeCourse = ref(null);
 
 const isAdmin = computed(() => {
@@ -75,6 +81,9 @@ function openAdd() {
   newCourseID.value = "";
   newDescription.value = "";
   newSemester.value = "";
+  newFrequency.value = "";
+  newHours.value = "";
+  newDept.value = "";
   error.value = "";
   addOpen.value = true;
 }
@@ -92,6 +101,9 @@ async function createCourse() {
       courseID: newCourseID.value.trim(),
       description: newDescription.value.trim(),
       semesterOffered: newSemester.value ? newSemester.value.trim() : "",
+      courseFrequency: newFrequency.value.trim(),
+      courseHours: String(newHours.value ?? "").trim(),
+      courseDept: newDept.value.trim(),
     });
     addOpen.value = false;
     await loadCourses();
@@ -106,6 +118,9 @@ function openEdit(course) {
   editCourseID.value = course.courseID;
   editDescription.value = course.description || "";
   editSemester.value = course.semesterOffered || "";
+  editFrequency.value = course.courseFrequency || "";
+  editHours.value = course.courseHours ?? "";
+  editDept.value = course.courseDept || "";
   error.value = "";
   editOpen.value = true;
 }
@@ -123,6 +138,9 @@ async function saveEdit() {
       courseID: editCourseID.value.trim(),
       description: editDescription.value.trim(),
       semesterOffered: editSemester.value ? editSemester.value.trim() : "",
+      courseFrequency: editFrequency.value.trim(),
+      courseHours: String(editHours.value ?? "").trim(),
+      courseDept: editDept.value.trim(),
     });
     editOpen.value = false;
     await loadCourses();
@@ -177,6 +195,9 @@ onMounted(loadCourses);
           {{ course.courseID }}
           <span v-if="course.description"> — {{ course.description }}</span>
           <span v-if="course.semesterOffered"> — {{ course.semesterOffered }}</span>
+          <span v-if="course.courseFrequency"> — {{ course.courseFrequency }}</span>
+          <span v-if="course.courseHours"> — {{ course.courseHours }}</span>
+          <span v-if="course.courseDept"> — {{ course.courseDept }}</span>
           </v-list-item-subtitle>
         <template #append>
           <v-btn
@@ -212,6 +233,9 @@ onMounted(loadCourses);
             <v-text-field v-model="newCourseID" label="CourseID" :rules="courseIdRules" />
             <v-text-field v-model="newDescription" label="Description" />
             <v-select v-model="newSemester" label="Semester Offered" :items="['Fall', 'Spring', 'Summer', 'Winter']" clearable />
+            <v-text-field v-model="newFrequency" label="Course Frequency" />
+            <v-text-field v-model="newHours" label="Course Hours" />
+            <v-text-field v-model="newDept" label="Course Department" />
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -233,6 +257,9 @@ onMounted(loadCourses);
             <v-text-field v-model="editCourseID" label="CourseID" :rules="courseIdRules" />
             <v-text-field v-model="editDescription" label="Description" />
             <v-select v-model="editSemester" label="Semester Offered" :items="['Fall', 'Spring', 'Summer', 'Winter']" clearable />
+            <v-text-field v-model="editFrequency" label="Course Frequency" />
+            <v-text-field v-model="editHours" label="Course Hours" />
+            <v-text-field v-model="editDept" label="Course Department" />
           </v-form>
         </v-card-text>
         <v-card-actions>

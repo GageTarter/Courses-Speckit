@@ -24,10 +24,15 @@ const programming = {
   courseID: "CMSC-1113-01",
   description: "Introduction to programming",
   semesterOffered: "Fall",
+  courseFrequency: "Every Semester",
+  courseHours: 3,
+  courseDept: "Computer Science",
 };
 
 const nameTooLong = "Course name must be 100 characters or fewer.";
 const descriptionTooLong = "Course description must be 300 characters or fewer.";
+const frequencyTooLong = "Course frequency must be 100 characters or fewer.";
+const departmentTooLong = "Course department must be 100 characters or fewer.";
 const invalidSemester = "Semester offered must be Fall, Spring, Summer, or Winter.";
 const nameInUse = "Course name is in use. Enter a different course name.";
 
@@ -117,6 +122,9 @@ describe("Feature 2 — Course Management", () => {
       await setText(wrapper, "New Course", "CourseID", "CMSC-1113-01");
       await setText(wrapper, "New Course", "Description", "Introduction to programming");
       await setSemester(wrapper, "New Course", "Fall");
+      await setText(wrapper, "New Course", "Course Frequency", "Every Semester");
+      await setText(wrapper, "New Course", "Course Hours", "3");
+      await setText(wrapper, "New Course", "Course Department", "Computer Science");
       buttonByText("Create").click();
       await flushPromises();
 
@@ -125,13 +133,23 @@ describe("Feature 2 — Course Management", () => {
         courseID: "CMSC-1113-01",
         description: "Introduction to programming",
         semesterOffered: "Fall",
+        courseFrequency: "Every Semester",
+        courseHours: "3",
+        courseDept: "Computer Science",
       });
       expect(listTitles()).toEqual(["Programming I"]);
       expect(activeDialogTitles()).not.toContain("New Course");
     });
 
-    it("User creates a course without a description or semester offered", async () => {
-      const created = { ...programming, description: null, semesterOffered: null };
+    it("User creates a course without a description, semester offered, course frequency, course hours, or course department", async () => {
+      const created = {
+        ...programming,
+        description: null,
+        semesterOffered: null,
+        courseFrequency: null,
+        courseHours: null,
+        courseDept: null,
+      };
       CourseServices.getAll
         .mockResolvedValueOnce({ data: [] })
         .mockResolvedValueOnce({ data: [created] });
@@ -149,6 +167,9 @@ describe("Feature 2 — Course Management", () => {
         courseID: "CMSC-1113-01",
         description: "",
         semesterOffered: "",
+        courseFrequency: "",
+        courseHours: "",
+        courseDept: "",
       });
       expect(listTitles()).toEqual(["Programming I"]);
     });
@@ -221,6 +242,38 @@ describe("Feature 2 — Course Management", () => {
       expect(document.body.querySelector(".v-alert").textContent).toContain(descriptionTooLong);
     });
 
+    it("User creates a course with a frequency that is too long", async () => {
+      CourseServices.getAll.mockResolvedValue({ data: [] });
+      CourseServices.create.mockRejectedValue({
+        response: { data: { message: frequencyTooLong } },
+      });
+      const wrapper = await mountList();
+      await openAdd(wrapper);
+      await setText(wrapper, "New Course", "Name", "Programming I");
+      await setText(wrapper, "New Course", "CourseID", "CMSC-1113-01");
+      await setText(wrapper, "New Course", "Course Frequency", "F".repeat(101));
+      buttonByText("Create").click();
+      await flushPromises();
+
+      expect(document.body.querySelector(".v-alert").textContent).toContain(frequencyTooLong);
+    });
+
+    it("User creates a course with a department that is too long", async () => {
+      CourseServices.getAll.mockResolvedValue({ data: [] });
+      CourseServices.create.mockRejectedValue({
+        response: { data: { message: departmentTooLong } },
+      });
+      const wrapper = await mountList();
+      await openAdd(wrapper);
+      await setText(wrapper, "New Course", "Name", "Programming I");
+      await setText(wrapper, "New Course", "CourseID", "CMSC-1113-01");
+      await setText(wrapper, "New Course", "Course Department", "D".repeat(101));
+      buttonByText("Create").click();
+      await flushPromises();
+
+      expect(document.body.querySelector(".v-alert").textContent).toContain(departmentTooLong);
+    });
+
     it("User creates a course with an invalid semester offered", async () => {
       CourseServices.getAll.mockResolvedValue({ data: [] });
       CourseServices.create.mockRejectedValue({
@@ -262,7 +315,7 @@ describe("Feature 2 — Course Management", () => {
     });
   });
 
-  describe("US-2.3 — Correct a course's name, ID, description or semester Offered", () => {
+  describe("US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department", () => {
     it("User edits a course's information", async () => {
       const updated = { ...programming, name: "Programming II", courseID: "CMSC-1113-02" };
       CourseServices.getAll
@@ -285,13 +338,23 @@ describe("Feature 2 — Course Management", () => {
         courseID: "CMSC-1113-02",
         description: "Introduction to programming",
         semesterOffered: "Fall",
+        courseFrequency: "Every Semester",
+        courseHours: "3",
+        courseDept: "Computer Science",
       });
       expect(listTitles()).toEqual(["Programming II"]);
       expect(activeDialogTitles()).not.toContain("Edit Course");
     });
 
-    it("User clears a course's description and semester offered", async () => {
-      const cleared = { ...programming, description: null, semesterOffered: null };
+    it("User clears a course's description, semester offered, course frequency, course hours, and course department", async () => {
+      const cleared = {
+        ...programming,
+        description: null,
+        semesterOffered: null,
+        courseFrequency: null,
+        courseHours: null,
+        courseDept: null,
+      };
       CourseServices.getAll
         .mockResolvedValueOnce({ data: [programming] })
         .mockResolvedValueOnce({ data: [cleared] });
@@ -304,6 +367,9 @@ describe("Feature 2 — Course Management", () => {
       await flushPromises();
       await setText(wrapper, "Edit Course", "Description", "");
       await setSemester(wrapper, "Edit Course", null);
+      await setText(wrapper, "Edit Course", "Course Frequency", "");
+      await setText(wrapper, "Edit Course", "Course Hours", "");
+      await setText(wrapper, "Edit Course", "Course Department", "");
       buttonByText("Save").click();
       await flushPromises();
 
@@ -312,11 +378,16 @@ describe("Feature 2 — Course Management", () => {
         courseID: "CMSC-1113-01",
         description: "",
         semesterOffered: "",
+        courseFrequency: "",
+        courseHours: "",
+        courseDept: "",
       });
       expect(listTitles()).toEqual(["Programming I"]);
       const subtitle = document.body.querySelector(".v-list-item-subtitle").textContent;
       expect(subtitle).not.toContain("Introduction to programming");
       expect(subtitle).not.toContain("Fall");
+      expect(subtitle).not.toContain("Every Semester");
+      expect(subtitle).not.toContain("Computer Science");
     });
 
     it("User edits a course with an empty name", async () => {
@@ -390,6 +461,36 @@ describe("Feature 2 — Course Management", () => {
       await flushPromises();
 
       expect(document.body.querySelector(".v-alert").textContent).toContain(descriptionTooLong);
+    });
+
+    it("User edits a course with a course frequency that is too long", async () => {
+      CourseServices.getAll.mockResolvedValue({ data: [programming] });
+      CourseServices.update.mockRejectedValue({
+        response: { data: { message: frequencyTooLong } },
+      });
+      const wrapper = await mountList();
+      clickEdit();
+      await flushPromises();
+      await setText(wrapper, "Edit Course", "Course Frequency", "F".repeat(101));
+      buttonByText("Save").click();
+      await flushPromises();
+
+      expect(document.body.querySelector(".v-alert").textContent).toContain(frequencyTooLong);
+    });
+
+    it("User edits a course with a course department that is too long", async () => {
+      CourseServices.getAll.mockResolvedValue({ data: [programming] });
+      CourseServices.update.mockRejectedValue({
+        response: { data: { message: departmentTooLong } },
+      });
+      const wrapper = await mountList();
+      clickEdit();
+      await flushPromises();
+      await setText(wrapper, "Edit Course", "Course Department", "D".repeat(101));
+      buttonByText("Save").click();
+      await flushPromises();
+
+      expect(document.body.querySelector(".v-alert").textContent).toContain(departmentTooLong);
     });
 
     it("User edits a course with an invalid semester offered", async () => {

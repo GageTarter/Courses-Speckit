@@ -85,6 +85,41 @@ const readCourseBody = (body) => {
     return description;
   }
 
+  const courseFrequency = normalizeOptionalText(
+    body?.courseFrequency,
+    100,
+    "Course frequency must be 100 characters or fewer.",
+  );
+  if (courseFrequency.error) {
+    return courseFrequency;
+  }
+
+  const normalizeOptionalHours = (raw) => {
+    if (raw == null || (typeof raw === "string" && raw.trim() === "")) {
+      return { value: null };
+    }
+  
+    const value = Number(raw);
+    if (!Number.isInteger(value)) {
+      return { error: "Course hours must be a number." };
+    }
+  
+    return { value };
+  };
+  const courseHours = normalizeOptionalHours(body?.courseHours);
+    if (courseHours.error) {
+      return courseHours;
+    }
+
+  const courseDept = normalizeOptionalText(
+    body?.courseDept,
+    100,
+    "Course department must be 100 characters or fewer.",
+  );
+  if (courseDept.error) {
+    return courseDept;
+  }
+
   const semesterOffered = normalizeSemester(body?.semesterOffered);
   if (semesterOffered.error) {
     return semesterOffered;
@@ -96,6 +131,9 @@ const readCourseBody = (body) => {
       courseID: courseID.value,
       description: description.value,
       semesterOffered: semesterOffered.value,
+      courseFrequency: courseFrequency.value,
+      courseHours: courseHours.value,
+      courseDept: courseDept.value,
     },
   };
 };

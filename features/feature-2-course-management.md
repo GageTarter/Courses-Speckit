@@ -50,10 +50,10 @@
 
 ## Functional Requirements
 
--- **FR-001:** An admin must fill `name` and `courseID`. `description` and `semesterOffered` are optional.
--- **FR-002:** Created courses are shared. Every signed-in user can view every course. No course belongs to a specific user.
--- **FR-003:** Only an admin can create, edit, or delete a course. A signed-in non-admin can list courses and cannot change them.
--- **FR-004:** On edit, `name` and `courseID` are required. `description` and `semesterOffered` are optional; a blank value clears that field.
+-- **FR-001:** An admin must fill `name` and `courseID`. `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept` are optional.
+-- **FR-002:** Created courses are shared. Only signed-in admin users can view every course. No course belongs to a specific user.
+-- **FR-003:** Only an admin can view and create, edit, or delete a course. 
+-- **FR-004:** On edit, `name` and `courseID` are required. `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDepartment` are optional; a blank value clears that field.
 -- **FR-005:** Edited information must be updated in the affected course when a user with admin privelages makes a change.
 -- **FR-006:** Course must be completely erased when the delete option is selected by the user with admin privelages.
 -- **FR-007:** Created courses must be listed in alphabetical order.
@@ -115,12 +115,12 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 
 **Create request body:** `name` and `courseID` are required. `description` and `semesterOffered` may be omitted.
 ```json
-{ "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall" }
+{ "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall", "courseFrequency": "Every semester", "courseHours": 3, "courseDept": "Computer Science" }
 ```
 
 **Create success** (`201`):
 ```json
-{ "id": 1, "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall" }
+{ "id": 1, "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall", "courseFrequency": "Every semester", "courseHours": 3, "courseDept": "Computer Science" }
 ```
 
 **Update request body:** `name` and `courseID` are required. `description` and `semesterOffered` are optional; omit them or send them blank to store `null` (**FR-004**).
@@ -139,7 +139,10 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 - Name longer than 100 characters → `400` `{ "message": "Course name must be 100 characters or fewer." }`
 - Description longer than 300 characters → `400` `{ "message": "Course description must be 300 characters or fewer." }`
 - `semesterOffered` present and not `Fall`, `Spring`, `Summer`, or `Winter` → `400` `{ "message": "Semester offered must be Fall, Spring, Summer, or Winter." }`
+- Course Frequency longer than 100 characters → `400` `{ "message": "Course frequency must be 100 characters or fewer." }`
+- Course Department longer than 100 characters → `400` `{ "message": "Course department must be 100 characters or fewer." }`
 - Non-numeric `:id` → `400` `{ "message": "Course id must be a number." }`
+- Non-numeric course hours → `400` `{ "message": "Course hours must be a number." }`
 - Missing course id → `404` `{ "message": "Course not found." }`
 - Signed-in non-admin `POST` / `PUT` / `DELETE` → `403` `{ "message": "Admin privileges are required." }`
 
@@ -159,8 +162,8 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 *   **Row actions (icon-only, `size="small"`):**
     *   **Edit Course** — `aria-label="Edit Course"`; opens the edit dialog (US-2.3).
     *   Delete icon on the row — `aria-label` **Delete course**; opens the delete confirm dialog (US-2.4).
-*   **Add dialog:** fields Name, Course ID, Description, and Semester Offered. Name and Course ID are required. Description and Semester Offered are optional. Confirm submits create; **Close** dismisses without saving (existing dialog chrome). Dialog closes after a successful create.
-*   **Edit dialog:** same four fields, prefilled from the row. Name and Course ID are required. Clearing Description or Semester Offered stores `null`. Confirm submits update; **Close** dismisses. Dialog closes after a successful update. Click target and title use **Edit Course**.
+*   **Add dialog:** fields Name, Course ID, Description, Semester Offered, Course Frequency, Course Hours, and Course Department. Name and Course ID are required. Description, Semester Offered, Course Frequency, Course Hours, and Course Department are optional. Confirm submits create; **Close** dismisses without saving (existing dialog chrome). Dialog closes after a successful create.
+*   **Edit dialog:** same seven fields, prefilled from the row. Name and Course ID are required. Clearing Description, Semester Offered, Course Frequency, Course Hours or Course Department stores `null`. Confirm submits update; **Close** dismisses. Dialog closes after a successful update. Click target and title use **Edit Course**.
 *   **Delete dialog:** confirm then call `DELETE`; cancel/close leaves the row in place.
 *   **Inline validation** (no API request) — exact AC copy:
     *   **"Course name is required."**
@@ -186,6 +189,9 @@ Course ID is a required field the user fills (Gherkin example `CMSC-1113-01`).
 | `courseID` | STRING(100) | Required; stored and displayed as typed |
 | `description` | STRING(300) | Optional. `null` when omitted or blank. At most 300 characters when present |
 | `semesterOffered` | ENUM | Optional. `null` when omitted or blank. When present, `Fall`, `Spring`, `Summer`, or `Winter` |
+| `courseFrequency` | STRING(100) | Optional. `null` when omitted or blank. At most 100 characters when present |
+| `courseHours` | INTEGER | Optional. `null` when omitted or blank. |
+| `courseDept` | STRING(100) | Optional. `null` when omitted or blank. At most 100 characters when present |
 | `createdAt` | DATE | Sequelize timestamp |
 | `updatedAt` | DATE | Sequelize timestamp |
 
@@ -204,12 +210,15 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** I enter course ID `CMSC-1113-01`
 *   **And** I enter description `Introduction to programming`
 *   **And** I enter semester offered `Fall`
+*   **And** I enter course frequency `Every Semester`
+*   **And** I enter course hours `3`
+*   **And** I enter course department `Computer Science`
 *   **And** I confirm the dialog
-*   **Then** the API returns `201` with a course object containing `id`, `name`, `courseID`, `description`, and `semesterOffered`
+*   **Then** the API returns `201` with a course object containing `id`, `name`, `courseID`, `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept`.
 *   **And** `Programming I` appears in the courses view
 *   **And** the add-course dialog closes
 
-#### Scenario: User creates a course without a description or semester offered
+#### Scenario: User creates a course without a description, semester offered, course frequency, course hours, or course department
 *   **Given** I am signed in as an admin on the dashboard
 *   **When** I open the new course dialog
 *   **And** I enter course name `Programming I`
@@ -217,7 +226,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** I leave description and semester offered empty
 *   **And** I confirm the dialog
 *   **Then** the API returns `201`
-*   **And** `description` and `semesterOffered` are `null`
+*   **And** `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept` are `null`
 *   **And** `Programming I` appears in the courses view
 
 #### Scenario: User creates a course with an empty name
@@ -259,6 +268,18 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Then** the API returns `400` with `{ "message": "Course description must be 300 characters or fewer." }`
 *   **And** the error is displayed in a `<v-alert type="error">`
 
+#### Scenario: User creates a course with a frequency that is too long
+*   **Given** I am signed in as an admin on the dashboard
+*   **When** I submit a course frequency longer than 100 characters
+*   **Then** the API returns `400` with `{ "message": "Course frequency must be 100 characters or fewer." }`
+*   **And** the error is displayed in a `<v-alert type="error">`
+
+#### Scenario: User creates a course with a department that is too long
+*   **Given** I am signed in as an admin on the dashboard
+*   **When** I submit a course department longer than 100 characters
+*   **Then** the API returns `400` with `{ "message": "Course department must be 100 characters or fewer." }`
+*   **And** the error is displayed in a `<v-alert type="error">`
+
 #### Scenario: User creates a course with an invalid semester offered
 *   **Given** I am signed in as an admin on the dashboard
 *   **When** I submit a semester offered that is not `Fall`, `Spring`, `Summer` or `Winter`
@@ -286,7 +307,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **When** I open the courses menu
 *   **Then** no courses should be displayed
 
-### US-2.3 — Correct a course's name, ID, description or semester Offered
+### US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department
 
 #### Scenario: User edits a course's information
 *   **Given** I am signed in as an admin on the dashboard
@@ -297,15 +318,15 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** the course is visible with updated information in the courses view
 *   **And** the edit-course dialog closes
 
-#### Scenario: User clears a course's description and semester offered
+#### Scenario: User clears a course's description, semester offered, course frequency, course hours, and course department
 *   **Given** I am signed in as an admin on the dashboard
-*   **And** a course has a description and a semester offered
+*   **And** a course has a description, a semester offered, a course frequency, course hours, and a course department
 *   **When** I open the edit course dialog
-*   **And** I clear description and semester offered
+*   **And** I clear description, semester offered, course frequency, course hours, and course department
 *   **And** I leave name and course ID filled
 *   **And** I confirm the dialog
 *   **Then** the API returns `200` with `{ "message": "Course was updated successfully." }`
-*   **And** that course's `description` and `semesterOffered` are `null` in the courses view
+*   **And** that course's `description` and `semesterOffered`, `courseFrequency`, `courseHours`, `courseDept` are `null` in the courses view
 
 #### Scenario: User edits a course with an empty name
 *   **Given** I am signed in as an admin on the dashboard
@@ -344,6 +365,18 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Given** I am signed in as an admin on the dashboard
 *   **When** I submit a course description longer than 300 characters
 *   **Then** the API returns `400` with `{ "message": "Course description must be 300 characters or fewer." }`
+*   **And** the error is displayed in a `<v-alert type="error">`
+
+#### Scenario: User edits a course with a course frequency that is too long
+*   **Given** I am signed in as an admin on the dashboard
+*   **When** I submit a course frequency longer than 100 characters
+*   **Then** the API returns `400` with `{ "message": "Course frequency must be 100 characters or fewer." }`
+*   **And** the error is displayed in a `<v-alert type="error">`
+
+#### Scenario: User edits a course with a course department that is too long
+*   **Given** I am signed in as an admin on the dashboard
+*   **When** I submit a course department longer than 100 characters
+*   **Then** the API returns `400` with `{ "message": "Course department must be 100 characters or fewer." }`
 *   **And** the error is displayed in a `<v-alert type="error">`
 
 #### Scenario: User edits a course with an invalid semester offered
@@ -408,23 +441,27 @@ Each scenario above must map to at least one automated test.
 | Story | Scenario | Test file | Test name |
 |-------|----------|-----------|-----------|
 | US-2.1 | User creates a new course | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a new course")` |
-| US-2.1 | User creates a course without a description or semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course without a description or semester offered")` |
+| US-2.1 | User creates a course without a description, semester offered, course frequency, course hours, or course department | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course without a description, semester offered, course frequency, course hours, or course department")` |
 | US-2.1 | User creates a course with an empty name | `frontend/tests/CourseList.test.js` | `it("User creates a course with an empty name")` |
 | US-2.1 | User creates a course with an empty courseID | `frontend/tests/CourseList.test.js` | `it("User creates a course with an empty courseID")` |
 | US-2.1 | User creates a course with an existing name | `frontend/tests/CourseList.test.js` | `it("User creates a course with an existing name")` |
 | US-2.1 | User creates a course with a name that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a name that is too long")` |
 | US-2.1 | User creates a course with a description that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a description that is too long")` |
+| US-2.1 | User creates a course with a frequency that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a frequency that is too long")` |
+| US-2.1 | User creates a course with a department that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a department that is too long")` |
 | US-2.1 | User creates a course with an invalid semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with an invalid semester offered")` |
 | US-2.1 | Non-admin cannot create a course | `backend/tests/courses.test.js` | `it("Non-admin cannot create a course")` |
 | US-2.2 | User views existing courses | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User views existing courses")` |
 | US-2.2 | There are no existing courses | `frontend/tests/CourseList.test.js` | `it("There are no existing courses")` |
 | US-2.3 | User edits a course's information | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course's information")` |
-| US-2.3 | User clears a course's description and semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User clears a course's description and semester offered")` |
+| US-2.3 | User clears a course's description, semester offered, course frequency, course hours, and course department | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User clears a course's description, semester offered, course frequency, course hours, and course department")` |
 | US-2.3 | User edits a course with an empty name | `frontend/tests/CourseList.test.js` | `it("User edits a course with an empty name")` |
 | US-2.3 | User edits a course with an empty courseID | `frontend/tests/CourseList.test.js` | `it("User edits a course with an empty courseID")` |
 | US-2.3 | User edits a course with an existing name | `frontend/tests/CourseList.test.js` | `it("User edits a course with an existing name")` |
 | US-2.3 | User edits a course with a name that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a name that is too long")` |
 | US-2.3 | User edits a course with a description that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a description that is too long")` |
+| US-2.3 | User edits a course with a course frequency that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a course frequency that is too long")` |
+| US-2.3 | User edits a course with a course department that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a course department that is too long")` |
 | US-2.3 | User edits a course with an invalid semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with an invalid semester offered")` |
 | US-2.3 | User updates a course with a non-numeric id | `backend/tests/courses.test.js` | `it("User updates a course with a non-numeric id")` |
 | US-2.3 | User updates a course that does not exist | `backend/tests/courses.test.js` | `it("User updates a course that does not exist")` |
