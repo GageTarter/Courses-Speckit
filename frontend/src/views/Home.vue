@@ -33,7 +33,7 @@ const signOut = async () => {
     </v-chip>
 
     <p class="text-body-1 mb-6">
-      Semesters, courses, sections, and enrollment arrive in later features.
+      Use the menu for Courses, Faculty, and Sections.
     </p>
 
     <v-btn

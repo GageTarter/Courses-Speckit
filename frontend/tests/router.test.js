@@ -53,3 +53,22 @@ describe("Feature 1 — Router guards", () => {
     });
   });
 });
+
+describe("Feature 6 — Router role guard", () => {
+  describe("US-6.3 — Enroll in a section", () => {
+    it("Admin cannot enroll", async () => {
+      Utils.setStore("user", {
+        userId: 2,
+        fName: "Site",
+        role: "admin",
+        token: "an-admin-token",
+      });
+
+      const router = await freshRouter();
+
+      await navigate(router, "/enroll");
+
+      expect(router.currentRoute.value.name).toBe("home");
+    });
+  });
+});
