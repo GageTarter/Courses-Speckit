@@ -33,6 +33,17 @@ Sequelize models live in `backend/app/models/`; associations are wired in `model
 | `createdAt` / `updatedAt` | DATE | Sequelize timestamps |
 
 A session row is deleted on logout, so a replayed token no longer resolves.
+### `faculties` — [Feature 4](../feature-4-faculty-management.md)
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `firstName` | STRING(100) | Required |
+| `lastName` | STRING(100) | Required |
+| `dept` | STRING(100) | Required |
+| `createdAt` / `updatedAt` | DATE | Sequelize timestamps |
+
+Shared catalogue — no `userId` / owner.
 
 ### `semesters` / `courses` / `sections` / `enrollments` — [Feature 6](../feature-6-enrollment-management.md)
 

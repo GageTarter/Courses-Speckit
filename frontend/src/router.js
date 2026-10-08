@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
+import FacultyList from "./views/FacultyList.vue";
 import Enroll from "./views/Enroll.vue";
 import Utils from "./config/utils.js";
 import { ROLES } from "./config/roles.js";
@@ -15,6 +16,11 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: Home,
+    },
+    {
+      path: "/faculty",
+      name: "faculty",
+      component: FacultyList,
     },
     {
       path: "/login",
@@ -48,6 +54,10 @@ router.beforeEach((to) => {
   }
 
   if (signedIn && isPublic) {
+    return { name: "home" };
+  }
+
+  if (to.name === "faculty" && Utils.getStore("user")?.role !== "admin") {
     return { name: "home" };
   }
 
