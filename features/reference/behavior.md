@@ -60,7 +60,6 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Anonymous visitors are redirected to `login` | `router.beforeEach` in `frontend/src/router.js` |
 | Signed-in users are redirected away from `login` and `register` | Same guard |
 | Client validation blocks submission before any API call | `v-form` `validate()` gates both auth views |
-| There is no `MenuBar` yet | `App.vue` renders `router-view` only; **Sign out** lives on the home page until a later feature adds app chrome |
 | Home shows the signed-in first name and a role chip | `Home.vue` |
 | Students reach enrollment from Home **Section Enrollment**; admins are redirected away from `enroll` | `router.js` + `Home.vue` |
 
