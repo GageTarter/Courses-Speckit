@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
+import SectionList from "./views/SectionList.vue";
+import CourseList from "./views/CourseList.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
+import FacultyList from "./views/FacultyList.vue";
 import Enroll from "./views/Enroll.vue";
 import Utils from "./config/utils.js";
 import { ROLES } from "./config/roles.js";
@@ -15,6 +18,21 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: Home,
+    },
+    {
+      path: "/sections",
+      name: "sections",
+      component: SectionList,
+    },
+    {
+      path: "/courses",
+      name: "courses",
+      component: CourseList,
+    },
+    {
+      path: "/faculty",
+      name: "faculty",
+      component: FacultyList,
     },
     {
       path: "/login",
@@ -51,7 +69,13 @@ router.beforeEach((to) => {
     return { name: "home" };
   }
 
-  // Feature 1 role: login payload.role. Admin-only pages set meta.roles: ["admin"].
+  if (
+    (to.name === "sections" || to.name === "faculty") &&
+    Utils.getStore("user")?.role !== "admin"
+  ) {
+    return { name: "home" };
+  }
+
   const allowedRoles = to.meta.roles;
   if (allowedRoles?.length) {
     const role = Utils.getStore("user")?.role;
