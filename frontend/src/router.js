@@ -49,6 +49,10 @@ router.beforeEach((to) => {
     return { name: "home" };
   }
 
+  if (to.name === "courses" && !Utils.getStore("user")?.role !== "admin") {
+    return { name: "home" };
+  }
+
   return true;
 });
 

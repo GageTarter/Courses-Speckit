@@ -166,7 +166,11 @@ async function confirmDelete() {
   }
 }
 
-onMounted(loadCourses);
+onMounted(() => {
+  if (isAdmin.value) {
+    loadCourses();
+  }
+});
 </script>
 
 <template>

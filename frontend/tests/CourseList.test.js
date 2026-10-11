@@ -313,6 +313,15 @@ describe("Feature 2 — Course Management", () => {
       await mountList();
       expect(document.body.querySelectorAll(".v-list-item").length).toBe(0);
     });
+
+    it("Non-admin does not see courses", async () => {
+      Utils.setStore("user", { role: "student", token: "student-token", username: "student" });
+      CourseServices.getAll.mockResolvedValue({ data: [programming] });
+      await mountList();
+
+      expect(CourseServices.getAll).not.toHaveBeenCalled();
+      expect(listTitles()).toEqual([]);
+    });
   });
 
   describe("US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department", () => {

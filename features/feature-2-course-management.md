@@ -21,7 +21,7 @@
 **Acceptance scenarios:** see ### US-2.1 under Acceptance Criteria
 
 ### US-2.2: Browse the courses list
-**As a** signed-in user
+**As a** signed-in admin user
 **I want to** see every course with its name, ID, description and semester offered
 **So that** I can see what courses are already in the system
 **Priority:** P1
@@ -74,21 +74,21 @@
 
 ## Success Criteria
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
-- **SC-002**: Every signed-in user can view every course on one screen. An admin can create, edit, and delete courses on that screen.
+- **SC-002**: Every signed-in admin can view every course on one screen, and can create, edit, and delete courses on that screen. A signed-in non-admin cannot view courses.
 - **SC-003**: `npm test` passes for course API and dashboard courses-view behavior.
 
 ## Data Ownership & Isolation
 
-Courses are a shared catalogue. A course has no owner and no `userId`. Every signed-in user sees the same rows (**FR-002**). Only an admin can create, edit, or delete (**FR-003**).
+Courses are a shared catalogue. A course has no owner and no `userId`. Every signed-in admin sees the same rows (**FR-002**). Only an admin can view, create, edit, or delete a course (**FR-003**).
 
 | Rule | Requirement |
 |------|-------------|
-| **Read scope** | `GET /courseapi/courses` returns every course, ordered by `name` ascending (**FR-007**). Do not filter by `req.user.id` |
+| **Read scope** | `GET /courseapi/courses` returns every course, ordered by `name` ascending (**FR-007**). Do not filter by `req.user.id`. Caller must be an admin |
 | **Write scope** | `PUT` / `DELETE /courseapi/courses/:id` update or erase the row with that primary key. Missing id → `404`. Caller must be an admin |
 | **Create scope** | `POST /courseapi/courses` inserts a shared row. Do not set `userId` from the session or the body. Caller must be an admin |
-| **Non-admin write** | A signed-in user who is not an admin → `403` on `POST`, `PUT`, and `DELETE` |
-| **UI scope** | `CourseList.vue` shows the full list from the API. Show **+ New Course**, **Edit Course**, and **Delete course** only when the signed-in user is an admin |
-| **Implementation** | Protect all four routes with `authenticateRoute`. Protect `POST`, `PUT`, and `DELETE` with `requireAdmin`. Do not scope queries by `req.user.id` |
+| **Non-admin access** | A signed-in user who is not an admin → `403` on `GET`, `POST`, `PUT`, and `DELETE` |
+| **UI scope** | `CourseList.vue` loads and shows the course list only when the signed-in user is an admin. A non-admin sees no course rows. Show **+ New Course**, **Edit Course**, and **Delete course** only for an admin. `router.js` redirects a non-admin from `/courses` to home |
+| **Implementation** | Protect all four routes with `authenticate` and `requireAdmin`. Do not scope queries by `req.user.id` |
 
 Unauthenticated callers → `401`.
 
@@ -104,7 +104,7 @@ JSON property `courseID` matches the running app, the Data Model column `courseI
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/courseapi/courses` | Yes | List every course, alphabetical by `name` (**FR-002**, **FR-007**, US-2.2) |
+| `GET` | `/courseapi/courses` | Admin | List every course, alphabetical by `name` (**FR-002**, **FR-007**, US-2.2) |
 | `POST` | `/courseapi/courses` | Admin | Create a course (**FR-001**, **FR-003**, US-2.1) |
 | `PUT` | `/courseapi/courses/:id` | Admin | Replace name, course ID, description, or semester offered of an existing course (**FR-004**, **FR-005**, US-2.3) |
 | `DELETE` | `/courseapi/courses/:id` | Admin | Erase an existing course (**FR-003**, **FR-006**, US-2.4) |
@@ -144,9 +144,9 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 - Non-numeric `:id` → `400` `{ "message": "Course id must be a number." }`
 - Non-numeric course hours → `400` `{ "message": "Course hours must be a number." }`
 - Missing course id → `404` `{ "message": "Course not found." }`
-- Signed-in non-admin `POST` / `PUT` / `DELETE` → `403` `{ "message": "Admin privileges are required." }`
+- Signed-in non-admin `GET` / `POST` / `PUT` / `DELETE` → `403` `{ "message": "Forbidden! Admin access required." }`
 
-**Other errors:** empty or whitespace-only `name` or `courseID` → `400`; blank `description` or `semesterOffered` → stored as `null`; unauthenticated → `401`; signed-in non-admin `POST` / `PUT` / `DELETE` → `403`; missing id → `404`. Flat JSON — no `{ success, data }` envelope.
+**Other errors:** empty or whitespace-only `name` or `courseID` → `400`; blank `description` or `semesterOffered` → stored as `null`; unauthenticated → `401`; signed-in non-admin `GET` / `POST` / `PUT` / `DELETE` → `403`; missing id → `404`. Flat JSON — no `{ success, data }` envelope.
 
 ## Screen Requirements
 
@@ -156,7 +156,7 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 
 *   **Route:** `/courses` → `frontend/src/views/CourseList.vue` (existing `router.js`).
 *   **Heading:** **Courses**
-*   **Purpose:** One screen where every signed-in user browses every course, and an admin creates, edits, and deletes courses (**SC-002**).
+*   **Purpose:** One screen where a signed-in admin browses every course, and creates, edits, and deletes courses (**SC-002**). A signed-in user whose `role` is not `admin` is redirected to home and does not load the list.
 *   **Primary action:** **+ New Course** (`oc-cta`) — opens the add dialog (US-2.1).
 *   **Table columns:** Name, CourseID, Description, SemesterOffered, Actions. Each row shows that course's name, course ID, description and semester offered (US-2.2).
 *   **Row actions (icon-only, `size="small"`):**
@@ -176,7 +176,7 @@ Course ID is a required field the user fills (Gherkin example `CMSC-1113-01`).
 
 **App chrome**
 
-*   Existing `MenuBar` **Courses** button (`:to="{ name: 'courses' }"`) is how US-2.2 "open the courses menu" is reached. This feature does not add a new nav item.
+*   Existing `MenuBar` **Courses** button (`:to="{ name: 'courses' }"`) is how an admin reaches US-2.2 "open the courses menu". Show that button only when the signed-in user's `role` is `admin`. This feature does not add a new nav item.
 *   MenuBar stays hidden on login (Feature 1). Courses navigation stays on Feature 2.
 
 ## Data Model Requirements
@@ -290,7 +290,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 #### Scenario: Non-admin cannot create a course
 *   **Given** I am signed in as a non-admin
 *   **When** I send `POST /courseapi/courses` with a name and course ID
-*   **Then** the API returns `403` with `{ "message": "Admin privileges are required." }`
+*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
 *   **And** the course is not created
 
 ---
@@ -298,14 +298,26 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 ### US-2.2 — Browse the Course List
 
 #### Scenario: User views existing courses
-*   **Given** I am signed in on the dashboard
+*   **Given** I am signed in as an admin on the dashboard
 *   **When** I open the courses menu
 *   **Then** existing courses are displayed in alphabetical order
 
 #### Scenario: There are no existing courses
-*   **Given** I am signed in on the dashboard
+*   **Given** I am signed in as an admin on the dashboard
 *   **When** I open the courses menu
 *   **Then** no courses should be displayed
+
+#### Scenario: Non-admin does not see courses
+*   **Given** I am signed in as a non-admin on the dashboard
+*   **When** I open the courses menu
+*   **Then** no courses are displayed
+
+#### Scenario: Non-admin cannot view courses
+*   **Given** I am signed in as a non-admin
+*   **And** a course exists
+*   **When** I send `GET /courseapi/courses`
+*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
+*   **And** no courses are returned
 
 ### US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department
 
@@ -402,7 +414,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Given** I am signed in as a non-admin
 *   **And** a course exists
 *   **When** I send `PUT /courseapi/courses/:id` for that course
-*   **Then** the API returns `403` with `{ "message": "Admin privileges are required." }`
+*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
 *   **And** the course is unchanged
 
 ### US-2.4 Remove a course
@@ -431,8 +443,8 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Given** I am signed in as a non-admin
 *   **And** a course named `Programming I` exists
 *   **When** I send `DELETE /courseapi/courses/:id` for that course
-*   **Then** the API returns `403` with `{ "message": "Admin privileges are required." }`
-*   **And** `Programming I` is still listed
+*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
+*   **And** the course is unchanged
 
 ## Test Coverage Map
 
@@ -453,6 +465,8 @@ Each scenario above must map to at least one automated test.
 | US-2.1 | Non-admin cannot create a course | `backend/tests/courses.test.js` | `it("Non-admin cannot create a course")` |
 | US-2.2 | User views existing courses | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User views existing courses")` |
 | US-2.2 | There are no existing courses | `frontend/tests/CourseList.test.js` | `it("There are no existing courses")` |
+| US-2.2 | Non-admin does not see courses | `frontend/tests/CourseList.test.js` | `it("Non-admin does not see courses")` |
+| US-2.2 | Non-admin cannot view courses | `backend/tests/courses.test.js` | `it("Non-admin cannot view courses")` |
 | US-2.3 | User edits a course's information | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course's information")` |
 | US-2.3 | User clears a course's description, semester offered, course frequency, course hours, and course department | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User clears a course's description, semester offered, course frequency, course hours, and course department")` |
 | US-2.3 | User edits a course with an empty name | `frontend/tests/CourseList.test.js` | `it("User edits a course with an empty name")` |
