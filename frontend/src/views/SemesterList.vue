@@ -260,7 +260,7 @@ onMounted(retrieveSemesters);
             :loading="deleting"
             @click="confirmDeleteSemester"
           >
-            Delete semester
+            Delete Semester
           </v-btn>
         </v-card-actions>
       </v-card>
