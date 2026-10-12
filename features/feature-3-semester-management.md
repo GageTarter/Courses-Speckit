@@ -1,21 +1,12 @@
 # Feature: Semester Management
 
-  
-
 **Feature ID:** 3
-
 **Branch pattern:** `feature/3-semester-management`
-
 **Status:** Ready
-
 **Created:** 2026-09-17
-
 **Input:** semesters created and managed by the user currently signed in
-
 **Depends on:** [Feature 1 — User Authentication](feature-1-user-authentification.md)
-
 **Related:** [features/reference/api.md](./reference/api.md), [features/reference/data-model.md](./reference/data-model.md), [features/reference/behavior.md](./reference/behavior.md)
-
   
 
 ---
@@ -26,58 +17,58 @@
 
   
 
-### US-5.1: View created semesters
+### US-3.1: View created semesters
 
 **As a** Authorized User  
-
 **I want to** view the list of created semesters  
-
 **So that** I can keep track of which semesters the software knows about
 
-  
 
 **Priority:** P1  
-
 **Independent test:** Display all created semesters  
-
-**Acceptance scenarios:** see ### US-5.1 under Acceptance Criteria
+**Acceptance scenarios:** see ### US-3.1 under Acceptance Criteria
 
   
 
-### US-5.2 Edit existing semesters
+### US-3.2: Edit existing semesters
 
 **As a** Authorized User
-
 **I want to** be able to edit the values of any created semester  
-
 **So that** I can change the values, such as the semester name and start/end dates, of any created semester, to be different than what was inputted on creation
 
   
 
 **Priority:** P1  
-
 **Independent test:** Edit the existing semesters  
-
-**Acceptance scenarios:** see ### US-5.2 under Acceptance Criteria
+**Acceptance scenarios:** see ### US-3.2 under Acceptance Criteria
 
   
 
-### US-5.3 Delete existing semesters
+### US-3.3: Delete existing semesters
 
 **As a** Authorized User  
-
 **I want to** delete any of the existing semesters
-
 **So that** I can no longer see or include them in the semester list
 
   
 
 **Priority:** P1  
-
 **Independent test:** Delete any existing semester and clear its data  
+**Acceptance scenarios:** see ### US-3.3 under Acceptance Criteria
 
-**Acceptance scenarios:** see ### US-5.3 under Acceptance Criteria
 
+
+### US-3.4: Add new semesters
+
+**As a** Authorized user
+**I want to** add a new semester
+**So that** I can create a new semester and change its values
+
+
+
+**Priority:** P1
+**Indepentent test:** Create a new semester
+**Acceptance scenarios:** see ### US-3.4 under Acceptance Criteria
   
 
 ---
@@ -93,17 +84,11 @@
   
 
 -- **FR-001:** User must fill all fields, including the name, start date, and end date.
-
 -- **FR-002:** Created semesters must be stored for each university so that users can view and manage semesters whenever they are signed in.
-
 -- **FR-003:** Created semesters must be accessible only to and by all authorized users.
-
 -- **FR-004:** User must fill all fields when making edits to an existing semester.
-
 -- **FR-005:** Edited information must be updated in the affected semester when a user makes a change.
-
 -- **FR-006:** semester must be completely erased when the delete option is selected by the user.
-
 -- **FR-007:** Created semesters must be listed in reverse chronological order.
 
   
@@ -118,18 +103,16 @@
 
 - Feature 1 auth and session handling MUST be merged to `dev` before implementing this feature.
 
-- Feature 4 semester catalogue management MUST be merged to 'dev' before implementing this feature.
+- Feature 4 semester catalogue management MUST be merged to `dev` before implementing this feature.
 
   
 
 ## Edge Cases
 
 - Empty or whitespace-only semester data fields → `400`.
-
 - Name or unit longer than 100 characters → `400`.
-
-- `pricePerUnit` that is not a number → `400`.
-
+- `semesterStartDate` that is not a valid date → `400`.
+- `semesterEndDate` that is not a valid date → `400`.
 - Invalid `semesterId` → `400`.
 
   
@@ -137,9 +120,7 @@
 ## Success Criteria
 
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
-
 - **SC-002**: Signed-in user can create, view, edit, and delete semesters on one screen without being able to access other users' private courses and semesters.
-
 - **SC-003**: `npm test` passes for semester API and dashboard semesters-view behavior.
 
   
@@ -153,7 +134,6 @@
   
 
 -- **semester** named group belonging to one user (from Feature 4).
-
 -- **User** owns many semesters (from Feature 1).
 
   
@@ -166,26 +146,19 @@
 
   
 
-### US-5.1 — Add a catalogue semester
+### US-3.4 — Add a catalogue semester
 
   
 
 #### Scenario: User creates a new semester
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I click **+ New semester**
-
 *   **And** I enter semester name `Fall 2026`
-
 *   **And** I enter start date `2026-8-14`
-
 *   **And** I enter end date `2026-12-11`
-
 *   **Then** the API returns `201` with an semester object containing `id`, `name`, `startDate`, `endDate`, and `userId`
-
 *   **And** `Fall 2026` appears in the semesters view
-
 *   **And** the add-semester dialog closes
 
   
@@ -193,115 +166,78 @@
 #### Scenario: User creates a semester with an empty name
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the new semester dialog
-
 *   **And** I leave the name field empty or whitespace only
-
 *   **And** I attempt to confirm
-
 *   **Then** inline validation blocks the request
-
 *   **And** I see the message **"semester name is required."**
-
 *   **And** no API request is sent
-
   
 
 #### Scenario: User creates an semester with an empty start date
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the new semester dialog
-
 *   **And** I leave the unit field empty or whitespace only
-
 *   **And** I attempt to confirm
-
 *   **Then** inline validation blocks the request
-
 *   **And** I see the message **"semester start date is required."**
-
 *   **And** no API request is sent
-
   
 
 #### Scenario: User creates an semester with an empty end date unit
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the new semester dialog
-
 *   **And** I leave the price per unit field empty or whitespace only
-
 *   **And** I attempt to confirm
-
 *   **Then** inline validation blocks the request
-
 *   **And** I see the message **"semester end date is required."**
-
 *   **And** no API request is sent
-
   
 
 #### Scenario: User creates an semester with a name that is too long
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I submit an semester name longer than 11 characters
-
 *   **Then** the API returns `400` with `{ "message": "semester name must be 11 characters or fewer." }`
-
 *   **And** the error is displayed in a `<v-alert type="error">`
 
-  
 
 ---
 
   
 
-### US-5.2 — Browse the semester list
+### US-3.1: — Browse the semester list
 
   
 
 #### Scenario: User views existing semesters
 
 *   **Given** I am signed in on the dashboard as an authorized user
-
 *   **When** I open the semesters list
-
 *   **Then** semesters are displayed in alphabetical order
-
   
 
-#### Scenario: There are no existing semesters
+#### Scenario: User has no existing semesters
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the semesters list
-
 *   **Then** no semesters should be displayed
 
   
 
-### US-5.3 — Correct an semester's start date or end date
+### US-3.2: — Correct an semester's start date or end date
 
   
 
 #### Scenario: User edits an semester's information
-
 *   **Given** I am signed in on the dashboard
-
 *   **When** I click **Edit semester** on an existing semester
-
 *   **And** I change any of the original values
-
 *   **And** I confirm the dialog
-
 *   **Then** the API returns `200` with `{ "message": "semester was updated successfully." }`
-
 *   **And** the semester is visible with updated information in the semesters view
-
 *   **And** the edit-semester dialog closes
 
   
@@ -309,17 +245,11 @@
 #### Scenario: User edits an semester with an empty name
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the edit semester dialog
-
 *   **And** I leave the name field empty or whitespace only
-
 *   **And** I attempt to confirm
-
 *   **Then** inline validation blocks the request
-
 *   **And** I see the message **"semester name is required."**
-
 *   **And** no API request is sent
 
   
@@ -327,17 +257,11 @@
 #### Scenario: User edits an semester with an empty start date
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the edit semester dialog
-
 *   **And** I leave the start date field empty or whitespace only
-
 *   **And** I attempt to confirm
-
 *   **Then** inline validation blocks the request
-
 *   **And** I see the message **"semester start date is required."**
-
 *   **And** no API request is sent
 
   
@@ -345,17 +269,11 @@
 #### Scenario: User edits an semester with an empty end date
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I open the edit semester dialog
-
 *   **And** I leave the end date field empty or whitespace only
-
 *   **And** I attempt to confirm
-
 *   **Then** inline validation blocks the request
-
 *   **And** I see the message **"semester end date is required."**
-
 *   **And** no API request is sent
 
   
@@ -363,55 +281,41 @@
 #### Scenario: User edits an semester with a name that is too long
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I submit an semester name longer than 11 characters
-
 *   **Then** the API returns `400` with `{ "message": "semester name must be 11 characters or fewer." }`
-
 *   **And** the error is displayed in a `<v-alert type="error">`
 
   
 
-#### Scenario: User edits an semester with a non-chronological start date
+#### Scenario: User edits an semester with a non-date start date
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I submit a semester start date that is not a valid date
-
 *   **Then** the API returns `400` with `{ "message": "semester start date must be a chronological date value." }`
-
 *   **And** the error is displayed in a `<v-alert type="error">`
 
 
 
-#### Scenario: User edits an semester with a non-chronological end date
+#### Scenario: User edits an semester with a non-date end date
 
 *   **Given** I am signed in on the dashboard
-
 *   **When** I submit a semester end date that is not a number
-
 *   **Then** the API returns `400` with `{ "message": "semester start date must be a chronological date value." }`
-
 *   **And** the error is displayed in a `<v-alert type="error">`
   
 
 
-### US-5.4 Remove an semester
+### US-3.3: Remove a semester
 
   
 
 #### Scenario: User removes an semester
 
 *   **Given** I am signed in
-
 *   **And** there exists a semester named `Fall 2026`
-
 *   **When** I click the delete icon on the `Fall 2026` row
-
 *   **And** I confirm the delete dialog
-
 *   **Then** the API returns `200` or `204`
-
 *   **And** the semester is removed from the semesters view
 
   
@@ -650,17 +554,17 @@ Existing view: `frontend/src/views/semesterList.vue`. Client calls: `frontend/sr
 
 *   Purpose: signed-in user creates, lists reverse chronologically, edits, and deletes the semesters on this one screen (**SC-002**)
 
-*   Primary action: **+ New semester** (`oc-cta`) — opens the add dialog (US-5.1)
+*   Primary action: **+ New semester** (`oc-cta`) — opens the add dialog (US-3.4)
 
 *   Table columns: **Name**, **Start Date**, **End Date**, plus row actions
 
 *   Rows show `name`, `startDate`, and `endDate` as stored (unit is a text field, not a fixed unit list)
 
-*   Row action **Edit semester** — opens the edit dialog with that row’s values (US-5.3)
+*   Row action **Edit semester** — opens the edit dialog with that row’s values (US-3.2)
 
-*   Row action: delete icon — opens a confirm-delete dialog (US-5.4). Icon-only control needs an accessible name (for example `aria-label="Delete semester"`)
+*   Row action: delete icon — opens a confirm-delete dialog (US-3.3). Icon-only control needs an accessible name (for example `aria-label="Delete semester"`)
 
-*   **Empty state:** no semester rows (US-5.2 “User has no existing semesters”)
+*   **Empty state:** no semester rows (US-3.1 “User has no existing semesters”)
 
 *   **Loading:** in-progress list request (`:loading` or equivalent); do not treat loading as an empty catalogue
 
@@ -730,7 +634,7 @@ Existing view: `frontend/src/views/semesterList.vue`. Client calls: `frontend/sr
 
   
 
-Each scenario above must map to at least one automated test. Story IDs follow the Gherkin headings in this file (`### US-5.n`). `it("…")` titles must match the **Scenario** column exactly.
+Each scenario above must map to at least one automated test. Story IDs follow the Gherkin headings in this file (`### US-3.n`). `it("…")` titles must match the **Scenario** column exactly.
 
   
 
@@ -742,57 +646,57 @@ If another Feature already added the same scenario titles in these files, extend
 
 |-------|----------|-----------|-----------|
 
-| US-5.1 | User creates a new semester | `backend/tests/semesters.test.js` | `User creates a new semester` |
+| US-3.4 | User creates a new semester | `backend/tests/semesters.test.js` | `User creates a new semester` |
 
-| US-5.1 | User creates a new semester | `frontend/tests/semesterList.test.js` | `User creates a new semester` |
+| US-3.4 | User creates a new semester | `frontend/tests/semesterList.test.js` | `User creates a new semester` |
 
-| US-5.1 | User creates an semester with an empty name | `frontend/tests/semesterList.test.js` | `User creates an semester with an empty name` |
+| US-3.4 | User creates a semester with an empty name | `frontend/tests/semesterList.test.js` | `User creates a semester with an empty name` |
 
-| US-5.1 | User creates an semester with an start date | `frontend/tests/semesterList.test.js` | `User creates an semester with an start date` |
+| US-3.4 | User creates a semester with an empty start date | `frontend/tests/semesterList.test.js` | `User creates a semester with an empty start date` |
 
-| US-5.1 | User creates an semester with an empty end date | `frontend/tests/semesterList.test.js` | `User creates an semester with an empty end date` |
+| US-3.4 | User creates a semester with an empty end date | `frontend/tests/semesterList.test.js` | `User creates a semester with an empty end date` |
 
-| US-5.1 | User creates an semester with a name that is too long | `backend/tests/semesters.test.js` | `User creates an semester with a name that is too long` |
+| US-3.4 | User creates a semester with a name that is too long | `backend/tests/semesters.test.js` | `User creates a semester with a name that is too long` |
 
-| US-5.1 | User creates an semester with a name that is too long | `frontend/tests/semesterList.test.js` | `User creates an semester with a name that is too long` |
+| US-3.4 | User creates a semester with a name that is too long | `frontend/tests/semesterList.test.js` | `User creates a semester with a name that is too long` |
 
-| US-5.1 | User creates an semester with a non-date start date | `backend/tests/semesters.test.js` | `User creates an semester with a non-date start date` |
+| US-3.4 | User creates a semester with a non-date start date | `backend/tests/semesters.test.js` | `User creates a semester with a non-date start date` |
 
-| US-5.1 | User creates an semester with a non-date start date | `frontend/tests/semesterList.test.js` | `User creates an semester with a non-date start date` |
+| US-3.4 | User creates a semester with a non-date start date | `frontend/tests/semesterList.test.js` | `User creates a semester with a non-date start date` |
 
-| US-5.2 | User views existing semesters | `backend/tests/semesters.test.js` | `User views existing semesters` |
+| US-3.1 | User views existing semesters | `backend/tests/semesters.test.js` | `User views existing semesters` |
 
-| US-5.2 | User views existing semesters | `frontend/tests/semesterList.test.js` | `User views existing semesters` |
+| US-3.1 | User views existing semesters | `frontend/tests/semesterList.test.js` | `User views existing semesters` |
 
-| US-5.2 | User has no existing semesters | `backend/tests/semesters.test.js` | `User has no existing semesters` |
+| US-3.1 | User has no existing semesters | `backend/tests/semesters.test.js` | `User has no existing semesters` |
 
-| US-5.2 | User has no existing semesters | `frontend/tests/semesterList.test.js` | `User has no existing semesters` |
+| US-3.1 | User has no existing semesters | `frontend/tests/semesterList.test.js` | `User has no existing semesters` |
 
-| US-5.3 | User edits an semester's information | `backend/tests/semesters.test.js` | `User edits an semester's information` |
+| US-3.2 | User edits an semester's information | `backend/tests/semesters.test.js` | `User edits an semester's information` |
 
-| US-5.3 | User edits an semester's information | `frontend/tests/semesterList.test.js` | `User edits an semester's information` |
+| US-3.2 | User edits an semester's information | `frontend/tests/semesterList.test.js` | `User edits an semester's information` |
 
-| US-5.3 | User edits an semester with an empty name | `frontend/tests/semesterList.test.js` | `User edits an semester with an empty name` |
+| US-3.2 | User edits an semester with an empty name | `frontend/tests/semesterList.test.js` | `User edits an semester with an empty name` |
 
-| US-5.3 | User edits an semester with an empty start date | `frontend/tests/semesterList.test.js` | `User edits an semester with an empty start date` |
+| US-3.2 | User edits an semester with an empty start date | `frontend/tests/semesterList.test.js` | `User edits an semester with an empty start date` |
 
-| US-5.3 | User edits an semester with an empty end date | `frontend/tests/semesterList.test.js` | `User edits an semester with an empty end date` |
+| US-3.2 | User edits an semester with an empty end date | `frontend/tests/semesterList.test.js` | `User edits an semester with an empty end date` |
 
-| US-5.3 | User edits an semester with a name that is too long | `backend/tests/semesters.test.js` | `User edits an semester with a name that is too long` |
+| US-3.2 | User edits an semester with a name that is too long | `backend/tests/semesters.test.js` | `User edits an semester with a name that is too long` |
 
-| US-5.3 | User edits an semester with a name that is too long | `frontend/tests/semesterList.test.js` | `User edits an semester with a name that is too long` |
+| US-3.2 | User edits an semester with a name that is too long | `frontend/tests/semesterList.test.js` | `User edits an semester with a name that is too long` |
 
-| US-5.3 | User edits an semester with a non-date start date | `backend/tests/semesters.test.js` | `User edits an semester with a non-date start date` |
+| US-3.2 | User edits an semester with a non-date start date | `backend/tests/semesters.test.js` | `User edits an semester with a non-date start date` |
 
-| US-5.3 | User edits an semester with a non-date start date | `frontend/tests/semesterList.test.js` | `User edits an semester with a non-date start date` |
+| US-3.2 | User edits an semester with a non-date start date | `frontend/tests/semesterList.test.js` | `User edits an semester with a non-date start date` |
 
-| US-5.3 | User edits an semester with a non-date end date | `backend/tests/semesters.test.js` | `User edits an semester with a non-date end date` |
+| US-3.2 | User edits an semester with a non-date end date | `backend/tests/semesters.test.js` | `User edits an semester with a non-date end date` |
 
-| US-5.3 | User edits an semester with a non-date end date | `frontend/tests/semesterList.test.js` | `User edits an semester with a non-date end date` |
+| US-3.2 | User edits an semester with a non-date end date | `frontend/tests/semesterList.test.js` | `User edits an semester with a non-date end date` |
 
-| US-5.4 | User removes an semester | `backend/tests/semesters.test.js` | `User removes an semester` |
+| US-3.3 | User removes an semester | `backend/tests/semesters.test.js` | `User removes an semester` |
 
-| US-5.4 | User removes an semester | `frontend/tests/semesterList.test.js` | `User removes an semester` |
+| US-3.3 | User removes an semester | `frontend/tests/semesterList.test.js` | `User removes an semester` |
 
   
   

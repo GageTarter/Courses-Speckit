@@ -213,6 +213,16 @@ const handleLogout = async () => {
       Sections
     </v-btn>
 
+    <v-btn
+      v-if="user?.role === 'admin'"
+      variant="text"
+      color="white"
+      to="/semesters"
+      class="ml-2"
+    >
+      Semesters
+    </v-btn>
+
     <v-spacer />
 
     <v-menu
