@@ -18,9 +18,10 @@ const enrolledSectionIds = computed(
   () => new Set(enrollments.value.map((row) => row.sectionId))
 );
 
-const availableSections = computed(() =>
-  sections.value.filter((row) => !enrolledSectionIds.value.has(row.id))
-);
+const isEnrolled = (sectionId) => enrolledSectionIds.value.has(sectionId);
+
+const enrollDisabled = (section) =>
+  isEnrolled(section.id) || section.remainingSeats === 0;
 
 const loadSemesters = async () => {
   loadingCatalog.value = true;
@@ -130,7 +131,7 @@ const confirmDrop = async () => {
             { title: 'Seats', key: 'seats' },
             { title: 'Actions', key: 'actions', sortable: false },
           ]"
-          :items="availableSections"
+          :items="sections"
           :loading="loadingTable"
           item-value="id"
         >
@@ -143,11 +144,12 @@ const confirmDrop = async () => {
               color="primary"
               variant="elevated"
               class="oc-cta"
-              :disabled="item.remainingSeats === 0"
+              :class="{ 'enroll-btn--disabled': enrollDisabled(item) }"
+              :disabled="enrollDisabled(item)"
               :loading="enrollingId === item.id"
               @click="enrollIn(item)"
             >
-              Enroll
+              {{ isEnrolled(item.id) ? "Enrolled" : "Enroll" }}
             </v-btn>
           </template>
           <template #no-data>
@@ -216,3 +218,10 @@ const confirmDrop = async () => {
     </v-dialog>
   </v-container>
 </template>
+
+<style scoped>
+.enroll-btn--disabled {
+  opacity: 0.45;
+  filter: blur(0.4px);
+}
+</style>
