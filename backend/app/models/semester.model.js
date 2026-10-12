@@ -5,4 +5,13 @@ export default (sequelize, Sequelize) =>
       allowNull: false,
       unique: true,
     },
+    // Present when Feature 3 has been merged into the shared DB.
+    startDate: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
+    endDate: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
   });

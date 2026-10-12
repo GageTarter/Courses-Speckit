@@ -3,7 +3,6 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import authServices from "../services/authServices.js";
 import Utils from "../config/utils.js";
-import { isStudent } from "../config/roles.js";
 
 const router = useRouter();
 
@@ -34,18 +33,12 @@ const signOut = async () => {
     </v-chip>
 
     <p class="text-body-1 mb-6">
-      Use Section Enrollment to pick a semester and add the sections you want.
+      {{
+        user?.role === "student"
+          ? "Use Enroll in the menu to pick a semester and add sections."
+          : "Sign in as a student to use Section Enrollment."
+      }}
     </p>
-
-    <v-btn
-      v-if="isStudent(user)"
-      :to="{ name: 'enroll' }"
-      color="primary"
-      variant="elevated"
-      class="oc-cta mr-4"
-    >
-      Section Enrollment
-    </v-btn>
 
     <v-btn
       color="primary"
