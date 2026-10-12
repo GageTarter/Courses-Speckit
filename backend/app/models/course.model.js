@@ -14,19 +14,7 @@ export default (sequelize, Sequelize) => {
       allowNull: true,
     },
     semesterOffered: {
-      type: Sequelize.ENUM('Fall', 'Spring', 'Summer', 'Winter'),
-      allowNull: true,
-    },
-    courseFrequency: {
-      type: Sequelize.STRING(100),
-      allowNull: true,
-    },
-    courseHours: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-    },
-    courseDept: {
-      type: Sequelize.STRING(100),
+      type: Sequelize.ENUM("Fall", "Spring", "Summer", "Winter"),
       allowNull: true,
     },
   });

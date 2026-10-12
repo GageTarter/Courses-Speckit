@@ -1,20 +1,25 @@
-import apiClient from "./services.js";
+import axios from "axios";
+
+const courseClient = axios.create({
+  baseURL: import.meta.env.DEV ? "http://localhost:3201/courses/" : "/courses/",
+  withCredentials: true,
+});
 
 const CourseServices = {
   getAll() {
-    return apiClient.get("courses");
+    return courseClient.get("courses");
   },
 
   create(data) {
-    return apiClient.post("courses", data);
+    return courseClient.post("courses", data);
   },
 
   update(id, data) {
-    return apiClient.put(`courses/${id}`, data);
+    return courseClient.put(`courses/${id}`, data);
   },
 
   remove(id) {
-    return apiClient.delete(`courses/${id}`);
+    return courseClient.delete(`courses/${id}`);
   },
 };
 

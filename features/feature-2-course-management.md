@@ -21,7 +21,7 @@
 **Acceptance scenarios:** see ### US-2.1 under Acceptance Criteria
 
 ### US-2.2: Browse the courses list
-**As a** signed-in admin user
+**As a** signed-in user
 **I want to** see every course with its name, ID, description and semester offered
 **So that** I can see what courses are already in the system
 **Priority:** P1
@@ -50,10 +50,10 @@
 
 ## Functional Requirements
 
--- **FR-001:** An admin must fill `name` and `courseID`. `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept` are optional.
--- **FR-002:** Created courses are shared. Only signed-in admin users can view every course. No course belongs to a specific user.
--- **FR-003:** Only an admin can view and create, edit, or delete a course. 
--- **FR-004:** On edit, `name` and `courseID` are required. `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDepartment` are optional; a blank value clears that field.
+-- **FR-001:** An admin must fill `name` and `courseID`. `description` and `semesterOffered` are optional.
+-- **FR-002:** Created courses are shared. Every signed-in user can view every course. No course belongs to a specific user.
+-- **FR-003:** Only an admin can create, edit, or delete a course. A signed-in non-admin can list courses and cannot change them.
+-- **FR-004:** On edit, `name` and `courseID` are required. `description` and `semesterOffered` are optional; a blank value clears that field.
 -- **FR-005:** Edited information must be updated in the affected course when a user with admin privelages makes a change.
 -- **FR-006:** Course must be completely erased when the delete option is selected by the user with admin privelages.
 -- **FR-007:** Created courses must be listed in alphabetical order.
@@ -74,21 +74,21 @@
 
 ## Success Criteria
 - **SC-001**: Every Gherkin scenario has at least one automated test before merge.
-- **SC-002**: Every signed-in admin can view every course on one screen, and can create, edit, and delete courses on that screen. A signed-in non-admin cannot view courses.
+- **SC-002**: Every signed-in user can view every course on one screen. An admin can create, edit, and delete courses on that screen.
 - **SC-003**: `npm test` passes for course API and dashboard courses-view behavior.
 
 ## Data Ownership & Isolation
 
-Courses are a shared catalogue. A course has no owner and no `userId`. Every signed-in admin sees the same rows (**FR-002**). Only an admin can view, create, edit, or delete a course (**FR-003**).
+Courses are a shared catalogue. A course has no owner and no `userId`. Every signed-in user sees the same rows (**FR-002**). Only an admin can create, edit, or delete (**FR-003**).
 
 | Rule | Requirement |
 |------|-------------|
-| **Read scope** | `GET /courseapi/courses` returns every course, ordered by `name` ascending (**FR-007**). Do not filter by `req.user.id`. Caller must be an admin |
+| **Read scope** | `GET /courseapi/courses` returns every course, ordered by `name` ascending (**FR-007**). Do not filter by `req.user.id` |
 | **Write scope** | `PUT` / `DELETE /courseapi/courses/:id` update or erase the row with that primary key. Missing id → `404`. Caller must be an admin |
 | **Create scope** | `POST /courseapi/courses` inserts a shared row. Do not set `userId` from the session or the body. Caller must be an admin |
-| **Non-admin access** | A signed-in user who is not an admin → `403` on `GET`, `POST`, `PUT`, and `DELETE` |
-| **UI scope** | `CourseList.vue` loads and shows the course list only when the signed-in user is an admin. A non-admin sees no course rows. Show **+ New Course**, **Edit Course**, and **Delete course** only for an admin. `router.js` redirects a non-admin from `/courses` to home |
-| **Implementation** | Protect all four routes with `authenticate` and `requireAdmin`. Do not scope queries by `req.user.id` |
+| **Non-admin write** | A signed-in user who is not an admin → `403` on `POST`, `PUT`, and `DELETE` |
+| **UI scope** | `CourseList.vue` shows the full list from the API. Show **+ New Course**, **Edit Course**, and **Delete course** only when the signed-in user is an admin |
+| **Implementation** | Protect all four routes with `authenticateRoute`. Protect `POST`, `PUT`, and `DELETE` with `requireAdmin`. Do not scope queries by `req.user.id` |
 
 Unauthenticated callers → `401`.
 
@@ -104,7 +104,7 @@ JSON property `courseID` matches the running app, the Data Model column `courseI
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| `GET` | `/courseapi/courses` | Admin | List every course, alphabetical by `name` (**FR-002**, **FR-007**, US-2.2) |
+| `GET` | `/courseapi/courses` | Yes | List every course, alphabetical by `name` (**FR-002**, **FR-007**, US-2.2) |
 | `POST` | `/courseapi/courses` | Admin | Create a course (**FR-001**, **FR-003**, US-2.1) |
 | `PUT` | `/courseapi/courses/:id` | Admin | Replace name, course ID, description, or semester offered of an existing course (**FR-004**, **FR-005**, US-2.3) |
 | `DELETE` | `/courseapi/courses/:id` | Admin | Erase an existing course (**FR-003**, **FR-006**, US-2.4) |
@@ -115,12 +115,12 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 
 **Create request body:** `name` and `courseID` are required. `description` and `semesterOffered` may be omitted.
 ```json
-{ "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall", "courseFrequency": "Every semester", "courseHours": 3, "courseDept": "Computer Science" }
+{ "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall" }
 ```
 
 **Create success** (`201`):
 ```json
-{ "id": 1, "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall", "courseFrequency": "Every semester", "courseHours": 3, "courseDept": "Computer Science" }
+{ "id": 1, "name": "Programming I", "courseID": "CMSC-1113-01", "description": "Introduction to programming", "semesterOffered": "Fall" }
 ```
 
 **Update request body:** `name` and `courseID` are required. `description` and `semesterOffered` are optional; omit them or send them blank to store `null` (**FR-004**).
@@ -139,14 +139,11 @@ This feature does **not** add `GET /courseapi/courses/:id` or `DELETE /courseapi
 - Name longer than 100 characters → `400` `{ "message": "Course name must be 100 characters or fewer." }`
 - Description longer than 300 characters → `400` `{ "message": "Course description must be 300 characters or fewer." }`
 - `semesterOffered` present and not `Fall`, `Spring`, `Summer`, or `Winter` → `400` `{ "message": "Semester offered must be Fall, Spring, Summer, or Winter." }`
-- Course Frequency longer than 100 characters → `400` `{ "message": "Course frequency must be 100 characters or fewer." }`
-- Course Department longer than 100 characters → `400` `{ "message": "Course department must be 100 characters or fewer." }`
 - Non-numeric `:id` → `400` `{ "message": "Course id must be a number." }`
-- Non-numeric course hours → `400` `{ "message": "Course hours must be a number." }`
 - Missing course id → `404` `{ "message": "Course not found." }`
-- Signed-in non-admin `GET` / `POST` / `PUT` / `DELETE` → `403` `{ "message": "Forbidden! Admin access required." }`
+- Signed-in non-admin `POST` / `PUT` / `DELETE` → `403` `{ "message": "Admin privileges are required." }`
 
-**Other errors:** empty or whitespace-only `name` or `courseID` → `400`; blank `description` or `semesterOffered` → stored as `null`; unauthenticated → `401`; signed-in non-admin `GET` / `POST` / `PUT` / `DELETE` → `403`; missing id → `404`. Flat JSON — no `{ success, data }` envelope.
+**Other errors:** empty or whitespace-only `name` or `courseID` → `400`; blank `description` or `semesterOffered` → stored as `null`; unauthenticated → `401`; signed-in non-admin `POST` / `PUT` / `DELETE` → `403`; missing id → `404`. Flat JSON — no `{ success, data }` envelope.
 
 ## Screen Requirements
 
@@ -156,14 +153,14 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 
 *   **Route:** `/courses` → `frontend/src/views/CourseList.vue` (existing `router.js`).
 *   **Heading:** **Courses**
-*   **Purpose:** One screen where a signed-in admin browses every course, and creates, edits, and deletes courses (**SC-002**). A signed-in user whose `role` is not `admin` is redirected to home and does not load the list.
+*   **Purpose:** One screen where every signed-in user browses every course, and an admin creates, edits, and deletes courses (**SC-002**).
 *   **Primary action:** **+ New Course** (`oc-cta`) — opens the add dialog (US-2.1).
 *   **Table columns:** Name, CourseID, Description, SemesterOffered, Actions. Each row shows that course's name, course ID, description and semester offered (US-2.2).
 *   **Row actions (icon-only, `size="small"`):**
     *   **Edit Course** — `aria-label="Edit Course"`; opens the edit dialog (US-2.3).
     *   Delete icon on the row — `aria-label` **Delete course**; opens the delete confirm dialog (US-2.4).
-*   **Add dialog:** fields Name, Course ID, Description, Semester Offered, Course Frequency, Course Hours, and Course Department. Name and Course ID are required. Description, Semester Offered, Course Frequency, Course Hours, and Course Department are optional. Confirm submits create; **Close** dismisses without saving (existing dialog chrome). Dialog closes after a successful create.
-*   **Edit dialog:** same seven fields, prefilled from the row. Name and Course ID are required. Clearing Description, Semester Offered, Course Frequency, Course Hours or Course Department stores `null`. Confirm submits update; **Close** dismisses. Dialog closes after a successful update. Click target and title use **Edit Course**.
+*   **Add dialog:** fields Name, Course ID, Description, and Semester Offered. Name and Course ID are required. Description and Semester Offered are optional. Confirm submits create; **Close** dismisses without saving (existing dialog chrome). Dialog closes after a successful create.
+*   **Edit dialog:** same four fields, prefilled from the row. Name and Course ID are required. Clearing Description or Semester Offered stores `null`. Confirm submits update; **Close** dismisses. Dialog closes after a successful update. Click target and title use **Edit Course**.
 *   **Delete dialog:** confirm then call `DELETE`; cancel/close leaves the row in place.
 *   **Inline validation** (no API request) — exact AC copy:
     *   **"Course name is required."**
@@ -176,7 +173,7 @@ Course ID is a required field the user fills (Gherkin example `CMSC-1113-01`).
 
 **App chrome**
 
-*   Existing `MenuBar` **Courses** button (`:to="{ name: 'courses' }"`) is how an admin reaches US-2.2 "open the courses menu". Show that button only when the signed-in user's `role` is `admin`. This feature does not add a new nav item.
+*   Existing `MenuBar` **Courses** button (`:to="{ name: 'courses' }"`) is how US-2.2 "open the courses menu" is reached. This feature does not add a new nav item.
 *   MenuBar stays hidden on login (Feature 1). Courses navigation stays on Feature 2.
 
 ## Data Model Requirements
@@ -189,9 +186,6 @@ Course ID is a required field the user fills (Gherkin example `CMSC-1113-01`).
 | `courseID` | STRING(100) | Required; stored and displayed as typed |
 | `description` | STRING(300) | Optional. `null` when omitted or blank. At most 300 characters when present |
 | `semesterOffered` | ENUM | Optional. `null` when omitted or blank. When present, `Fall`, `Spring`, `Summer`, or `Winter` |
-| `courseFrequency` | STRING(100) | Optional. `null` when omitted or blank. At most 100 characters when present |
-| `courseHours` | INTEGER | Optional. `null` when omitted or blank. |
-| `courseDept` | STRING(100) | Optional. `null` when omitted or blank. At most 100 characters when present |
 | `createdAt` | DATE | Sequelize timestamp |
 | `updatedAt` | DATE | Sequelize timestamp |
 
@@ -210,15 +204,12 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** I enter course ID `CMSC-1113-01`
 *   **And** I enter description `Introduction to programming`
 *   **And** I enter semester offered `Fall`
-*   **And** I enter course frequency `Every Semester`
-*   **And** I enter course hours `3`
-*   **And** I enter course department `Computer Science`
 *   **And** I confirm the dialog
-*   **Then** the API returns `201` with a course object containing `id`, `name`, `courseID`, `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept`.
+*   **Then** the API returns `201` with a course object containing `id`, `name`, `courseID`, `description`, and `semesterOffered`
 *   **And** `Programming I` appears in the courses view
 *   **And** the add-course dialog closes
 
-#### Scenario: User creates a course without a description, semester offered, course frequency, course hours, or course department
+#### Scenario: User creates a course without a description or semester offered
 *   **Given** I am signed in as an admin on the dashboard
 *   **When** I open the new course dialog
 *   **And** I enter course name `Programming I`
@@ -226,7 +217,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** I leave description and semester offered empty
 *   **And** I confirm the dialog
 *   **Then** the API returns `201`
-*   **And** `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept` are `null`
+*   **And** `description` and `semesterOffered` are `null`
 *   **And** `Programming I` appears in the courses view
 
 #### Scenario: User creates a course with an empty name
@@ -268,18 +259,6 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Then** the API returns `400` with `{ "message": "Course description must be 300 characters or fewer." }`
 *   **And** the error is displayed in a `<v-alert type="error">`
 
-#### Scenario: User creates a course with a frequency that is too long
-*   **Given** I am signed in as an admin on the dashboard
-*   **When** I submit a course frequency longer than 100 characters
-*   **Then** the API returns `400` with `{ "message": "Course frequency must be 100 characters or fewer." }`
-*   **And** the error is displayed in a `<v-alert type="error">`
-
-#### Scenario: User creates a course with a department that is too long
-*   **Given** I am signed in as an admin on the dashboard
-*   **When** I submit a course department longer than 100 characters
-*   **Then** the API returns `400` with `{ "message": "Course department must be 100 characters or fewer." }`
-*   **And** the error is displayed in a `<v-alert type="error">`
-
 #### Scenario: User creates a course with an invalid semester offered
 *   **Given** I am signed in as an admin on the dashboard
 *   **When** I submit a semester offered that is not `Fall`, `Spring`, `Summer` or `Winter`
@@ -290,7 +269,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 #### Scenario: Non-admin cannot create a course
 *   **Given** I am signed in as a non-admin
 *   **When** I send `POST /courseapi/courses` with a name and course ID
-*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
+*   **Then** the API returns `403` with `{ "message": "Admin privileges are required." }`
 *   **And** the course is not created
 
 ---
@@ -298,28 +277,16 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 ### US-2.2 — Browse the Course List
 
 #### Scenario: User views existing courses
-*   **Given** I am signed in as an admin on the dashboard
+*   **Given** I am signed in on the dashboard
 *   **When** I open the courses menu
 *   **Then** existing courses are displayed in alphabetical order
 
 #### Scenario: There are no existing courses
-*   **Given** I am signed in as an admin on the dashboard
+*   **Given** I am signed in on the dashboard
 *   **When** I open the courses menu
 *   **Then** no courses should be displayed
 
-#### Scenario: Non-admin does not see courses
-*   **Given** I am signed in as a non-admin on the dashboard
-*   **When** I open the courses menu
-*   **Then** no courses are displayed
-
-#### Scenario: Non-admin cannot view courses
-*   **Given** I am signed in as a non-admin
-*   **And** a course exists
-*   **When** I send `GET /courseapi/courses`
-*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
-*   **And** no courses are returned
-
-### US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department
+### US-2.3 — Correct a course's name, ID, description or semester Offered
 
 #### Scenario: User edits a course's information
 *   **Given** I am signed in as an admin on the dashboard
@@ -330,15 +297,15 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **And** the course is visible with updated information in the courses view
 *   **And** the edit-course dialog closes
 
-#### Scenario: User clears a course's description, semester offered, course frequency, course hours, and course department
+#### Scenario: User clears a course's description and semester offered
 *   **Given** I am signed in as an admin on the dashboard
-*   **And** a course has a description, a semester offered, a course frequency, course hours, and a course department
+*   **And** a course has a description and a semester offered
 *   **When** I open the edit course dialog
-*   **And** I clear description, semester offered, course frequency, course hours, and course department
+*   **And** I clear description and semester offered
 *   **And** I leave name and course ID filled
 *   **And** I confirm the dialog
 *   **Then** the API returns `200` with `{ "message": "Course was updated successfully." }`
-*   **And** that course's `description` and `semesterOffered`, `courseFrequency`, `courseHours`, `courseDept` are `null` in the courses view
+*   **And** that course's `description` and `semesterOffered` are `null` in the courses view
 
 #### Scenario: User edits a course with an empty name
 *   **Given** I am signed in as an admin on the dashboard
@@ -379,18 +346,6 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Then** the API returns `400` with `{ "message": "Course description must be 300 characters or fewer." }`
 *   **And** the error is displayed in a `<v-alert type="error">`
 
-#### Scenario: User edits a course with a course frequency that is too long
-*   **Given** I am signed in as an admin on the dashboard
-*   **When** I submit a course frequency longer than 100 characters
-*   **Then** the API returns `400` with `{ "message": "Course frequency must be 100 characters or fewer." }`
-*   **And** the error is displayed in a `<v-alert type="error">`
-
-#### Scenario: User edits a course with a course department that is too long
-*   **Given** I am signed in as an admin on the dashboard
-*   **When** I submit a course department longer than 100 characters
-*   **Then** the API returns `400` with `{ "message": "Course department must be 100 characters or fewer." }`
-*   **And** the error is displayed in a `<v-alert type="error">`
-
 #### Scenario: User edits a course with an invalid semester offered
 *   **Given** I am signed in as an admin on the dashboard
 *   **When** I submit a semester offered that is not `Fall`, `Spring`, `Summer`, or `Winter`
@@ -414,7 +369,7 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Given** I am signed in as a non-admin
 *   **And** a course exists
 *   **When** I send `PUT /courseapi/courses/:id` for that course
-*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
+*   **Then** the API returns `403` with `{ "message": "Admin privileges are required." }`
 *   **And** the course is unchanged
 
 ### US-2.4 Remove a course
@@ -443,8 +398,8 @@ This feature does not associate **Course** with **User**. Courses have no owner 
 *   **Given** I am signed in as a non-admin
 *   **And** a course named `Programming I` exists
 *   **When** I send `DELETE /courseapi/courses/:id` for that course
-*   **Then** the API returns `403` with `{ "message": "Forbidden! Admin access required." }`
-*   **And** the course is unchanged
+*   **Then** the API returns `403` with `{ "message": "Admin privileges are required." }`
+*   **And** `Programming I` is still listed
 
 ## Test Coverage Map
 
@@ -453,29 +408,23 @@ Each scenario above must map to at least one automated test.
 | Story | Scenario | Test file | Test name |
 |-------|----------|-----------|-----------|
 | US-2.1 | User creates a new course | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a new course")` |
-| US-2.1 | User creates a course without a description, semester offered, course frequency, course hours, or course department | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course without a description, semester offered, course frequency, course hours, or course department")` |
+| US-2.1 | User creates a course without a description or semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course without a description or semester offered")` |
 | US-2.1 | User creates a course with an empty name | `frontend/tests/CourseList.test.js` | `it("User creates a course with an empty name")` |
 | US-2.1 | User creates a course with an empty courseID | `frontend/tests/CourseList.test.js` | `it("User creates a course with an empty courseID")` |
 | US-2.1 | User creates a course with an existing name | `frontend/tests/CourseList.test.js` | `it("User creates a course with an existing name")` |
 | US-2.1 | User creates a course with a name that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a name that is too long")` |
 | US-2.1 | User creates a course with a description that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a description that is too long")` |
-| US-2.1 | User creates a course with a frequency that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a frequency that is too long")` |
-| US-2.1 | User creates a course with a department that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with a department that is too long")` |
 | US-2.1 | User creates a course with an invalid semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User creates a course with an invalid semester offered")` |
 | US-2.1 | Non-admin cannot create a course | `backend/tests/courses.test.js` | `it("Non-admin cannot create a course")` |
 | US-2.2 | User views existing courses | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User views existing courses")` |
 | US-2.2 | There are no existing courses | `frontend/tests/CourseList.test.js` | `it("There are no existing courses")` |
-| US-2.2 | Non-admin does not see courses | `frontend/tests/CourseList.test.js` | `it("Non-admin does not see courses")` |
-| US-2.2 | Non-admin cannot view courses | `backend/tests/courses.test.js` | `it("Non-admin cannot view courses")` |
 | US-2.3 | User edits a course's information | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course's information")` |
-| US-2.3 | User clears a course's description, semester offered, course frequency, course hours, and course department | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User clears a course's description, semester offered, course frequency, course hours, and course department")` |
+| US-2.3 | User clears a course's description and semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User clears a course's description and semester offered")` |
 | US-2.3 | User edits a course with an empty name | `frontend/tests/CourseList.test.js` | `it("User edits a course with an empty name")` |
 | US-2.3 | User edits a course with an empty courseID | `frontend/tests/CourseList.test.js` | `it("User edits a course with an empty courseID")` |
 | US-2.3 | User edits a course with an existing name | `frontend/tests/CourseList.test.js` | `it("User edits a course with an existing name")` |
 | US-2.3 | User edits a course with a name that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a name that is too long")` |
 | US-2.3 | User edits a course with a description that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a description that is too long")` |
-| US-2.3 | User edits a course with a course frequency that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a course frequency that is too long")` |
-| US-2.3 | User edits a course with a course department that is too long | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with a course department that is too long")` |
 | US-2.3 | User edits a course with an invalid semester offered | `backend/tests/courses.test.js`; `frontend/tests/CourseList.test.js` | `it("User edits a course with an invalid semester offered")` |
 | US-2.3 | User updates a course with a non-numeric id | `backend/tests/courses.test.js` | `it("User updates a course with a non-numeric id")` |
 | US-2.3 | User updates a course that does not exist | `backend/tests/courses.test.js` | `it("User updates a course that does not exist")` |

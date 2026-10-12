@@ -4,6 +4,11 @@
  *
  * Shared request guards. Controllers call these instead of re-checking
  * tokens or roles inline.
+ *
+ * Teammates (Features 2, 3, 5 — courses, semesters, sections, faculty):
+ *   catalog writes → [authenticate, requireAdmin]
+ *   enrollment writes → [authenticate, requireStudent]
+ * Role comes from the session user (req.user.role), never from the body.
  */
 import jwt from "jsonwebtoken";
 import db from "../models/index.js";
@@ -50,6 +55,23 @@ export const authenticate = async (req, res, next) => {
   req.session = session;
 
   return next();
+};
+
+export const requireStudent = (req, res, next) => {
+  if (req.user?.role !== "student") {
+    logger.warn(`Student route refused for user id=${req.user?.id}`);
+    return res.status(403).send({ message: "Forbidden! Student access required." });
+  }
+
+  return next();
+};
+
+export const getOwnedEnrollmentOrNull = async (req, enrollmentId) => {
+  const row = await db.enrollment.findOne({
+    where: { id: enrollmentId, userId: req.user.id },
+  });
+
+  return row ?? null;
 };
 
 export const requireAdmin = (req, res, next) => {
