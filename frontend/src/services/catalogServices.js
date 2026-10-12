@@ -6,6 +6,6 @@ export default {
   },
 
   listSections(semesterId) {
-    return apiClient.get("sections", { params: { semesterId } });
+    return apiClient.get("catalog/sections", { params: { semesterId } });
   },
 };

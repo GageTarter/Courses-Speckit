@@ -36,7 +36,7 @@ const signOut = async () => {
       {{
         user?.role === "student"
           ? "Use Enroll in the menu to pick a semester and add sections."
-          : "Sign in as a student to use Section Enrollment."
+          : "Use the menu for Courses, Faculty, and Sections."
       }}
     </p>
 
