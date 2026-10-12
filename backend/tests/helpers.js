@@ -98,8 +98,16 @@ export const seedCatalog = async () => {
     dept: "Computer Science",
   });
 
-  const fall = await db.semester.create({ name: "Fall 2026" });
-  const spring = await db.semester.create({ name: "Spring 2027" });
+  const fall = await db.semester.create(
+    validSemester({ name: "Fall 2026" }),
+  );
+  const spring = await db.semester.create(
+    validSemester({
+      name: "Spring 2027",
+      startDate: "2027-01-01",
+      endDate: "2027-05-31",
+    }),
+  );
   const course = await db.course.create({
     name: "Software Engineering IV",
     courseID: "CMSC 4123",

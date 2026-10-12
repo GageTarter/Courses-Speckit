@@ -232,18 +232,18 @@ Endpoints introduced by this feature:
 ### [View: Enroll] — route name `enroll`
 Single student-facing view with a selector, an available-sections table, and a schedule panel.
 
-*   Heading: **Section Enrollment**
+*   Heading: **Enrollment**
 *   **Semester selector:** `<v-select>` labelled **Semester**, populated from `GET /courses/semesters`, with no default selection.
     *   Before a selection: **"Select a semester to see available sections."**
     *   No semesters exist: **"No semesters are open for registration yet."**
-*   **Available sections table:** `<v-data-table>` with columns Course, Title, Section, Seats, and an action column.
+*   **Available sections:** sections are grouped by course for display (sorted by course code, then section number). Each course shows a header with code, title, and section count, then a table with columns Section, Seats, and Actions. Enroll / Full / Enrolled behavior is unchanged.
     *   Seats renders as `remaining / capacity`.
     *   Primary action per row: **Enroll** (`<v-btn color="primary" variant="elevated" class="oc-cta" :loading="…">`), disabled (visually muted) while its request is in flight, when remaining seats are `0`, or when the student is already enrolled in that section (label becomes **Enrolled**).
     *   A full row shows a `<v-chip>` reading **Full** in place of the seat count's normal styling.
-    *   Sections the student is already enrolled in stay in this table with a disabled **Enrolled** button; seat counts still refresh after enroll/drop.
+    *   Sections the student is already enrolled in stay in this list with a disabled **Enrolled** button; seat counts still refresh after enroll/drop.
     *   **Empty state:** **"No sections are offered in this semester."**
-*   **My schedule panel:** `<v-card rounded="lg">` titled **My Schedule**, listing the student's enrollments for the selected semester.
-    *   Each row shows course code, title, and section number.
+*   **My schedule panel:** heading **My Schedule**, listing the student's enrollments for the selected semester.
+    *   Each row shows course code, title, and section number, with the same drop control as before.
     *   Icon-only action: drop, with `aria-label` **Drop section**, opening a confirm dialog.
     *   Confirm dialog: title **Drop section?**, body naming the course, primary confirm **Drop** (`oc-cta`), secondary **Cancel** (`variant="text"`).
     *   **Empty state:** **"You are not enrolled in any sections for this semester."**
