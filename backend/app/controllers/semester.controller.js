@@ -84,6 +84,10 @@ exports.create = async (req, res) => {
 
     return res.status(201).send(semester);
   } catch (err) {
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).send({ message: "Semester name is already taken." });
+    }
+
     logger.error(`semester create failed: ${err.message}`);
     return res.status(500).send({ message: "Failed to create semester." });
   }
@@ -117,6 +121,10 @@ exports.update = async (req, res) => {
       message: "Semester was updated successfully.",
     });
   } catch (err) {
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).send({ message: "Semester name is already taken." });
+    }
+
     logger.error(`semester update failed: ${err.message}`);
     return res.status(500).send({ message: "Failed to update semester." });
   }
