@@ -1,17 +1,24 @@
-export default (sequelize, Sequelize) =>
-  sequelize.define("semester", {
+export default (sequelize, Sequelize) => {
+  const Semester = sequelize.define("semester", {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     name: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(50),
       allowNull: false,
       unique: true,
     },
-    // Present when Feature 3 has been merged into the shared DB.
     startDate: {
-      type: Sequelize.DATE,
-      allowNull: true,
+      type: Sequelize.DATEONLY,
+      allowNull: false,
     },
     endDate: {
-      type: Sequelize.DATE,
-      allowNull: true,
+      type: Sequelize.DATEONLY,
+      allowNull: false,
     },
   });
+
+  return Semester;
+};
