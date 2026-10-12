@@ -294,6 +294,16 @@ Feature 5 — Section Management associates **Section** belongsTo **Faculty** (`
 *   **Then** no delete request is sent
 *   **And** the faculty member remains listed
 
+#### Scenario: Admin cancels deleting a faculty member
+*   **Given** I am signed in as an admin
+*   **And** a faculty member exists
+*   **When** I click **Delete faculty**
+*   **And** I click **Cancel**
+*   **Then** no delete request is sent
+*   **And** the faculty member remains listed
+
+---
+
 ## Test Coverage Map
 
 Each scenario above must map to at least one automated test.
@@ -341,6 +351,7 @@ Do not implement behavior not in this spec.
 
 *   `GET /courses/facultyapi/faculties/:id` and delete-all
 *   Faculty login accounts (Feature 1 roles stay `student` and `admin` only)
+*   Section faculty name menu wiring beyond providing the catalogue (Feature 5 may still send numeric `facultyId` until it is updated to use this list)
 *   Enrollment (Feature 6 — Enrollment Management)
 *   Student course listing (Feature 7 — Student Course Listing)
 *   Section student listing (Feature 8 — Section Student Listing)
