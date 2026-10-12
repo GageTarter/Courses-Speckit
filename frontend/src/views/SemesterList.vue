@@ -9,6 +9,18 @@ const emptyForm = () => ({
   endDate: "",
 });
 
+const dateFormat = (value) =>
+  value
+    ? new Date(value).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+  : "";
+
+const fixedDateInput = (value) => (value ? String(value).slice(0, 10) : "");
+
 const semesters = ref([]);
 const loading = ref(false);
 const listError = ref("");
@@ -58,8 +70,8 @@ const openEditDialog = (semester) => {
   editingId.value = semester.id;
   form.value = {
     name: semester.name ?? "",
-    startDate: semester.startDate ?? "",
-    endDate: semester.endDate ?? "",
+    startDate: fixedDateInput(semester.startDate),
+    endDate: fixedDateInput(semester.endDate),
   };
   formError.value = "";
   formDialogOpen.value = true;
@@ -183,8 +195,8 @@ onMounted(retrieveSemesters);
           <tbody>
             <tr v-for="semester in semesters" :key="semester.id">
               <td>{{ semester.name }}</td>
-              <td>{{ semester.startDate }}</td>
-              <td>{{ semester.endDate }}</td>
+              <td>{{ dateFormat(semester.startDate) }}</td>
+              <td>{{ dateFormat(semester.endDate) }}</td>
               <td>
                 <v-icon
                   size="small"

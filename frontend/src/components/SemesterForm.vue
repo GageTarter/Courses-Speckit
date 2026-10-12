@@ -47,7 +47,7 @@ defineExpose({ validate });
     <v-text-field
       :model-value="modelValue.startDate"
       label="Start Date"
-      :items="date"
+      type="date"
       density="comfortable"
       :rules="startDateRules"
       @update:model-value="updateField('startDate', $event)"
@@ -55,7 +55,7 @@ defineExpose({ validate });
     <v-text-field
       :model-value="modelValue.endDate"
       label="End Date"
-      :items="date"
+      type="date"
       density="comfortable"
       :rules="endDateRules"
       @update:model-value="updateField('endDate', $event)"
