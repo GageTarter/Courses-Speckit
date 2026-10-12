@@ -12,6 +12,7 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+db.course = courseModel(sequelize, Sequelize);
 db.user = userModel(sequelize, Sequelize);
 db.session = sessionModel(sequelize, Sequelize);
 db.faculty = facultyModel(sequelize, Sequelize);

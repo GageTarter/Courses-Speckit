@@ -36,10 +36,10 @@ export const validRegistration = (overrides = {}) => ({
 });
 
 export const registerUser = (overrides = {}) =>
-  request(app).post("/courses/register").send(validRegistration(overrides));
+  request(app).post("/courseapi/register").send(validRegistration(overrides));
 
 export const login = (username, password) =>
-  request(app).post("/courses/login").send({ username, password });
+  request(app).post("/courseapi/login").send({ username, password });
 
 /** Admins never self-register, so seed them the way the script does. */
 export const seedAdmin = async (overrides = {}) => {
