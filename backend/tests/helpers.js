@@ -36,10 +36,10 @@ export const validRegistration = (overrides = {}) => ({
 });
 
 export const registerUser = (overrides = {}) =>
-  request(app).post("/courses/register").send(validRegistration(overrides));
+  request(app).post("/courseapi/register").send(validRegistration(overrides));
 
 export const login = (username, password) =>
-  request(app).post("/courses/login").send({ username, password });
+  request(app).post("/courseapi/login").send({ username, password });
 
 /** Admins never self-register, so seed them the way the script does. */
 export const seedAdmin = async (overrides = {}) => {
@@ -61,6 +61,20 @@ export const seedAdmin = async (overrides = {}) => {
   return fields;
 };
 
+export const validSemester = (overrides = {}) => ({
+  name: "Fall 2026",
+  startDate: "2026-08-01",
+  endDate: "2026-12-31",
+  ...overrides,
+});
+
+export const createSemester = async (app, token, overrides = {}) => {
+  return request(app)
+    .post("/courses/semesters")
+    .set(authHeader(token))
+    .send(validSemester(overrides));
+};
+
 /** Register a student and return their Bearer token. */
 export const tokenForNewStudent = async (overrides = {}) => {
   const res = await registerUser(overrides);
@@ -75,6 +89,7 @@ export const seedCatalog = async () => {
     username: "catalogadmin",
     email: "catalogadmin@example.com",
   });
+  
   const adminRow = await db.user.findOne({ where: { username: admin.username } });
 
   const faculty = await db.faculty.create({
