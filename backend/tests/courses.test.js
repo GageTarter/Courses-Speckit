@@ -171,6 +171,17 @@ describe("Feature 2 — Course Management", () => {
       expect(response.status).toBe(200);
       expect(response.body.map((course) => course.name)).toEqual(["Alpha", "Zebra"]);
     });
+
+    it("Non-admin cannot view courses", async () => {
+      await createCourse();
+
+      const response = await asStudent(request(app).get("/courseapi/courses"));
+
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual(adminRequired);
+      const rows = await db.course.findAll();
+      expect(rows).toHaveLength(1);
+    });
   });
 
   describe("US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department", () => {

@@ -76,7 +76,7 @@ router.beforeEach((to) => {
   }
 
   if (
-    (to.name === "sections" || to.name === "faculty") &&
+    (to.name === "sections" || to.name === "faculty" || to.name === "courses") &&
     Utils.getStore("user")?.role !== "admin"
   ) {
     return { name: "home" };

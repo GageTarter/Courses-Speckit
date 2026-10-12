@@ -51,8 +51,8 @@
 ## Functional Requirements
 
 -- **FR-001:** An admin must fill `name` and `courseID`. `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDept` are optional.
--- **FR-002:** Created courses are shared. Only signed-in admin users can view every course. No course belongs to a specific user.
--- **FR-003:** Only an admin can view and create, edit, or delete a course. 
+-- **FR-002:** Created courses are shared. Only signed-in admin users can view every course. No course belongs to a specific user. A signed-in non-admin MUST receive `403` on `GET /courseapi/courses`.
+-- **FR-003:** Only an admin can view, create, edit, or delete a course. 
 -- **FR-004:** On edit, `name` and `courseID` are required. `description`, `semesterOffered`, `courseFrequency`, `courseHours`, and `courseDepartment` are optional; a blank value clears that field.
 -- **FR-005:** Edited information must be updated in the affected course when a user with admin privelages makes a change.
 -- **FR-006:** Course must be completely erased when the delete option is selected by the user with admin privelages.

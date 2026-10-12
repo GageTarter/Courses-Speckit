@@ -1,8 +1,4 @@
-import axios from "axios";
+import apiClient from "./services.js";
 
-const courseClient = axios.create({
-  baseURL: "http://localhost:3201/courses/",
-  withCredentials: true,
-});
-
-export const getCourses = () => courseClient.get("courses");
+/** Feature 5 adapter — loads course options for section forms. */
+export const getCourses = () => apiClient.get("courses");

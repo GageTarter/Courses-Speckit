@@ -5,7 +5,7 @@ import { authenticate, requireAdmin } from "../authorization/authorization.js";
 const router = Router();
 const adminOnly = [authenticate, requireAdmin];
 
-router.get("/", [authenticate], courseController.findAll);
+router.get("/", adminOnly, courseController.findAll);
 router.post("/", adminOnly, courseController.create);
 router.put("/:id", adminOnly, courseController.update);
 router.delete("/:id", adminOnly, courseController.remove);

@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from "vue";
 import sectionServices from "../services/sectionServices.js";
 import facultyServices from "../services/facultyServices.js";
+import semesterServices from "../services/semesterServices.js";
 import { getCourses } from "../services/courseCatalog.js";
-import { semesterName } from "../utils/semesters.js";
 import SectionForm from "../components/SectionForm.vue";
 
 const emptyForm = () => ({
@@ -17,6 +17,7 @@ const emptyForm = () => ({
 });
 
 const sections = ref([]);
+const semesters = ref([]);
 const courses = ref([]);
 const faculties = ref([]);
 const loading = ref(false);
@@ -34,6 +35,11 @@ const deleting = ref(false);
 
 const formatSectionNumber = (value) => String(value).padStart(2, "0");
 
+const semesterName = (semesterId) => {
+  const semester = semesters.value.find((item) => item.id === Number(semesterId));
+  return semester?.name || semesterId;
+};
+
 const courseLabel = (courseId) => {
   const course = courses.value.find((item) => item.id === Number(courseId));
   return course?.courseID || courseId;
@@ -47,6 +53,15 @@ const facultyLabel = (facultyId) => {
   }
 
   return `${faculty.firstName} ${faculty.lastName}`.trim();
+};
+
+const loadSemesters = async () => {
+  try {
+    const response = await semesterServices.getSemesters();
+    semesters.value = response.data || [];
+  } catch {
+    semesters.value = [];
+  }
 };
 
 const loadCourses = async () => {
@@ -91,6 +106,7 @@ const retrieveSections = async () => {
 };
 
 const openAddDialog = () => {
+  loadSemesters();
   loadCourses();
   loadFaculties();
   isAddMode.value = true;
@@ -101,6 +117,7 @@ const openAddDialog = () => {
 };
 
 const openEditDialog = (section) => {
+  loadSemesters();
   loadCourses();
   loadFaculties();
   isAddMode.value = false;
@@ -206,6 +223,7 @@ const confirmDeleteSection = async () => {
 
 onMounted(() => {
   retrieveSections();
+  loadSemesters();
   loadCourses();
   loadFaculties();
 });
@@ -327,6 +345,7 @@ onMounted(() => {
           <SectionForm
             ref="formRef"
             v-model="form"
+            :semesters="semesters"
             :courses="courses"
             :faculties="faculties"
             @submit="saveSection"

@@ -41,6 +41,33 @@ afterAll(async () => {
 beforeEach(async () => {
   await db.section.destroy({ where: {} });
   await db.faculty.destroy({ where: {} });
+  await db.semester.destroy({ where: {} });
+  await db.semester.bulkCreate([
+    {
+      id: 1,
+      name: "Fall",
+      startDate: "2026-08-15",
+      endDate: "2026-12-15",
+    },
+    {
+      id: 2,
+      name: "Spring",
+      startDate: "2027-01-10",
+      endDate: "2027-05-10",
+    },
+    {
+      id: 3,
+      name: "Summer",
+      startDate: "2027-05-20",
+      endDate: "2027-08-10",
+    },
+    {
+      id: 4,
+      name: "Winter",
+      startDate: "2026-12-16",
+      endDate: "2027-01-09",
+    },
+  ]);
   const faculty = await db.faculty.create({
     firstName: "Ada",
     lastName: "Lovelace",
@@ -110,12 +137,12 @@ describe("Feature 5 — Section Management", () => {
       });
     });
 
-    it("Semester id is not 1, 2, 3, or 4 returns 400", async () => {
+    it("Unknown semester id returns 404", async () => {
       const response = await createSection({ semesterId: 9 });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
       expect(response.body).toEqual({
-        message: "semesterId must be Fall, Winter, Spring, or Summer.",
+        message: "Cannot find semester with id=9.",
       });
     });
 
@@ -140,7 +167,7 @@ describe("Feature 5 — Section Management", () => {
       expect(otherSemester.body.semesterId).toBe(2);
     });
 
-    it("Winter saves as semesterId 4", async () => {
+    it("A Feature 3 semester id is stored on the section", async () => {
       const response = await createSection({ semesterId: 4 });
 
       expect(response.status).toBe(201);

@@ -5,8 +5,6 @@ import { parseId } from "../helpers/fields.js";
 
 const exports = {};
 
-const OFFERED_SEMESTER_IDS = new Set([1, 2, 3, 4]);
-
 const parseSectionNumber = (value) => {
   if (value === undefined || value === null || String(value).trim() === "") {
     return { error: "sectionNumber is required." };
@@ -40,6 +38,19 @@ const assertFacultyExists = async (facultyId) => {
     return {
       status: 404,
       message: `Cannot find faculty with id=${facultyId}.`,
+    };
+  }
+
+  return null;
+};
+
+const assertSemesterExists = async (semesterId) => {
+  const semester = await db.semester.findByPk(semesterId);
+
+  if (!semester) {
+    return {
+      status: 404,
+      message: `Cannot find semester with id=${semesterId}.`,
     };
   }
 
@@ -87,12 +98,6 @@ exports.create = async (req, res) => {
       });
     }
 
-    if (!OFFERED_SEMESTER_IDS.has(semesterId)) {
-      return res.status(400).send({
-        message: "semesterId must be Fall, Winter, Spring, or Summer.",
-      });
-    }
-
     if (courseId === null) {
       return res.status(400).send({
         message: "courseId is required.",
@@ -102,6 +107,14 @@ exports.create = async (req, res) => {
     if (facultyId === null) {
       return res.status(400).send({
         message: "facultyId is required.",
+      });
+    }
+
+    const missingSemester = await assertSemesterExists(semesterId);
+
+    if (missingSemester) {
+      return res.status(missingSemester.status).send({
+        message: missingSemester.message,
       });
     }
 
@@ -215,12 +228,6 @@ exports.update = async (req, res) => {
       });
     }
 
-    if (!OFFERED_SEMESTER_IDS.has(semesterId)) {
-      return res.status(400).send({
-        message: "semesterId must be Fall, Winter, Spring, or Summer.",
-      });
-    }
-
     if (courseId === null) {
       return res.status(400).send({
         message: "courseId is required.",
@@ -230,6 +237,14 @@ exports.update = async (req, res) => {
     if (facultyId === null) {
       return res.status(400).send({
         message: "facultyId is required.",
+      });
+    }
+
+    const missingSemester = await assertSemesterExists(semesterId);
+
+    if (missingSemester) {
+      return res.status(missingSemester.status).send({
+        message: missingSemester.message,
       });
     }
 
