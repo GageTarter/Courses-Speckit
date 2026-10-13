@@ -130,7 +130,7 @@ describe("Feature 3 — Semester Management", () => {
 
       await clickButton(wrapper, "+ New semester");
       await fillSemesterForm(wrapper, {
-        name: "Fall 2026",
+        name: "Fall 2026!!!",
         startDate: "2026-08-20",
         endDate: "2026-12-31",
       });
@@ -147,7 +147,7 @@ describe("Feature 3 — Semester Management", () => {
       wrapper = mounted.wrapper;
 
       await clickButton(wrapper, "+ New semester");
-      await fillSemesterForm(wrapper, { startDate: "2026-08-19" });
+      await fillSemesterForm(wrapper, { startDate: "2026-02-30" });
       await clickButton(wrapper, "Create");
 
       expect(semesterServices.createSemester).not.toHaveBeenCalled();
@@ -253,7 +253,7 @@ describe("Feature 3 — Semester Management", () => {
       await wrapper.get('[aria-label="Edit semester"]').trigger("click");
       await flushPromises();
       await fillSemesterForm(wrapper, {
-        name: "Spring 2027",
+        name: "Spring 2027!",
         startDate: "2027-01-01",
         endDate: "2027-05-31",
       });
