@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "./views/Home.vue";
 import SectionList from "./views/SectionList.vue";
 import CourseList from "./views/CourseList.vue";
+import SemesterList from "./views/SemesterList.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
 import FacultyList from "./views/FacultyList.vue";
@@ -33,6 +34,11 @@ const router = createRouter({
       path: "/faculty",
       name: "faculty",
       component: FacultyList,
+    },
+    {
+      path: "/semesters",
+      name: "semesters",
+      component: SemesterList,
     },
     {
       path: "/login",
