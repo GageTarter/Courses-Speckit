@@ -8,7 +8,7 @@ import SectionList from "../src/views/SectionList.vue";
 import sectionServices from "../src/services/sectionServices.js";
 import facultyServices from "../src/services/facultyServices.js";
 import semesterServices from "../src/services/semesterServices.js";
-import { getCourses } from "../src/services/courseCatalog.js";
+import CourseServices from "../src/services/courseServices.js";
 import { mountWithPlugins } from "./testUtils.js";
 
 vi.mock("../src/services/sectionServices.js", () => ({
@@ -32,8 +32,10 @@ vi.mock("../src/services/semesterServices.js", () => ({
   },
 }));
 
-vi.mock("../src/services/courseCatalog.js", () => ({
-  getCourses: vi.fn(),
+vi.mock("../src/services/courseServices.js", () => ({
+  default: {
+    getAll: vi.fn(),
+  },
 }));
 
 const course = {
@@ -125,7 +127,7 @@ describe("Feature 5 — Section Management", () => {
     sectionServices.getSections.mockResolvedValue({ data: [] });
     sectionServices.createSection.mockResolvedValue({ data: {} });
     sectionServices.updateSection.mockResolvedValue({ data: {} });
-    getCourses.mockResolvedValue({ data: [course] });
+    CourseServices.getAll.mockResolvedValue({ data: [course] });
     facultyServices.getAll.mockResolvedValue({ data: [faculty] });
     semesterServices.getSemesters.mockResolvedValue({ data: [fall, winter] });
   });

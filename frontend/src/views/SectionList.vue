@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import sectionServices from "../services/sectionServices.js";
 import facultyServices from "../services/facultyServices.js";
 import semesterServices from "../services/semesterServices.js";
-import { getCourses } from "../services/courseCatalog.js";
+import CourseServices from "../services/courseServices.js";
 import SectionForm from "../components/SectionForm.vue";
 
 const emptyForm = () => ({
@@ -58,7 +58,7 @@ const facultyLabel = (facultyId) => {
 const loadSemesters = async () => {
   try {
     const response = await semesterServices.getSemesters();
-    semesters.value = response.data || [];
+    semesters.value = Array.isArray(response.data) ? response.data : [];
   } catch {
     semesters.value = [];
   }
@@ -66,19 +66,30 @@ const loadSemesters = async () => {
 
 const loadCourses = async () => {
   try {
-    const response = await getCourses();
-    courses.value = response.data || [];
-  } catch {
+    const response = await CourseServices.getAll();
+    courses.value = Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
     courses.value = [];
+    throw error;
   }
 };
 
 const loadFaculties = async () => {
   try {
     const response = await facultyServices.getAll();
-    faculties.value = response.data || [];
+    faculties.value = Array.isArray(response.data) ? response.data : [];
   } catch {
     faculties.value = [];
+  }
+};
+
+const loadFormOptions = async () => {
+  try {
+    await Promise.all([loadSemesters(), loadCourses(), loadFaculties()]);
+  } catch (error) {
+    formError.value =
+      error.response?.data?.message ||
+      "Unable to load courses for the section form.";
   }
 };
 
@@ -105,21 +116,16 @@ const retrieveSections = async () => {
   }
 };
 
-const openAddDialog = () => {
-  loadSemesters();
-  loadCourses();
-  loadFaculties();
+const openAddDialog = async () => {
   isAddMode.value = true;
   editingId.value = null;
   form.value = emptyForm();
   formError.value = "";
   formDialogOpen.value = true;
+  await loadFormOptions();
 };
 
-const openEditDialog = (section) => {
-  loadSemesters();
-  loadCourses();
-  loadFaculties();
+const openEditDialog = async (section) => {
   isAddMode.value = false;
   editingId.value = section.id;
 
@@ -139,6 +145,7 @@ const openEditDialog = (section) => {
 
   formError.value = "";
   formDialogOpen.value = true;
+  await loadFormOptions();
 };
 
 const closeFormDialog = () => {
@@ -224,7 +231,7 @@ const confirmDeleteSection = async () => {
 onMounted(() => {
   retrieveSections();
   loadSemesters();
-  loadCourses();
+  loadCourses().catch(() => {});
   loadFaculties();
 });
 </script>
