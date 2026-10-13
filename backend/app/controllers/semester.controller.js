@@ -121,6 +121,10 @@ exports.update = async (req, res) => {
       message: "Semester was updated successfully.",
     });
   } catch (err) {
+    if (err.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).send({ message: "Semester name is already taken." });
+    }
+
     logger.error(`semester update failed: ${err.message}`);
     return res.status(500).send({ message: "Failed to update semester." });
   }

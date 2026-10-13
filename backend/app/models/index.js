@@ -12,7 +12,6 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.course = courseModel(sequelize, Sequelize);
 db.user = userModel(sequelize, Sequelize);
 db.session = sessionModel(sequelize, Sequelize);
 db.faculty = facultyModel(sequelize, Sequelize);
@@ -30,7 +29,7 @@ db.enrollment.belongsTo(db.user, { foreignKey: "userId" });
 db.faculty.hasMany(db.section, { foreignKey: "facultyId", constraints: false });
 db.section.belongsTo(db.faculty, { foreignKey: "facultyId", constraints: false });
 
-// No DB FKs yet — Feature 5 still uses fixed semester ids; Features 2/3 own catalog rows.
+// No DB FKs yet — Feature 5 stores semesterId/courseId/facultyId; Feature 3 owns semester rows.
 db.semester.hasMany(db.section, { foreignKey: "semesterId", constraints: false });
 db.course.hasMany(db.section, { foreignKey: "courseId", constraints: false });
 db.section.belongsTo(db.semester, { foreignKey: "semesterId", constraints: false });
