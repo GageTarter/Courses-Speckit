@@ -7,7 +7,8 @@ import { vi } from "vitest";
 import SectionList from "../src/views/SectionList.vue";
 import sectionServices from "../src/services/sectionServices.js";
 import facultyServices from "../src/services/facultyServices.js";
-import { getCourses } from "../src/services/courseCatalog.js";
+import semesterServices from "../src/services/semesterServices.js";
+import CourseServices from "../src/services/courseServices.js";
 import { mountWithPlugins } from "./testUtils.js";
 
 vi.mock("../src/services/sectionServices.js", () => ({
@@ -25,8 +26,16 @@ vi.mock("../src/services/facultyServices.js", () => ({
   },
 }));
 
-vi.mock("../src/services/courseCatalog.js", () => ({
-  getCourses: vi.fn(),
+vi.mock("../src/services/semesterServices.js", () => ({
+  default: {
+    getSemesters: vi.fn(),
+  },
+}));
+
+vi.mock("../src/services/courseServices.js", () => ({
+  default: {
+    getAll: vi.fn(),
+  },
 }));
 
 const course = {
@@ -40,6 +49,20 @@ const faculty = {
   firstName: "Ada",
   lastName: "Lovelace",
   dept: "Computer Science",
+};
+
+const fall = {
+  id: 1,
+  name: "Fall",
+  startDate: "2026-08-15",
+  endDate: "2026-12-15",
+};
+
+const winter = {
+  id: 4,
+  name: "Winter",
+  startDate: "2026-12-16",
+  endDate: "2027-01-09",
 };
 
 const section = {
@@ -104,8 +127,9 @@ describe("Feature 5 — Section Management", () => {
     sectionServices.getSections.mockResolvedValue({ data: [] });
     sectionServices.createSection.mockResolvedValue({ data: {} });
     sectionServices.updateSection.mockResolvedValue({ data: {} });
-    getCourses.mockResolvedValue({ data: [course] });
+    CourseServices.getAll.mockResolvedValue({ data: [course] });
     facultyServices.getAll.mockResolvedValue({ data: [faculty] });
+    semesterServices.getSemesters.mockResolvedValue({ data: [fall, winter] });
   });
 
   afterEach(() => {
@@ -125,7 +149,7 @@ describe("Feature 5 — Section Management", () => {
       expect(wrapper.text()).toContain("Ada Lovelace");
     });
 
-    it("Choosing Winter in the form sends semesterId 4", async () => {
+    it("Choosing a Feature 3 semester in the form sends that semester.id", async () => {
       const wrapper = await mountList();
       await openAdd(wrapper);
       await fillSection(wrapper, { semesterId: 4 });

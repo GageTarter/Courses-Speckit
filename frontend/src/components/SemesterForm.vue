@@ -13,37 +13,35 @@ const updateField = (field, value) => {
   emit("update:modelValue", { ...props.modelValue, [field]: value });
 };
 
+const isValidDateOnly = (value) => {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
+    return false;
+  }
+
+  const [year, month, day] = String(value).split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  );
+};
+
 const nameRules = [
   (value) => !!value?.trim() || "Required",
   (value) =>
     (value?.trim().length ?? 0) <= 11 ||
     "Semester name must be 11 characters or fewer.",
 ];
-const isValidDate = (value) => {
-  if (!value) {
-    return false;
-  }
-
-  const text = String(value).trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-    return false;
-  }
-
-  const time = Date.parse(`${text}T00:00:00Z`);
-  if (Number.isNaN(time)) {
-    return false;
-  }
-
-  return new Date(time).toISOString().slice(0, 10) === text;
-};
 
 const startDateRules = [
   (value) => !!value || "Required",
-  (value) => isValidDate(value) || "Start date must be a valid date.",
+  (value) => isValidDateOnly(value) || "Start date must be a valid date.",
 ];
 const endDateRules = [
   (value) => !!value || "Required",
-  (value) => isValidDate(value) || "End date must be a valid date.",
+  (value) => isValidDateOnly(value) || "End date must be a valid date.",
   (value) =>
     !props.modelValue.startDate ||
     value >= props.modelValue.startDate ||

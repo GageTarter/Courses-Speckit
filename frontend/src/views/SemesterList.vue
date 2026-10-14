@@ -85,9 +85,9 @@ const closeFormDialog = () => {
 
 const saveSemester = async () => {
   formError.value = "";
-  const result = await formRef.value?.validate();
+  const { valid } = (await formRef.value?.validate()) ?? { valid: false };
 
-  if (!result?.valid) {
+  if (!valid) {
     return;
   }
 

@@ -15,7 +15,7 @@
 
 ### US-5.1: Create a Section
 **As a** signed-in admin
-**I want to** create a section with a section number, a semester (Fall, Winter, Spring, or Summer), a course ID, a faculty ID, days of the week, and a start time and end time.
+**I want to** create a section with a section number, a semester from Feature 3, a course ID, a faculty ID, days of the week, and a start time and end time.
 **So that** I can record a section that is offered. 
 
 **Priority:** P1
@@ -34,7 +34,7 @@
 
 ### US-5.3: Update a section's details
 **As a** signed-in admin
-**I want to** change a section's section number, semester (Fall, Winter, Spring, or Summer), course ID, faculty ID, days of the week, and start time and end time.
+**I want to** change a section's section number, semester (from Feature 3), course ID, faculty ID, days of the week, and start time and end time.
 **So that** the section reflects how I want my section to look.
 
 **Priority:** P1
@@ -57,7 +57,7 @@
 ### Functional Requirements
 
 - **FR-001**: An admin MUST be signed in to view, create, update, or delete a section.
-- **FR-002**: The System MUST require `sectionNumber`, `semesterId`, `courseId`, `facultyId`, `daysOfWeek`, `startTime`, and `endTime` when creating a section. `sectionNumber` MUST be an integer from 1 through 99. `semesterId` MUST be `1` (Fall), `4` (Winter), `2` (Spring), or `3` (Summer). `courseId` and `facultyId` MUST be integers. `daysOfWeek` is sent as an array of day names and stored as one comma-separated string.
+- **FR-002**: The System MUST require `sectionNumber`, `semesterId`, `courseId`, `facultyId`, `daysOfWeek`, `startTime`, and `endTime` when creating a section. `sectionNumber` MUST be an integer from 1 through 99. `semesterId` MUST be the `id` of an existing Feature 3 semester (`GET /courses/semesters`). Unknown `semesterId` MUST return `404` with `` `Cannot find semester with id=${id}.` ``. `courseId` and `facultyId` MUST be integers. `daysOfWeek` is sent as an array of day names and stored as one comma-separated string.
 - **FR-003**: The System MUST reject a create request that omits a required field with `400` and a message naming that field (for example `"sectionNumber is required."`).
 - **FR-004**: The System MUST set a new sections's owner from the authenticated session never from a `userId` supplied in the request body.
 - **FR-005**: `startTime` and `endTime` MUST be same-day clock times chosen with the device time picker and MUST be stored and returned as `HH:MM` strings (for example `"11:40"`). The system MUST NOT convert them to minutes from midnight.
@@ -65,7 +65,7 @@
 - **FR-007**: The system MUST list only sections owned by the signed-in admin (`userId` equals that admin).
 - **FR-008**: The signed-in admin MUST be able to update `sectionNumber`, `semesterId`, `courseId`, `facultyId`, `daysOfWeek`, `startTime`, and `endTime` on sections they own. 
 - **FR-009**: The system MUST return `400` when `startTime` is equal to or later than `endTime`.
-- **FR-010**: The Sections page MUST display each section's section number as two digits (`01`), the semester name (Fall, Winter, Spring, or Summer), the course code when available, the faculty member's first and last name when available (otherwise the numeric `facultyId`), the days of the week, the start time, and the end time.
+- **FR-010**: The Sections page MUST display each section's section number as two digits (`01`), the semester name from Feature 3 when available (otherwise the numeric `semesterId`), the course code when available, the faculty member's first and last name when available (otherwise the numeric `facultyId`), the days of the week, the start time, and the end time.
 - **FR-011**: The system MUST NOT let an admin read, update, or delete a section owned by another admin. Such a request MUST return `404` with `` `Cannot find section with id=${id}.` `` rather than `403`.
 - **FR-012**: The system MUST return `404` with `` `Cannot find section with id=${id}.` `` when the requested section does not exist.
 - **FR-013**: Deleting a section MUST also remove that sections's details,leaving no orphaned rows.
@@ -170,11 +170,11 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 *   **Heading:** **Sections**
 *   **Purpose:** One screen to create, browse, edit, and delete the signed-in admin's sections (**SC-002**).
 *   **Primary action:** **+ New Section** (`oc-cta`) — opens the add dialog (US-5.1).
-*   **Table columns:** Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, Actions (US-5.2). Section Number displays as two digits (`1` shows as `01`). The stored value stays the integer. Semester displays as **Fall**, **Winter**, **Spring**, or **Summer**. Course displays `course.courseID` from the course list when that list loads, and the numeric `courseId` when it does not. Faculty displays `firstName lastName` from the faculty list when that list loads, and the numeric `facultyId` when it does not.
+*   **Table columns:** Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, Actions (US-5.2). Section Number displays as two digits (`1` shows as `01`). The stored value stays the integer. Semester displays `semester.name` from Feature 3 when that list loads, and the numeric `semesterId` when it does not. Course displays `course.courseID` from the course list when that list loads, and the numeric `courseId` when it does not. Faculty displays `firstName lastName` from the faculty list when that list loads, and the numeric `facultyId` when it does not.
 *   **Row actions (icon-only, `size="small"`):**
     *   **Edit section** — `aria-label="Edit section"`; opens the edit dialog (US-5.3).
     *   **Delete section** — `aria-label="Delete section"`; opens the delete confirm dialog (US-5.4).
-*   **Add dialog:** title **Add Section**. Fields: Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, all required. **Semester** is a select of **Fall**, **Winter**, **Spring**, and **Summer** (`semesterId` `1`, `4`, `2`, and `3`). **Course** is a select of courses from the course catalogue. Each item shows `courseID` and name. The saved value is `course.id`. **Faculty** is a select of faculty from `GET /courses/facultyapi/faculties`. Each item shows `firstName lastName`. The saved value is `faculty.id`. **Start Time** and **End Time** use the device time picker (`type="time"`); the value sent and shown is `HH:MM` (for example `11:40`). **Create** submits create. **Cancel** dismisses without saving. The dialog closes after a successful create.
+*   **Add dialog:** title **Add Section**. Fields: Section Number, Semester, Course, Faculty, Days of the Week, Start Time, End Time, all required. **Semester** is a select of semesters from `GET /courses/semesters` (Feature 3). Each item shows `name`. The saved value is `semester.id`. **Course** is a select of courses from the course catalogue. Each item shows `courseID` and name. The saved value is `course.id`. **Faculty** is a select of faculty from `GET /courses/facultyapi/faculties`. Each item shows `firstName lastName`. The saved value is `faculty.id`. **Start Time** and **End Time** use the device time picker (`type="time"`); the value sent and shown is `HH:MM` (for example `11:40`). **Create** submits create. **Cancel** dismisses without saving. The dialog closes after a successful create.
 *   **Edit dialog:** title **Edit Section**. Same fields as the add dialog, prefilled from the row. **Save Section** submits update. **Cancel** dismisses. The dialog closes after a successful update.
 *   **Delete dialog:** title **Delete Section**, body `"Delete this section?"`. **Delete Section** calls `DELETE`. **Cancel** leaves the row in place.
 *   **Inline validation:** required fields must be validated before sending the API request.
@@ -197,7 +197,7 @@ Follow [ui-style-system.mdc](../.cursor/rules/ui-style-system.mdc). Primary labe
 | `id` | INTEGER | PK, auto-increment |
 | `userId` | INTEGER | Required, FK → `users.id`, `ON DELETE CASCADE` |
 | `sectionNumber` | INTEGER | Required; integer from 1 through 99. The Sections page displays it as two digits (`01`) |
-| `semesterId` | INTEGER | Required, FK → `semesters.id`. Offered values: `1` Fall, `4` Winter, `2` Spring, `3` Summer |
+| `semesterId` | INTEGER | Required, FK → `semesters.id` (Feature 3 semester rows) |
 | `courseId` | INTEGER | Required, FK → `courses.id` |
 | `facultyId` | INTEGER | Required, FK → `faculty.id` |
 | `daysOfWeek` | STRING(100) | Required; comma-separated day names, for example `Monday,Wednesday` |
