@@ -1,11 +1,11 @@
 [Unit]
-Description=courses example app Node.js API (OC CS Speckit)
+Description=Courses Speckit Node.js API (OC CS Speckit)
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/nodeapps/courses-speckit-backend/
+WorkingDirectory=/home/ubuntu/nodeapps/2026/project3/t5/
 ExecStart=npm run start
 Restart=on-failure
 

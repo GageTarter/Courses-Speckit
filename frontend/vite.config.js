@@ -6,7 +6,10 @@ import dns from "dns";
 dns.setDefaultResultOrder("verbatim");
 
 export default () => {
-  const baseURL = process.env.APP_ENV === "development" ? "/" : "/";
+  // Production base must match the SPA folder URL on the class server
+  // (FRONTEND_DEPLOY_TARGET under /var/www/html/...).
+  const baseURL =
+    process.env.APP_ENV === "development" ? "/" : "/seiv2026/p3/t5/";
   return defineConfig({
     plugins: [vue(), vuetify({ autoImport: false })],
     server: { host: "localhost", port: 8082 },
