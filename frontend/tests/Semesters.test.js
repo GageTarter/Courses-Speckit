@@ -147,7 +147,7 @@ describe("Feature 3 — Semester Management", () => {
       wrapper = mounted.wrapper;
 
       await clickButton(wrapper, "+ New semester");
-      await fillSemesterForm(wrapper, { startDate: "2026-08-99" });
+      await fillSemesterForm(wrapper, { startDate: "2026-02-30" });
       await clickButton(wrapper, "Create");
 
       expect(semesterServices.createSemester).not.toHaveBeenCalled();

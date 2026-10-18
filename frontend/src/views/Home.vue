@@ -33,7 +33,11 @@ const signOut = async () => {
     </v-chip>
 
     <p class="text-body-1 mb-6">
-      Use the menu for Courses, Faculty, and Sections.
+      {{
+        user?.role === "student"
+          ? "Use Enroll in the menu to pick a semester and add sections."
+          : "Use the menu for Courses, Faculty, and Sections."
+      }}
     </p>
 
     <v-btn
