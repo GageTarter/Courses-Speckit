@@ -1,5 +1,5 @@
 [Unit]
-Description=Courses Speckit Node.js API (OC CS Speckit)
+Description=Courses Speckit team 5 Node.js API (OC CS Speckit)
 After=network.target
 
 [Service]
