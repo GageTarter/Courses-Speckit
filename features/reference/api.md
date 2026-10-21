@@ -81,7 +81,7 @@ A `role` sent in the register body is ignored; self-registration always produces
 | `Unauthorized! Invalid token.` | Signature invalid or no matching session row |
 | `Unauthorized! Session expired.` | Session row past `expirationDate` |
 | `Forbidden! Admin access required.` | Non-admin hit a `requireAdmin` route |
-| `Forbidden! Student access required.` | Non-student POST/DELETE `/courses/enrollments` |
+| `Forbidden! Student access required.` | Non-student POST/DELETE `/courses/enrollments`, or non-student `GET /courses/my-courses` |
 | `semesterId is required.` | `GET /courses/catalog/sections` without a numeric `semesterId` |
 | `sectionId is required.` | POST enrollment without `sectionId` |
 | `You are already enrolled in this section.` | Duplicate section enrollment |
@@ -106,6 +106,14 @@ A `userId` in the body is ignored.
 **DELETE `200`:** `{ "message": "Enrollment dropped." }`
 
 Admin create/update/delete for catalog rows is not exposed here; Features 2, 3, and 5 own those writes.
+
+### Enrolled courses — [Feature 7](../feature-7-student-course-listing.md)
+
+| Method | Endpoint | Auth | Purpose |
+|--------|----------|------|---------|
+| `GET` | `/courses/my-courses` | Yes (student) | Distinct catalogue courses the caller is enrolled in, `name` ascending |
+
+**`200`:** `[{ "id", "name", "courseID", "description", "semesterOffered" }]`. `description` and `semesterOffered` are `null` when blank. No enrollments → `[]`. Admin → `403`. No token → `401`.
 
 ## Conventions
 
