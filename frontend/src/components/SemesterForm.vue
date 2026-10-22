@@ -34,6 +34,7 @@ const nameRules = [
     (value?.trim().length ?? 0) <= 11 ||
     "Semester name must be 11 characters or fewer.",
 ];
+
 const startDateRules = [
   (value) => !!value || "Required",
   (value) => isValidDateOnly(value) || "Start date must be a valid date.",

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env APP_ENV=development vite",
     "build": "cross-env APP_ENV=production vite build",
-    "bundle": "node scripts/copy-htaccess.mjs",
+    "bundle": "rm -rf deploy && mkdir deploy && cp -r dist deploy && cp public/.htaccess deploy/dist/.htaccess",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

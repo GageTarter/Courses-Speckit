@@ -75,3 +75,28 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Capacity is a hard cap | Count enrollments vs `section.capacity` |
 | Seats are not stored | `remainingSeats` on `GET /courses/catalog/sections` |
 | Catalog browse for enrollment | `GET /courses/semesters` and `GET /courses/catalog/sections` |
+
+## My Courses — [Feature 7](../feature-7-student-course-listing.md)
+
+| Rule | Enforcement |
+|------|-------------|
+| A student sees only courses linked to their enrollments | `GET /courses/my-courses` filters `enrollment.userId` to `req.user.id` |
+| One row per course | Distinct `course.id` even when several sections are enrolled |
+| Sort is course name ascending | Controller sorts after de-duplicating |
+| Students only | `requireStudent` → `403` for admins; router `meta.roles` sends admins home from `/my-courses` |
+| Empty list copy | **You are not enrolled in any courses.** |
+| Menu | **My Courses** is shown for students only; admin **Courses** stays `/courses` |
+
+## My Sections — [Feature 8](../feature-8-student-section-listing.md)
+
+| Rule | Enforcement |
+|------|-------------|
+| A student sees only sections linked to their enrollments | `GET /courses/my-sections` filters `enrollment.userId` to `req.user.id` |
+| One row per section | Two sections of the same course both appear |
+| Sort is section id ascending | Controller sorts after de-duplicating |
+| Semester is the Feature 3 name | Response `semester` is `semesters.name`, not `semesterOffered` |
+| Faculty is the numeric id | Response `facultyId` is `sections.facultyId` |
+| Students only | `requireStudent` → `403` for admins; router `meta.roles` sends admins home from `/my-sections` |
+| Empty list copy | **You are not enrolled in any sections.** |
+| Section number display | The page shows two digits (`01`); the API returns the integer |
+| Menu | **My Sections** is shown for students only; admin **Sections** stays `/sections` |

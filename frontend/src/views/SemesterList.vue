@@ -157,69 +157,67 @@ onMounted(retrieveSemesters);
 
 <template>
   <v-container class="py-8">
-    <v-card rounded="lg">
-      <v-card-item>
-        <v-card-title>Semesters</v-card-title>
-        <template #append>
-          <v-btn
-            color="primary"
-            variant="elevated"
-            class="oc-cta"
-            @click="openAddDialog"
-          >
-            + New semester
-          </v-btn>
-        </template>
-      </v-card-item>
+    <v-row align="center" class="mb-4">
+      <v-col>
+        <h1 class="text-h4">Semesters</h1>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn
+          color="primary"
+          variant="elevated"
+          class="oc-cta"
+          @click="openAddDialog"
+        >
+          + New semester
+        </v-btn>
+      </v-col>
+    </v-row>
 
-      <v-card-text>
-        <v-progress-linear v-if="loading" indeterminate class="mb-4" />
+    <v-progress-linear v-if="loading" indeterminate class="mb-4" />
 
-        <v-alert v-if="listError" type="error" density="compact" class="mb-4">
-          {{ listError }}
-        </v-alert>
+    <v-alert v-if="listError" type="error" density="compact" class="mb-4">
+      {{ listError }}
+    </v-alert>
 
-        <p v-if="!loading && semesters.length === 0" class="text-body-1">
-          No semesters yet. Create your first semester.
-        </p>
+    <p v-if="!loading && semesters.length === 0" class="text-body-1">
+      No semesters yet. Create your first semester.
+    </p>
 
-        <v-table v-if="!loading && semesters.length > 0">
-          <thead>
-            <tr>
-              <th class="text-left">Semester name</th>
-              <th class="text-left">Start date</th>
-              <th class="text-left">End date</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="semester in semesters" :key="semester.id">
-              <td>{{ semester.name }}</td>
-              <td>{{ dateFormat(semester.startDate) }}</td>
-              <td>{{ dateFormat(semester.endDate) }}</td>
-              <td>
-                <v-icon
-                  size="small"
-                  class="mx-4"
-                  aria-label="Edit semester"
-                  @click="openEditDialog(semester)"
-                >
-                  mdi-pencil
-                </v-icon>
-                <v-icon
-                  size="small"
-                  class="mx-4"
-                  aria-label="Delete semester"
-                  @click="openDeleteDialog(semester)"
-                >
-                  mdi-trash-can
-                </v-icon>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-card-text>
-    </v-card>
+    <v-table v-if="!loading && semesters.length > 0">
+      <thead>
+        <tr>
+          <th class="text-left">Semester name</th>
+          <th class="text-left">Start date</th>
+          <th class="text-left">End date</th>
+          <th class="text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="semester in semesters" :key="semester.id">
+          <td>{{ semester.name }}</td>
+          <td>{{ dateFormat(semester.startDate) }}</td>
+          <td>{{ dateFormat(semester.endDate) }}</td>
+          <td>
+            <v-icon
+              size="small"
+              class="mx-4"
+              aria-label="Edit semester"
+              @click="openEditDialog(semester)"
+            >
+              mdi-pencil
+            </v-icon>
+            <v-icon
+              size="small"
+              class="mx-4"
+              aria-label="Delete semester"
+              @click="openDeleteDialog(semester)"
+            >
+              mdi-trash-can
+            </v-icon>
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
 
     <v-dialog v-model="formDialogOpen" max-width="520">
       <v-card rounded="lg">

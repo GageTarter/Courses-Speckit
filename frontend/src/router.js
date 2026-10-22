@@ -6,6 +6,8 @@ import SemesterList from "./views/SemesterList.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
 import Enroll from "./views/Enroll.vue";
+import MyCourses from "./views/MyCourses.vue";
+import MySections from "./views/MySections.vue";
 import Utils from "./config/utils.js";
 import { ROLES } from "./config/roles.js";
 
@@ -51,6 +53,18 @@ const router = createRouter({
       meta: { roles: [ROLES.STUDENT] },
     },
     {
+      path: "/my-courses",
+      name: "my-courses",
+      component: MyCourses,
+      meta: { roles: [ROLES.STUDENT] },
+    },
+    {
+      path: "/my-sections",
+      name: "my-sections",
+      component: MySections,
+      meta: { roles: [ROLES.STUDENT] },
+    },
+    {
       path: "/:pathMatch(.*)*",
       redirect: { name: "home" },
     },
@@ -69,7 +83,13 @@ router.beforeEach((to) => {
     return { name: "home" };
   }
 
-  if (to.name === "sections" && Utils.getStore("user")?.role !== "admin") {
+  if (
+    (to.name === "sections" ||
+      to.name === "faculty" ||
+      to.name === "semesters" ||
+      to.name === "courses") &&
+    Utils.getStore("user")?.role !== "admin"
+  ) {
     return { name: "home" };
   }
 

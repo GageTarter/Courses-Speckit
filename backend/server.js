@@ -38,7 +38,10 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// /courses = app + local tests; /courseapi = Feature 2 clients; /course-t5 = production.
 app.use("/courses", routes);
+app.use("/courseapi", routes);
+app.use("/course-t5", routes);
 
 const PORT = process.env.PORT || 3201;
 

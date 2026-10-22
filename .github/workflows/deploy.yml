@@ -29,13 +29,28 @@ jobs:
           npm run build
           npm run bundle
 
+      - name: Verify frontend deploy secrets
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.FRONTEND_DEPLOY_TARGET }}
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          missing=0
+          [ -n "$REMOTE_HOST" ] || { echo "::error::REMOTE_HOST secret is empty"; missing=1; }
+          [ -n "$REMOTE_USER" ] || { echo "::error::REMOTE_USER secret is empty"; missing=1; }
+          [ -n "$TARGET" ] || { echo "::error::FRONTEND_DEPLOY_TARGET secret is empty — create it under Settings → Secrets (not Variables)"; missing=1; }
+          [ -n "$SSH_KEY" ] || { echo "::error::SERVER_SSH_KEY secret is empty"; missing=1; }
+          if [ "$missing" -ne 0 ]; then exit 1; fi
+          echo "Frontend deploy secrets are present."
+
       - name: Deploy to server
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          SOURCE: frontend/dist/
+          SOURCE: frontend/deploy/dist/
           TARGET: ${{ secrets.FRONTEND_DEPLOY_TARGET }}
           ARGS: "-rltgoDzvO --delete"
 
@@ -86,7 +101,7 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          ARGS: "-rltgoDzvO --delete"
+          ARGS: "-rltgoDzvO --delete --exclude=node_modules --exclude=logs"
           SOURCE: backend/deploy/
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
@@ -101,7 +116,7 @@ jobs:
           command: |
             cd ${{ secrets.BACKEND_DEPLOY_TARGET }}
             npm install --omit=dev
-            sudo systemctl stop courses-speckit-backend
-            sudo cp courses-speckit-backend.service /lib/systemd/system/courses-speckit-backend.service
+            sudo systemctl stop course-t5-backend || true
+            sudo cp course-t5-backend.service /lib/systemd/system/course-t5-backend.service
             sudo systemctl daemon-reload
-            sudo systemctl start courses-speckit-backend
+            sudo systemctl start course-t5-backend

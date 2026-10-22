@@ -1,5 +1,5 @@
 {
-  "name": "todo-speckit-backend",
+  "name": "courses-t5-backend",
   "version": "1.0.0",
   "type": "module",
   "description": "Todo example app — Node.js REST API (OC CS Speckit)",
@@ -10,7 +10,7 @@
     "create-admin": "node app/scripts/create-admin.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "bundle": "node scripts/make-deploy.mjs"
+    "bundle": "rm -rf deploy && mkdir deploy && cp -r app server.js package.json package-lock.json course-t5-backend.service .env deploy"
   },
   "keywords": ["node.js", "express", "sequelize"],
   "license": "ISC",

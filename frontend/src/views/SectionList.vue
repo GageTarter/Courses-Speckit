@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from "vue";
 import sectionServices from "../services/sectionServices.js";
 import facultyServices from "../services/facultyServices.js";
-import { getCourses } from "../services/courseCatalog.js";
-import { semesterName } from "../utils/semesters.js";
+import semesterServices from "../services/semesterServices.js";
+import CourseServices from "../services/courseServices.js";
 import SectionForm from "../components/SectionForm.vue";
 
 const emptyForm = () => ({
@@ -17,6 +17,7 @@ const emptyForm = () => ({
 });
 
 const sections = ref([]);
+const semesters = ref([]);
 const courses = ref([]);
 const faculties = ref([]);
 const loading = ref(false);
@@ -34,6 +35,11 @@ const deleting = ref(false);
 
 const formatSectionNumber = (value) => String(value).padStart(2, "0");
 
+const semesterName = (semesterId) => {
+  const semester = semesters.value.find((item) => item.id === Number(semesterId));
+  return semester?.name || semesterId;
+};
+
 const courseLabel = (courseId) => {
   const course = courses.value.find((item) => item.id === Number(courseId));
   return course?.courseID || courseId;
@@ -49,21 +55,41 @@ const facultyLabel = (facultyId) => {
   return `${faculty.firstName} ${faculty.lastName}`.trim();
 };
 
+const loadSemesters = async () => {
+  try {
+    const response = await semesterServices.getSemesters();
+    semesters.value = Array.isArray(response.data) ? response.data : [];
+  } catch {
+    semesters.value = [];
+  }
+};
+
 const loadCourses = async () => {
   try {
-    const response = await getCourses();
-    courses.value = response.data || [];
-  } catch {
+    const response = await CourseServices.getAll();
+    courses.value = Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
     courses.value = [];
+    throw error;
   }
 };
 
 const loadFaculties = async () => {
   try {
     const response = await facultyServices.getAll();
-    faculties.value = response.data || [];
+    faculties.value = Array.isArray(response.data) ? response.data : [];
   } catch {
     faculties.value = [];
+  }
+};
+
+const loadFormOptions = async () => {
+  try {
+    await Promise.all([loadSemesters(), loadCourses(), loadFaculties()]);
+  } catch (error) {
+    formError.value =
+      error.response?.data?.message ||
+      "Unable to load courses for the section form.";
   }
 };
 
@@ -90,19 +116,16 @@ const retrieveSections = async () => {
   }
 };
 
-const openAddDialog = () => {
-  loadCourses();
-  loadFaculties();
+const openAddDialog = async () => {
   isAddMode.value = true;
   editingId.value = null;
   form.value = emptyForm();
   formError.value = "";
   formDialogOpen.value = true;
+  await loadFormOptions();
 };
 
-const openEditDialog = (section) => {
-  loadCourses();
-  loadFaculties();
+const openEditDialog = async (section) => {
   isAddMode.value = false;
   editingId.value = section.id;
 
@@ -122,6 +145,7 @@ const openEditDialog = (section) => {
 
   formError.value = "";
   formDialogOpen.value = true;
+  await loadFormOptions();
 };
 
 const closeFormDialog = () => {
@@ -206,7 +230,8 @@ const confirmDeleteSection = async () => {
 
 onMounted(() => {
   retrieveSections();
-  loadCourses();
+  loadSemesters();
+  loadCourses().catch(() => {});
   loadFaculties();
 });
 </script>
@@ -327,6 +352,7 @@ onMounted(() => {
           <SectionForm
             ref="formRef"
             v-model="form"
+            :semesters="semesters"
             :courses="courses"
             :faculties="faculties"
             @submit="saveSection"

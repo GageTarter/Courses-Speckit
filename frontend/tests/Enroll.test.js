@@ -167,7 +167,11 @@ describe("Feature 6 — Enroll view", () => {
       expect(enrollmentServices.enroll).toHaveBeenCalledWith(12);
       expect(wrapper.text()).toContain("My Schedule");
       expect(wrapper.text()).toContain("CMSC 4123");
-      expect(wrapper.findAll("button").find((b) => b.text() === "Enroll")).toBeUndefined();
+      const enrolledBtn = wrapper
+        .findAll("button")
+        .find((b) => b.text() === "Enrolled");
+      expect(enrolledBtn).toBeTruthy();
+      expect(enrolledBtn.attributes("disabled")).toBeDefined();
     });
   });
 

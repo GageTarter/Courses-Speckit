@@ -1,9 +1,9 @@
 <script setup>
 import { computed, ref } from "vue";
-import { offeredSemesters } from "../utils/semesters.js";
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
+  semesters: { type: Array, default: () => [] },
   courses: { type: Array, default: () => [] },
   faculties: { type: Array, default: () => [] },
 });
@@ -102,10 +102,11 @@ defineExpose({ validate });
     <v-select
       :model-value="modelValue.semesterId"
       label="Semester"
-      :items="offeredSemesters"
+      :items="semesters"
       item-title="name"
       item-value="id"
       density="comfortable"
+      no-data-text="No semesters yet. Create one on the Semesters page."
       :rules="semesterRules"
       @update:model-value="updateField('semesterId', $event)"
     />

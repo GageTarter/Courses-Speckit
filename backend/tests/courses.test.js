@@ -7,15 +7,17 @@ import app from "../server.js";
 import db from "../app/models/index.js";
 import { seedAdmin, syncTestDatabase } from "./helpers.js";
 
-const COURSES = "/courses/courses";
-const adminRequired = { message: "Forbidden! Admin access required." };
-
 const validCourse = {
   name: "Programming I",
   courseID: "CMSC-1113-01",
   description: "Introduction to programming",
   semesterOffered: "Fall",
+  courseFrequency: "Every Semester",
+  courseHours: 3,
+  courseDept: "Computer Science",
 };
+
+const adminRequired = { message: "Forbidden! Admin access required." };
 
 let adminToken;
 let studentToken;
@@ -29,7 +31,7 @@ function asStudent(req) {
 }
 
 async function createCourse(overrides = {}) {
-  return asAdmin(request(app).post(COURSES)).send({
+  return asAdmin(request(app).post("/courseapi/courses")).send({
     ...validCourse,
     ...overrides,
   });
@@ -40,11 +42,11 @@ beforeAll(async () => {
 
   const admin = await seedAdmin();
   const adminLogin = await request(app)
-    .post("/courses/login")
+    .post("/courseapi/login")
     .send({ username: admin.username, password: admin.password });
   adminToken = adminLogin.body.token;
 
-  const student = await request(app).post("/courses/register").send({
+  const student = await request(app).post("/courseapi/register").send({
     fName: "Sam",
     lName: "Student",
     email: "sam@example.com",
@@ -73,21 +75,30 @@ describe("Feature 2 — Course Management", () => {
         courseID: "CMSC-1113-01",
         description: "Introduction to programming",
         semesterOffered: "Fall",
+        courseFrequency: "Every Semester",
+        courseHours: 3,
+        courseDept: "Computer Science",
       });
       expect(response.body.id).toEqual(expect.any(Number));
     });
 
-    it("User creates a course without a description or semester offered", async () => {
-      const response = await asAdmin(request(app).post(COURSES)).send({
+    it("User creates a course without a description, semester offered, course frequency, course hours, or course department", async () => {
+      const response = await asAdmin(request(app).post("/courseapi/courses")).send({
         name: "Programming I",
         courseID: "CMSC-1113-01",
         description: "   ",
         semesterOffered: "",
+        courseFrequency: " ",
+        courseHours: "",
+        courseDept: "",
       });
 
       expect(response.status).toBe(201);
       expect(response.body.description).toBeNull();
       expect(response.body.semesterOffered).toBeNull();
+      expect(response.body.courseFrequency).toBeNull();
+      expect(response.body.courseHours).toBeNull();
+      expect(response.body.courseDept).toBeNull();
     });
 
     it("User creates a course with a name that is too long", async () => {
@@ -108,6 +119,24 @@ describe("Feature 2 — Course Management", () => {
       });
     });
 
+    it("User creates a course with a frequency that is too long", async () => {
+      const response = await createCourse({ courseFrequency: "F".repeat(101) });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course frequency must be 100 characters or fewer.",
+      });
+    });
+
+    it("User creates a course with a department that is too long", async () => {
+      const response = await createCourse({ courseDept: "D".repeat(101) });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course department must be 100 characters or fewer.",
+      });
+    });
+
     it("User creates a course with an invalid semester offered", async () => {
       const response = await createCourse({ semesterOffered: "Monday" });
 
@@ -120,7 +149,7 @@ describe("Feature 2 — Course Management", () => {
     });
 
     it("Non-admin cannot create a course", async () => {
-      const response = await asStudent(request(app).post(COURSES)).send({
+      const response = await asStudent(request(app).post("/courseapi/courses")).send({
         name: "Programming I",
         courseID: "CMSC-1113-01",
       });
@@ -137,19 +166,28 @@ describe("Feature 2 — Course Management", () => {
       await createCourse({ name: "Zebra" });
       await createCourse({ name: "Alpha", courseID: "CMSC-1113-02" });
 
-      const response = await asAdmin(request(app).get(COURSES));
+      const response = await asAdmin(request(app).get("/courseapi/courses"));
 
       expect(response.status).toBe(200);
       expect(response.body.map((course) => course.name)).toEqual(["Alpha", "Zebra"]);
     });
+
+    it("Non-admin cannot view courses", async () => {
+      await createCourse();
+
+      const response = await asStudent(request(app).get("/courseapi/courses"));
+
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual(adminRequired);
+      const rows = await db.course.findAll();
+      expect(rows).toHaveLength(1);
+    });
   });
 
-  describe("US-2.3 — Correct a course's name, ID, description or semester Offered", () => {
+  describe("US-2.3 — Correct a course's name, ID, description, semester Offered, curse Frequency, course hours or course department", () => {
     it("User edits a course's information", async () => {
       const created = await createCourse();
-      const response = await asAdmin(
-        request(app).put(`${COURSES}/${created.body.id}`)
-      ).send({
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
         ...validCourse,
         name: "Programming II",
         courseID: "CMSC-1113-02",
@@ -158,37 +196,42 @@ describe("Feature 2 — Course Management", () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: "Course was updated successfully." });
 
-      const listed = await asAdmin(request(app).get(COURSES));
+      const listed = await asAdmin(request(app).get("/courseapi/courses"));
       expect(listed.body[0]).toMatchObject({
         name: "Programming II",
         courseID: "CMSC-1113-02",
       });
     });
 
-    it("User clears a course's description and semester offered", async () => {
+    it("User clears a course's description, semester offered, course frequency, course hours, and course department", async () => {
       const created = await createCourse();
-      const response = await asAdmin(
-        request(app).put(`${COURSES}/${created.body.id}`)
-      ).send({
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
         name: "Programming I",
         courseID: "CMSC-1113-01",
         description: "",
         semesterOffered: "",
+        courseFrequency: "",
+        courseHours: "",
+        courseDept: "",
       });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: "Course was updated successfully." });
 
-      const listed = await asAdmin(request(app).get(COURSES));
+      const listed = await asAdmin(request(app).get("/courseapi/courses"));
       expect(listed.body[0].description).toBeNull();
       expect(listed.body[0].semesterOffered).toBeNull();
+      expect(listed.body[0].courseFrequency).toBeNull();
+      expect(listed.body[0].courseHours).toBeNull();
+      expect(listed.body[0].courseDept).toBeNull();
     });
 
     it("User edits a course with a name that is too long", async () => {
       const created = await createCourse();
-      const response = await asAdmin(
-        request(app).put(`${COURSES}/${created.body.id}`)
-      ).send({ ...validCourse, name: "A".repeat(101) });
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        name: "A".repeat(101),
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
@@ -198,9 +241,10 @@ describe("Feature 2 — Course Management", () => {
 
     it("User edits a course with a description that is too long", async () => {
       const created = await createCourse();
-      const response = await asAdmin(
-        request(app).put(`${COURSES}/${created.body.id}`)
-      ).send({ ...validCourse, description: "D".repeat(301) });
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        description: "D".repeat(301),
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
@@ -208,11 +252,38 @@ describe("Feature 2 — Course Management", () => {
       });
     });
 
+    it("User edits a course with a course frequency that is too long", async () => {
+      const created = await createCourse();
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        courseFrequency: "F".repeat(101),
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course frequency must be 100 characters or fewer.",
+      });
+    });
+
+    it("User edits a course with a course department that is too long", async () => {
+      const created = await createCourse();
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        courseDept: "D".repeat(101),
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: "Course department must be 100 characters or fewer.",
+      });
+    });
+
     it("User edits a course with an invalid semester offered", async () => {
       const created = await createCourse();
-      const response = await asAdmin(
-        request(app).put(`${COURSES}/${created.body.id}`)
-      ).send({ ...validCourse, semesterOffered: "Monday" });
+      const response = await asAdmin(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        semesterOffered: "Monday",
+      });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
@@ -225,9 +296,7 @@ describe("Feature 2 — Course Management", () => {
 
     it("User updates a course with a non-numeric id", async () => {
       await createCourse();
-      const response = await asAdmin(request(app).put(`${COURSES}/abc`)).send(
-        validCourse
-      );
+      const response = await asAdmin(request(app).put("/courseapi/courses/abc")).send(validCourse);
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "Course id must be a number." });
@@ -238,9 +307,7 @@ describe("Feature 2 — Course Management", () => {
 
     it("User updates a course that does not exist", async () => {
       await createCourse();
-      const response = await asAdmin(request(app).put(`${COURSES}/99999`)).send(
-        validCourse
-      );
+      const response = await asAdmin(request(app).put("/courseapi/courses/99999")).send(validCourse);
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({ message: "Course not found." });
@@ -250,9 +317,10 @@ describe("Feature 2 — Course Management", () => {
 
     it("Non-admin cannot edit a course", async () => {
       const created = await createCourse();
-      const response = await asStudent(
-        request(app).put(`${COURSES}/${created.body.id}`)
-      ).send({ ...validCourse, name: "Changed" });
+      const response = await asStudent(request(app).put(`/courseapi/courses/${created.body.id}`)).send({
+        ...validCourse,
+        name: "Changed",
+      });
 
       expect(response.status).toBe(403);
       expect(response.body).toEqual(adminRequired);
@@ -264,9 +332,7 @@ describe("Feature 2 — Course Management", () => {
   describe("US-2.4 Remove a course", () => {
     it("User removes a course", async () => {
       const created = await createCourse();
-      const response = await asAdmin(
-        request(app).delete(`${COURSES}/${created.body.id}`)
-      );
+      const response = await asAdmin(request(app).delete(`/courseapi/courses/${created.body.id}`));
 
       expect([200, 204]).toContain(response.status);
       const rows = await db.course.findAll();
@@ -275,7 +341,7 @@ describe("Feature 2 — Course Management", () => {
 
     it("User deletes a course with a non-numeric id", async () => {
       await createCourse();
-      const response = await asAdmin(request(app).delete(`${COURSES}/abc`));
+      const response = await asAdmin(request(app).delete("/courseapi/courses/abc"));
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "Course id must be a number." });
@@ -285,7 +351,7 @@ describe("Feature 2 — Course Management", () => {
 
     it("User deletes a course that does not exist", async () => {
       await createCourse();
-      const response = await asAdmin(request(app).delete(`${COURSES}/99999`));
+      const response = await asAdmin(request(app).delete("/courseapi/courses/99999"));
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({ message: "Course not found." });
@@ -296,7 +362,7 @@ describe("Feature 2 — Course Management", () => {
     it("Non-admin cannot remove a course", async () => {
       const created = await createCourse();
       const response = await asStudent(
-        request(app).delete(`${COURSES}/${created.body.id}`)
+        request(app).delete(`/courseapi/courses/${created.body.id}`),
       );
 
       expect(response.status).toBe(403);

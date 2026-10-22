@@ -22,10 +22,12 @@ Regenerate writing-guide PDFs: `npm run writing-guides:pdf`
 | 4 | [feature-4-faculty-management.md](./feature-4-faculty-management.md) | `feature/4-faculty-management` | Draft | Feature 1 |
 | 5 | [feature-5-section-management.md](./feature-5-section-management.md) | `feature/5-section-management` | Draft | Features 1, 2, 3, 4 |
 | 6 | [feature-6-enrollment-management.md](./feature-6-enrollment-management.md) | `feature/6-enrollment-management` | Draft | Features 1, 2, 3, 5 |
+| 7 | [feature-7-student-course-listing.md](./feature-7-student-course-listing.md) | `feature/7-student-course-listing` | Ready | Features 1, 2, 5, 6 |
+| 8 | [feature-8-student-section-listing.md](./feature-8-student-section-listing.md) | `feature/8-student-section-listing` | Ready | Features 1, 2, 3, 5, 6 |
 
 **Branch roles:** `main` = scaffold-only starter kit · `dev` = integration (branch from `main`, merge features here) · `feature/N-*` = feature implementation (branch from `dev`).
 
-Implement features in dependency order: 1 first, then 2, 3, and 4 in parallel, then 5, then 6.
+Implement features in dependency order: 1 first, then 2, 3, and 4 in parallel, then 5, then 6, then 7 and 8.
 
 ## Living reference (current integrated state)
 
