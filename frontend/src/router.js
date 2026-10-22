@@ -8,6 +8,7 @@ import Register from "./views/Register.vue";
 import FacultyList from "./views/FacultyList.vue";
 import Enroll from "./views/Enroll.vue";
 import MyCourses from "./views/MyCourses.vue";
+import MySections from "./views/MySections.vue";
 import Utils from "./config/utils.js";
 import { ROLES } from "./config/roles.js";
 
@@ -61,6 +62,12 @@ const router = createRouter({
       path: "/my-courses",
       name: "my-courses",
       component: MyCourses,
+      meta: { roles: [ROLES.STUDENT] },
+    },
+    {
+      path: "/my-sections",
+      name: "my-sections",
+      component: MySections,
       meta: { roles: [ROLES.STUDENT] },
     },
     {
