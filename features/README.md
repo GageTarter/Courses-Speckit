@@ -17,14 +17,15 @@ Regenerate writing-guide PDFs: `npm run writing-guides:pdf`
 | ID | File | Branch | Status | Depends on |
 |----|------|--------|--------|------------|
 | 1 | [feature-1-user-auth.md](./feature-1-user-auth.md) | `feature/1-user-auth` | Ready | — |
-| 2 | feature-2-course-management.md | `feature/2-course-management` | Not written | Feature 1 |
-| 3 | feature-3-semester-management.md | `feature/3-semester-management` | Not written | Feature 1 |
-| 5 | feature-5-section-management.md | `feature/5-section-management` | Not written | Features 1, 2, 3 |
-| 6 | [feature-6-enrollment-management.md](./feature-6-enrollment-management.md) | `feature/6-enrollment-management` | Ready | Feature 1 (catalog tables scaffolded here; Features 2/3/5 add admin CRUD) |
+| 2 | [feature-2-course-management.md](./feature-2-course-management.md) | `feature/2-course-management` | Draft | Feature 1 |
+| 3 | [feature-3-semester-management.md](./feature-3-semester-management.md) | `feature/3-semester-management` | Draft | Feature 1 |
+| 4 | [feature-4-faculty-management.md](./feature-4-faculty-management.md) | `feature/4-faculty-management` | Draft | Feature 1 |
+| 5 | [feature-5-section-management.md](./feature-5-section-management.md) | `feature/5-section-management` | Draft | Features 1, 2, 3, 4 |
+| 6 | [feature-6-enrollment-management.md](./feature-6-enrollment-management.md) | `feature/6-enrollment-management` | Draft | Features 1, 2, 3, 5 |
 
 **Branch roles:** `main` = scaffold-only starter kit · `dev` = integration (branch from `main`, merge features here) · `feature/N-*` = feature implementation (branch from `dev`).
 
-Implement Feature 1 first. Feature 6 can ship next using the catalog tables it introduces; Features 2, 3, and 5 add admin CRUD on those same tables.
+Implement features in dependency order: 1 first, then 2, 3, and 4 in parallel, then 5, then 6.
 
 ## Living reference (current integrated state)
 

@@ -22,7 +22,11 @@ const toSectionPayload = async (section) => {
     semesterId: section.semesterId,
     courseId: section.courseId,
     course: course
-      ? { id: course.id, code: course.code, title: course.title }
+      ? {
+          id: course.id,
+          code: course.courseID,
+          title: course.name,
+        }
       : null,
   };
 };

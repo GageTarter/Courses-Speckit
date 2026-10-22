@@ -47,6 +47,20 @@ export const seedAdmin = async (overrides = {}) => {
   return fields;
 };
 
+export const validSemester = (overrides = {}) => ({
+  name: "Fall 2026",
+  startDate: "2026-08-01",
+  endDate: "2026-12-31",
+  ...overrides,
+});
+
+export const createSemester = async (app, token, overrides = {}) => {
+  return request(app)
+    .post("/courses/semesters")
+    .set(authHeader(token))
+    .send(validSemester(overrides));
+};
+
 /** Register a student and return their Bearer token. */
 export const tokenForNewStudent = async (overrides = {}) => {
   const res = await registerUser(overrides);
@@ -57,24 +71,53 @@ export const authHeader = (token) => ({ Authorization: `Bearer ${token}` });
 
 /** Minimum catalog Feature 6 needs so enrollment tests do not wait on Features 2/3/5. */
 export const seedCatalog = async () => {
-  const fall = await db.semester.create({ name: "Fall 2026" });
-  const spring = await db.semester.create({ name: "Spring 2027" });
-  const course = await db.course.create({
-    code: "CMSC 4123",
-    title: "Software Engineering IV",
+  const admin = await seedAdmin({
+    username: "catalogadmin",
+    email: "catalogadmin@example.com",
   });
-  const s001 = await db.section.create({
-    sectionNumber: "001",
-    capacity: 30,
-    semesterId: fall.id,
-    courseId: course.id,
-  });
-  const s002 = await db.section.create({
-    sectionNumber: "002",
-    capacity: 30,
-    semesterId: fall.id,
-    courseId: course.id,
+  
+  const adminRow = await db.user.findOne({ where: { username: admin.username } });
+
+  const faculty = await db.faculty.create({
+    firstName: "Ada",
+    lastName: "Lovelace",
+    dept: "Computer Science",
   });
 
-  return { fall, spring, course, s001, s002 };
+  const fall = await db.semester.create({
+    name: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+  });
+  const spring = await db.semester.create({
+    name: "Spring 2027",
+    startDate: "2027-01-01",
+    endDate: "2027-05-31",
+  });
+  const course = await db.course.create({
+    name: "Software Engineering IV",
+    courseID: "CMSC 4123",
+  });
+
+  const sectionDefaults = {
+    userId: adminRow.id,
+    facultyId: faculty.id,
+    daysOfWeek: "Monday,Wednesday",
+    startTime: "11:40",
+    endTime: "12:50",
+    capacity: 30,
+    semesterId: fall.id,
+    courseId: course.id,
+  };
+
+  const s001 = await db.section.create({
+    ...sectionDefaults,
+    sectionNumber: 1,
+  });
+  const s002 = await db.section.create({
+    ...sectionDefaults,
+    sectionNumber: 2,
+  });
+
+  return { fall, spring, course, s001, s002, faculty, admin };
 };

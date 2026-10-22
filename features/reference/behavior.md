@@ -73,5 +73,5 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | One enrollment per section | Unique (`userId`, `sectionId`) plus a `400` before insert |
 | One section per course per semester | Controller checks sibling sections |
 | Capacity is a hard cap | Count enrollments vs `section.capacity` |
-| Seats are not stored | `remainingSeats` on `GET /courses/sections` |
-| Catalog has no public write API | Seed script `seed-catalog`; Features 2/3/5 add admin CRUD later |
+| Seats are not stored | `remainingSeats` on `GET /courses/catalog/sections` |
+| Catalog browse for enrollment | `GET /courses/semesters` and `GET /courses/catalog/sections` |

@@ -1,12 +1,23 @@
-export default (sequelize, Sequelize) =>
-  sequelize.define("course", {
-    code: {
-      type: Sequelize.STRING,
+export default (sequelize, Sequelize) => {
+  const Course = sequelize.define("course", {
+    name: {
+      type: Sequelize.STRING(100),
       allowNull: false,
       unique: true,
     },
-    title: {
-      type: Sequelize.STRING,
+    courseID: {
+      type: Sequelize.STRING(100),
       allowNull: false,
     },
+    description: {
+      type: Sequelize.STRING(300),
+      allowNull: true,
+    },
+    semesterOffered: {
+      type: Sequelize.ENUM("Fall", "Spring", "Summer", "Winter"),
+      allowNull: true,
+    },
   });
+
+  return Course;
+};

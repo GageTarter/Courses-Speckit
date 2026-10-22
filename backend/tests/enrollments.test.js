@@ -24,7 +24,7 @@ const listEnrollments = (token, query = "") =>
 
 const listSections = (token, semesterId) =>
   request(app)
-    .get("/courses/sections")
+    .get("/courses/catalog/sections")
     .query(semesterId === undefined ? {} : { semesterId })
     .set(authHeader(token));
 
@@ -210,10 +210,15 @@ describe("Feature 6 — Section Enrollment", () => {
     it("Schedule is filtered by the selected semester", async () => {
       const catalog = await seedCatalog();
       const springSection = await db.section.create({
-        sectionNumber: "001",
+        sectionNumber: 1,
         capacity: 20,
         semesterId: catalog.spring.id,
         courseId: catalog.course.id,
+        userId: catalog.s001.userId,
+        facultyId: catalog.faculty.id,
+        daysOfWeek: "Tuesday,Thursday",
+        startTime: "09:00",
+        endTime: "10:15",
       });
       const { body: student } = await registerUser();
 

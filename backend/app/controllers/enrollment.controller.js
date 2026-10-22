@@ -28,7 +28,11 @@ const toEnrollmentPayload = (row) => {
           sectionNumber: section.sectionNumber,
           semesterId: section.semesterId,
           course: course
-            ? { id: course.id, code: course.code, title: course.title }
+            ? {
+                id: course.id,
+                code: course.courseID,
+                title: course.name,
+              }
             : null,
         }
       : undefined,
