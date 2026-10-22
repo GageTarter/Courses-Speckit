@@ -8,7 +8,7 @@ const apiClient = axios.create({
   // Local: /courses/  |  Production: /course-t5/ (must match server.js mount)
   baseURL: import.meta.env.DEV
     ? "http://localhost:3201/courses/"
-    : "/courses/",
+    : "/course-t5/",
   withCredentials: true,
 });
 
