@@ -8,7 +8,6 @@ const apiClient = axios.create({
   baseURL: import.meta.env.DEV
     ? "http://localhost:3201/courses/"
     : "/courses/",
-
   withCredentials: true,
 });
 

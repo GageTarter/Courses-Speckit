@@ -5,20 +5,6 @@ import db from "../app/models/index.js";
 
 /** Sync schema for tests. */
 export const syncTestDatabase = async () => {
-  await db.sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
-  for (const table of [
-    "enrollments",
-    "sections",
-    "courses",
-    "semesters",
-    "faculties",
-    "faculty",
-    "sessions",
-    "users",
-  ]) {
-    await db.sequelize.query(`DROP TABLE IF EXISTS \`${table}\``);
-  }
-  await db.sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
   await db.sequelize.sync({ force: true });
 };
 

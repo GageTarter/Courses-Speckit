@@ -5,7 +5,6 @@ import CourseList from "./views/CourseList.vue";
 import SemesterList from "./views/SemesterList.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
-import FacultyList from "./views/FacultyList.vue";
 import Enroll from "./views/Enroll.vue";
 import Utils from "./config/utils.js";
 import { ROLES } from "./config/roles.js";
@@ -31,16 +30,11 @@ const router = createRouter({
       component: CourseList,
     },
     {
-      path: "/faculty",
-      name: "faculty",
-      component: FacultyList,
-    },
-    {
       path: "/semesters",
       name: "semesters",
       component: SemesterList,
     },
-    {
+    {      
       path: "/login",
       name: "login",
       component: Login,
@@ -75,10 +69,7 @@ router.beforeEach((to) => {
     return { name: "home" };
   }
 
-  if (
-    (to.name === "sections" || to.name === "faculty") &&
-    Utils.getStore("user")?.role !== "admin"
-  ) {
+  if (to.name === "sections" && Utils.getStore("user")?.role !== "admin") {
     return { name: "home" };
   }
 
