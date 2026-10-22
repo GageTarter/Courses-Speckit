@@ -244,6 +244,16 @@ const handleLogout = async () => {
       My Courses
     </v-btn>
 
+    <v-btn
+      v-if="user?.role === 'student'"
+      variant="text"
+      color="white"
+      :to="{ name: 'my-sections' }"
+      class="ml-2"
+    >
+      My Sections
+    </v-btn>
+
     <v-spacer />
 
     <v-menu
