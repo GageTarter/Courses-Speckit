@@ -5,6 +5,7 @@ import CourseList from "./views/CourseList.vue";
 import SemesterList from "./views/SemesterList.vue";
 import Login from "./views/Login.vue";
 import Register from "./views/Register.vue";
+import FacultyList from "./views/FacultyList.vue";
 import Enroll from "./views/Enroll.vue";
 import MyCourses from "./views/MyCourses.vue";
 import MySections from "./views/MySections.vue";
@@ -32,11 +33,16 @@ const router = createRouter({
       component: CourseList,
     },
     {
+      path: "/faculty",
+      name: "faculty",
+      component: FacultyList,
+    },
+    {
       path: "/semesters",
       name: "semesters",
       component: SemesterList,
     },
-    {      
+    {
       path: "/login",
       name: "login",
       component: Login,
